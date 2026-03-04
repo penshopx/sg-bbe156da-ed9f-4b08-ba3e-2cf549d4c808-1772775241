@@ -1,534 +1,468 @@
+import { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/router";
 import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useRouter } from "next/router";
-import { useEffect, useRef, useState } from "react";
-import {
-  Video,
-  VideoOff,
-  Mic,
-  MicOff,
-  Monitor,
-  MonitorOff,
-  Phone,
-  Users,
-  MessageSquare,
-  Settings,
-  Copy,
-  Check,
-  Send,
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { 
+  Mic, MicOff, Video, VideoOff, Monitor, MonitorOff, 
+  PhoneOff, Users, MessageSquare, Copy, Check, Send
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { meetingService } from "@/services/meetingService";
 import { authService } from "@/services/authService";
 import { useWebRTC } from "@/hooks/useWebRTC";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
-interface ChatMessage {
-  id: string;
-  user_id: string;
-  message: string;
-  created_at: string;
-  profiles?: {
-    full_name: string;
-    avatar_url?: string;
-  };
-}
-
-interface Participant {
-  id: string;
-  user_id: string;
-  display_name: string;
-  is_camera_on: boolean;
-  is_mic_on: boolean;
-  is_screen_sharing: boolean;
-}
-
-export default function MeetingPage() {
+export default function MeetingRoom() {
   const router = useRouter();
-  const { id } = router.query;
+  const { id: meetingCode } = router.query;
   const { toast } = useToast();
   
-  const [meeting, setMeeting] = useState<any>(null);
-  const [participants, setParticipantsState] = useState<Participant[]>([]);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [meetingId, setMeetingId] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<{ id: string | null; name: string } | null>(null);
+  const [participants, setParticipants] = useState<any[]>([]);
+  const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  const [displayName, setDisplayName] = useState("");
   const [showChat, setShowChat] = useState(false);
   const [showParticipants, setShowParticipants] = useState(false);
-  const [isCopied, setIsCopied] = useState(false);
-  const [userId, setUserId] = useState<string>("");
+  const [hasCopied, setHasCopied] = useState(false);
   const [isJoined, setIsJoined] = useState(false);
+  const [joinName, setJoinName] = useState("");
 
+  // WebRTC hook will be initialized once we have meetingId and userId
   const {
     localStream,
-    participants: webrtcParticipants,
+    participants: rtcParticipants,
     isCameraOn,
     isMicOn,
     isScreenSharing,
     initializeLocalStream,
-    createOffer,
-    handleOffer,
-    handleAnswer,
-    handleIceCandidate,
     toggleCamera,
     toggleMic,
     startScreenShare,
     stopScreenShare,
-    setParticipants: setWebRTCParticipants,
-    cleanup,
-  } = useWebRTC(id as string, userId);
+    createOffer,
+    handleOffer,
+    handleAnswer,
+    handleIceCandidate,
+    cleanup
+  } = useWebRTC(meetingId || "", currentUser?.id || "");
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
 
-  // Initialize user and join meeting
+  // Initial setup: Validate meeting code and check user session
   useEffect(() => {
-    if (!id) return;
+    if (!meetingCode || typeof meetingCode !== "string") return;
 
-    const initializeMeeting = async () => {
+    const setupMeeting = async () => {
       try {
-        // Get or create user
-        let user = await authService.getCurrentUser();
+        // 1. Get meeting details
+        const { data: meeting, error } = await meetingService.getMeetingByCode(meetingCode);
         
-        if (!user) {
-          const anonymousId = `guest_${Math.random().toString(36).substring(2, 15)}`;
-          user = { id: anonymousId, email: `${anonymousId}@anonymous.com` };
-        }
-
-        setUserId(user.id);
-
-        // Get meeting details
-        const { data: meetingData, error: meetingError } = await meetingService.getMeetingById(id as string);
-        
-        if (meetingError || !meetingData) {
+        if (error || !meeting) {
           toast({
-            title: "Meeting tidak ditemukan",
-            description: "Meeting tidak valid atau sudah berakhir.",
-            variant: "destructive",
+            title: "Meeting Not Found",
+            description: "The meeting code is invalid or the meeting has ended.",
+            variant: "destructive"
           });
           router.push("/");
           return;
         }
 
-        setMeeting(meetingData);
+        setMeetingId(meeting.id);
 
-        // Initialize media stream
-        await initializeLocalStream();
-
-        // Join meeting
-        const name = `User ${Math.floor(Math.random() * 1000)}`;
-        setDisplayName(name);
+        // 2. Check user session
+        const { userId, displayName, isGuest } = await authService.getUserInfo();
         
-        await meetingService.joinMeeting(id as string, user.id, name);
-        setIsJoined(true);
-
-        // Load participants and chat
-        loadParticipants();
-        loadChatMessages();
+        if (userId || displayName) {
+          setCurrentUser({ id: userId, name: displayName });
+          if (userId && displayName) {
+            // Check if stored guest ID is valid UUID if it's a guest
+            if (isGuest && !isValidUUID(userId)) {
+              // Invalid UUID format for guest, clear it
+              authService.clearGuestUser();
+              setCurrentUser(null);
+            } else {
+              setJoinName(displayName);
+            }
+          }
+        }
       } catch (error) {
-        console.error("Error initializing meeting:", error);
-        toast({
-          title: "Error",
-          description: "Gagal bergabung ke meeting.",
-          variant: "destructive",
-        });
+        console.error("Error setting up meeting:", error);
       }
     };
 
-    initializeMeeting();
+    setupMeeting();
+  }, [meetingCode, router, toast]);
 
-    return () => {
-      cleanup();
-    };
-  }, [id]);
+  // Helper to validate UUID
+  const isValidUUID = (uuid: string) => {
+    const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return regex.test(uuid);
+  };
 
-  // Setup local video stream
+  // Attach local stream to video element
   useEffect(() => {
     if (localStream && localVideoRef.current) {
       localVideoRef.current.srcObject = localStream;
     }
   }, [localStream]);
 
-  // Subscribe to real-time updates
+  // Subscribe to signals and participants when joined
   useEffect(() => {
-    if (!id || !userId || !isJoined) return;
+    if (!isJoined || !meetingId || !currentUser?.id) return;
+
+    // Initialize media
+    initializeLocalStream();
+
+    // Subscribe to participants
+    const participantsSub = meetingService.subscribeToParticipants(meetingId, (payload) => {
+      loadParticipants();
+      
+      // Handle new participant for WebRTC
+      if (payload.eventType === "INSERT" && payload.new.user_id !== currentUser.id) {
+        // New participant joined, initiate connection if I'm already here
+        // We add a small delay to ensure they are ready
+        setTimeout(() => createOffer(payload.new.user_id), 1000);
+      }
+    });
 
     // Subscribe to WebRTC signals
-    const signalChannel = meetingService.subscribeToSignals(
-      id as string,
-      userId,
-      async (signal) => {
-        console.log("Received signal:", signal);
-        
-        if (signal.signal_type === "offer") {
-          await handleOffer(signal.from_user_id, signal.signal_data);
-        } else if (signal.signal_type === "answer") {
-          await handleAnswer(signal.from_user_id, signal.signal_data);
-        } else if (signal.signal_type === "ice-candidate") {
-          await handleIceCandidate(signal.from_user_id, signal.signal_data);
-        }
+    const signalsSub = meetingService.subscribeToSignals(meetingId, currentUser.id, (signal) => {
+      const { from_user_id, signal_type, signal_data } = signal;
+      
+      switch (signal_type) {
+        case "offer":
+          handleOffer(from_user_id, signal_data);
+          break;
+        case "answer":
+          handleAnswer(from_user_id, signal_data);
+          break;
+        case "ice-candidate":
+          handleIceCandidate(from_user_id, signal_data);
+          break;
       }
-    );
+    });
 
-    // Subscribe to participants changes
-    const participantsChannel = meetingService.subscribeToParticipants(
-      id as string,
-      (payload) => {
-        console.log("Participants update:", payload);
-        loadParticipants();
-        
-        // Create offer for new participants
-        if (payload.eventType === "INSERT" && payload.new.user_id !== userId) {
-          createOffer(payload.new.user_id);
-        }
-      }
-    );
+    // Subscribe to chat
+    const chatSub = meetingService.subscribeToChatMessages(meetingId, (message) => {
+      setMessages(prev => [...prev, message]);
+    });
 
-    // Subscribe to chat messages
-    const chatChannel = meetingService.subscribeToChatMessages(
-      id as string,
-      (message) => {
-        setChatMessages((prev) => [...prev, message]);
-      }
-    );
+    // Initial load
+    loadParticipants();
+    loadMessages();
 
     return () => {
-      signalChannel.unsubscribe();
-      participantsChannel.unsubscribe();
-      chatChannel.unsubscribe();
+      participantsSub.unsubscribe();
+      signalsSub.unsubscribe();
+      chatSub.unsubscribe();
+      cleanup();
+      meetingService.leaveMeeting(meetingId, currentUser.id);
     };
-  }, [id, userId, isJoined]);
+  }, [isJoined, meetingId, currentUser?.id]);
 
   const loadParticipants = async () => {
-    if (!id) return;
-    
-    const { data, error } = await meetingService.getParticipants(id as string);
-    if (!error && data) {
-      setParticipantsState(data);
+    if (!meetingId) return;
+    const { data } = await meetingService.getParticipants(meetingId);
+    if (data) setParticipants(data);
+  };
+
+  const loadMessages = async () => {
+    if (!meetingId) return;
+    const { data } = await meetingService.getChatMessages(meetingId);
+    if (data) setMessages(data);
+  };
+
+  const handleJoin = async () => {
+    if (!joinName.trim() || !meetingId) return;
+
+    try {
+      let userId = currentUser?.id;
+
+      // If no user ID (new guest), create one
+      if (!userId) {
+        const { guestUserId, error } = await authService.createGuestUser(joinName);
+        if (error || !guestUserId) throw error || new Error("Failed to create guest user");
+        
+        userId = guestUserId;
+        authService.setGuestUser(userId, joinName);
+      }
+
+      setCurrentUser({ id: userId, name: joinName });
+
+      // Join meeting in DB
+      await meetingService.joinMeeting(meetingId, userId, joinName);
+      setIsJoined(true);
+      
+    } catch (error) {
+      console.error("Error joining meeting:", error);
+      toast({
+        title: "Error Joining",
+        description: "Could not join the meeting. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
-  const loadChatMessages = async () => {
-    if (!id) return;
-    
-    const { data, error } = await meetingService.getChatMessages(id as string);
-    if (!error && data) {
-      setChatMessages(data);
-    }
-  };
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMessage.trim() || !meetingId || !currentUser?.id) return;
 
-  const copyMeetingLink = () => {
-    const link = window.location.href;
-    navigator.clipboard.writeText(link);
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 2000);
-  };
-
-  const sendMessage = async () => {
-    if (!newMessage.trim() || !id || !userId) return;
-
-    await meetingService.sendChatMessage(id as string, userId, newMessage);
+    await meetingService.sendChatMessage(meetingId, currentUser.id, newMessage);
     setNewMessage("");
   };
 
-  const endCall = async () => {
-    if (id && userId) {
-      await meetingService.leaveMeeting(id as string, userId);
-      
-      if (meeting && meeting.host_id === userId) {
-        await meetingService.endMeeting(id as string);
-      }
-    }
-    
-    cleanup();
-    router.push("/");
+  const copyMeetingCode = () => {
+    if (!meetingCode) return;
+    navigator.clipboard.writeText(meetingCode as string);
+    setHasCopied(true);
+    setTimeout(() => setHasCopied(false), 2000);
+    toast({
+      title: "Copied!",
+      description: "Meeting code copied to clipboard",
+    });
   };
 
-  if (!meeting) {
+  if (!meetingCode) return null;
+
+  // Pre-join screen
+  if (!isJoined) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="text-white text-xl">Loading meeting...</div>
-      </div>
+      <>
+        <SEO title="Join Meeting - Chaesa Live" />
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+          <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 space-y-8">
+            <div className="text-center space-y-2">
+              <h1 className="text-2xl font-bold text-gray-900">Join Meeting</h1>
+              <p className="text-gray-500">Code: {meetingCode}</p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Display Name</label>
+                <Input
+                  value={joinName}
+                  onChange={(e) => setJoinName(e.target.value)}
+                  placeholder="Enter your name"
+                  className="h-12"
+                />
+              </div>
+
+              <Button 
+                onClick={handleJoin} 
+                className="w-full h-12 text-lg bg-indigo-600 hover:bg-indigo-700"
+                disabled={!joinName.trim()}
+              >
+                Join Now
+              </Button>
+            </div>
+          </div>
+        </div>
+      </>
     );
   }
 
   return (
     <>
-      <SEO
-        title={`${meeting.title} - Chaesa Live`}
-        description="Join the video meeting on Chaesa Live"
-      />
-
-      <div className="min-h-screen bg-gray-950 flex flex-col">
-        {/* Header */}
-        <header className="bg-gray-900 border-b border-gray-800 px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-500 rounded-lg flex items-center justify-center">
-                <Video className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-white font-semibold">{meeting.title}</h1>
-                <button
-                  onClick={copyMeetingLink}
-                  className="text-sm text-gray-400 hover:text-white flex items-center gap-2 transition-colors"
-                >
-                  {isCopied ? (
-                    <>
-                      <Check className="w-3 h-3" />
-                      Link copied!
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-3 h-3" />
-                      Code: {meeting.meeting_code}
-                    </>
-                  )}
-                </button>
-              </div>
+      <SEO title="Meeting Room - Chaesa Live" />
+      <div className="h-screen bg-gray-900 flex flex-col overflow-hidden">
+        {/* Top Bar */}
+        <div className="h-16 bg-gray-800/50 backdrop-blur border-b border-gray-700 flex items-center justify-between px-6 shrink-0">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-800 rounded-lg border border-gray-700">
+              <span className="text-white font-medium">{meetingCode}</span>
+              <button onClick={copyMeetingCode} className="text-gray-400 hover:text-white transition-colors">
+                {hasCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              </button>
             </div>
-            <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowParticipants(!showParticipants)}
-                className="text-gray-400 hover:text-white hover:bg-gray-800 relative"
-              >
-                <Users className="w-5 h-5" />
-                {participants.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-purple-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {participants.length}
-                  </span>
-                )}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowChat(!showChat)}
-                className="text-gray-400 hover:text-white hover:bg-gray-800"
-              >
-                <MessageSquare className="w-5 h-5" />
-              </Button>
-            </div>
+            <span className="text-gray-400 text-sm hidden sm:inline">
+              {participants.length} participant{participants.length !== 1 && 's'}
+            </span>
           </div>
-        </header>
+          
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn("text-gray-400 hover:text-white hover:bg-gray-800", showParticipants && "bg-gray-800 text-white")}
+              onClick={() => setShowParticipants(!showParticipants)}
+            >
+              <Users className="w-5 h-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn("text-gray-400 hover:text-white hover:bg-gray-800", showChat && "bg-gray-800 text-white")}
+              onClick={() => setShowChat(!showChat)}
+            >
+              <MessageSquare className="w-5 h-5" />
+            </Button>
+          </div>
+        </div>
 
         {/* Main Content */}
         <div className="flex-1 flex overflow-hidden">
           {/* Video Grid */}
-          <div className="flex-1 p-6 flex items-center justify-center">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-7xl w-full">
+          <div className="flex-1 p-4 overflow-y-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr h-full max-h-full">
               {/* Local Video */}
-              <div className="relative bg-gray-900 rounded-2xl overflow-hidden aspect-video">
-                {isCameraOn ? (
-                  <video
-                    ref={localVideoRef}
-                    autoPlay
-                    playsInline
-                    muted
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                      <span className="text-3xl font-bold text-white">
-                        {displayName.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
+              <div className="relative bg-gray-800 rounded-xl overflow-hidden aspect-video shadow-lg ring-1 ring-white/10 group">
+                <video
+                  ref={localVideoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className={cn("w-full h-full object-cover mirror", !isCameraOn && "hidden")}
+                />
+                {!isCameraOn && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Avatar className="w-24 h-24 border-4 border-gray-700">
+                      <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser?.name}`} />
+                      <AvatarFallback className="text-2xl">{currentUser?.name?.[0]}</AvatarFallback>
+                    </Avatar>
                   </div>
                 )}
-                <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm px-3 py-1 rounded-lg">
-                  <span className="text-white text-sm font-medium">{displayName} (You)</span>
+                <div className="absolute bottom-4 left-4 bg-black/50 backdrop-blur px-3 py-1 rounded-lg text-white text-sm font-medium">
+                  You ({currentUser?.name})
                 </div>
-                {!isMicOn && (
-                  <div className="absolute top-4 right-4 bg-red-500 p-2 rounded-lg">
-                    <MicOff className="w-4 h-4 text-white" />
-                  </div>
-                )}
+                <div className="absolute bottom-4 right-4 flex gap-2">
+                  {!isMicOn && <div className="p-1.5 bg-red-500/80 rounded-full"><MicOff className="w-3 h-3 text-white" /></div>}
+                </div>
               </div>
 
               {/* Remote Participants */}
-              {Array.from(webrtcParticipants.values()).map((participant) => (
-                <div
-                  key={participant.userId}
-                  className="relative bg-gray-900 rounded-2xl overflow-hidden aspect-video"
-                >
-                  {participant.stream ? (
-                    <video
-                      autoPlay
-                      playsInline
-                      ref={(el) => {
-                        if (el && participant.stream) {
-                          el.srcObject = participant.stream;
-                        }
-                      }}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
-                        <span className="text-3xl font-bold text-white">
-                          {participant.displayName.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
+              {Array.from(rtcParticipants.values()).map((participant) => (
+                <div key={participant.userId} className="relative bg-gray-800 rounded-xl overflow-hidden aspect-video shadow-lg ring-1 ring-white/10">
+                  <video
+                    autoPlay
+                    playsInline
+                    className={cn("w-full h-full object-cover", !participant.isCameraOn && "hidden")}
+                    ref={(el) => {
+                      if (el && participant.stream) el.srcObject = participant.stream;
+                    }}
+                  />
+                  {!participant.isCameraOn && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Avatar className="w-24 h-24 border-4 border-gray-700">
+                        <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${participant.displayName}`} />
+                        <AvatarFallback className="text-2xl">{participant.displayName[0]}</AvatarFallback>
+                      </Avatar>
                     </div>
                   )}
-                  <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm px-3 py-1 rounded-lg">
-                    <span className="text-white text-sm font-medium">{participant.displayName}</span>
+                  <div className="absolute bottom-4 left-4 bg-black/50 backdrop-blur px-3 py-1 rounded-lg text-white text-sm font-medium">
+                    {participant.displayName}
                   </div>
-                  {!participant.isMicOn && (
-                    <div className="absolute top-4 right-4 bg-red-500 p-2 rounded-lg">
-                      <MicOff className="w-4 h-4 text-white" />
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Participants Sidebar */}
-          {showParticipants && (
-            <div className="w-80 bg-gray-900 border-l border-gray-800 flex flex-col">
-              <div className="px-6 py-4 border-b border-gray-800">
-                <h2 className="text-white font-semibold">Participants ({participants.length})</h2>
-              </div>
-              <div className="flex-1 overflow-y-auto p-4">
-                {participants.map((participant) => (
-                  <div
-                    key={participant.id}
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors"
-                  >
-                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                      <span className="text-sm font-bold text-white">
-                        {participant.display_name.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-white text-sm font-medium">{participant.display_name}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        {!participant.is_mic_on && (
-                          <MicOff className="w-3 h-3 text-red-400" />
-                        )}
-                        {!participant.is_camera_on && (
-                          <VideoOff className="w-3 h-3 text-red-400" />
+          {/* Right Sidebar (Chat/Participants) */}
+          {(showChat || showParticipants) && (
+            <div className="w-80 bg-gray-800 border-l border-gray-700 flex flex-col shrink-0 transition-all duration-300">
+              {showParticipants && (
+                <div className="flex-1 flex flex-col min-h-0">
+                  <div className="p-4 border-b border-gray-700">
+                    <h3 className="text-white font-medium">Participants ({participants.length})</h3>
+                  </div>
+                  <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                    {participants.map((p) => (
+                      <div key={p.id} className="flex items-center gap-3">
+                        <Avatar className="w-8 h-8">
+                          <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${p.display_name}`} />
+                          <AvatarFallback>{p.display_name[0]}</AvatarFallback>
+                        </Avatar>
+                        <span className="text-gray-200 text-sm">{p.display_name}</span>
+                        {p.user_id === currentUser?.id && (
+                          <span className="text-xs text-gray-500">(You)</span>
                         )}
                       </div>
-                    </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Chat Sidebar */}
-          {showChat && (
-            <div className="w-80 bg-gray-900 border-l border-gray-800 flex flex-col">
-              <div className="px-6 py-4 border-b border-gray-800">
-                <h2 className="text-white font-semibold">Chat</h2>
-              </div>
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {chatMessages.length === 0 ? (
-                  <div className="text-center text-gray-500 text-sm py-8">
-                    No messages yet. Start the conversation!
-                  </div>
-                ) : (
-                  chatMessages.map((msg) => (
-                    <div key={msg.id} className="space-y-1">
-                      <p className="text-xs text-gray-400">
-                        {msg.profiles?.full_name || "Unknown User"}
-                      </p>
-                      <div className="bg-gray-800 rounded-lg p-3">
-                        <p className="text-white text-sm">{msg.message}</p>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-              <div className="p-4 border-t border-gray-800">
-                <div className="flex gap-2">
-                  <Input
-                    type="text"
-                    placeholder="Type a message..."
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && sendMessage()}
-                    className="flex-1 bg-gray-800 text-white border-gray-700 focus:border-purple-500"
-                  />
-                  <Button
-                    onClick={sendMessage}
-                    disabled={!newMessage.trim()}
-                    className="bg-purple-500 hover:bg-purple-600"
-                  >
-                    <Send className="w-4 h-4" />
-                  </Button>
                 </div>
-              </div>
+              )}
+
+              {showChat && (
+                <div className={cn("flex flex-col min-h-0", showParticipants ? "h-1/2 border-t border-gray-700" : "flex-1")}>
+                  <div className="p-4 border-b border-gray-700">
+                    <h3 className="text-white font-medium">Chat</h3>
+                  </div>
+                  <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                    {messages.map((msg, i) => (
+                      <div key={i} className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-medium text-gray-400">
+                            {participants.find(p => p.user_id === msg.user_id)?.display_name || "Unknown"}
+                          </span>
+                          <span className="text-[10px] text-gray-600">
+                            {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                        <p className="text-gray-200 text-sm bg-gray-700/50 p-2 rounded-lg">
+                          {msg.message}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                  <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-700 flex gap-2">
+                    <Input
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      placeholder="Type a message..."
+                      className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-500"
+                    />
+                    <Button type="submit" size="icon" disabled={!newMessage.trim()}>
+                      <Send className="w-4 h-4" />
+                    </Button>
+                  </form>
+                </div>
+              )}
             </div>
           )}
         </div>
 
-        {/* Controls */}
-        <div className="bg-gray-900 border-t border-gray-800 px-6 py-5">
-          <div className="flex items-center justify-center gap-3">
-            <Button
-              onClick={toggleMic}
-              size="lg"
-              className={cn(
-                "rounded-full w-14 h-14",
-                isMicOn
-                  ? "bg-gray-800 hover:bg-gray-700 text-white"
-                  : "bg-red-500 hover:bg-red-600 text-white"
-              )}
-            >
-              {isMicOn ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
-            </Button>
+        {/* Bottom Controls */}
+        <div className="h-20 bg-gray-800 border-t border-gray-700 flex items-center justify-center gap-4 shrink-0 px-4">
+          <Button
+            variant={isMicOn ? "secondary" : "destructive"}
+            size="lg"
+            className="rounded-full w-12 h-12 p-0"
+            onClick={toggleMic}
+          >
+            {isMicOn ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
+          </Button>
+          
+          <Button
+            variant={isCameraOn ? "secondary" : "destructive"}
+            size="lg"
+            className="rounded-full w-12 h-12 p-0"
+            onClick={toggleCamera}
+          >
+            {isCameraOn ? <Video className="w-5 h-5" /> : <VideoOff className="w-5 h-5" />}
+          </Button>
 
-            <Button
-              onClick={toggleCamera}
-              size="lg"
-              className={cn(
-                "rounded-full w-14 h-14",
-                isCameraOn
-                  ? "bg-gray-800 hover:bg-gray-700 text-white"
-                  : "bg-red-500 hover:bg-red-600 text-white"
-              )}
-            >
-              {isCameraOn ? <Video className="w-5 h-5" /> : <VideoOff className="w-5 h-5" />}
-            </Button>
+          <Button
+            variant={isScreenSharing ? "destructive" : "secondary"}
+            size="lg"
+            className="rounded-full w-12 h-12 p-0"
+            onClick={isScreenSharing ? stopScreenShare : startScreenShare}
+          >
+            {isScreenSharing ? <MonitorOff className="w-5 h-5" /> : <Monitor className="w-5 h-5" />}
+          </Button>
 
-            <Button
-              onClick={isScreenSharing ? stopScreenShare : startScreenShare}
-              size="lg"
-              className={cn(
-                "rounded-full w-14 h-14",
-                isScreenSharing
-                  ? "bg-purple-500 hover:bg-purple-600 text-white"
-                  : "bg-gray-800 hover:bg-gray-700 text-white"
-              )}
-            >
-              {isScreenSharing ? (
-                <MonitorOff className="w-5 h-5" />
-              ) : (
-                <Monitor className="w-5 h-5" />
-              )}
-            </Button>
+          <div className="w-px h-8 bg-gray-700 mx-2" />
 
-            <Button
-              onClick={endCall}
-              size="lg"
-              className="rounded-full w-14 h-14 bg-red-500 hover:bg-red-600 text-white ml-4"
-            >
-              <Phone className="w-5 h-5 rotate-[135deg]" />
-            </Button>
-
-            <Button
-              size="lg"
-              variant="ghost"
-              className="rounded-full w-14 h-14 bg-gray-800 hover:bg-gray-700 text-white ml-2"
-            >
-              <Settings className="w-5 h-5" />
-            </Button>
-          </div>
+          <Button
+            variant="destructive"
+            size="lg"
+            className="rounded-full px-8 bg-red-600 hover:bg-red-700"
+            onClick={() => router.push("/")}
+          >
+            <PhoneOff className="w-5 h-5 mr-2" />
+            End Call
+          </Button>
         </div>
       </div>
     </>
