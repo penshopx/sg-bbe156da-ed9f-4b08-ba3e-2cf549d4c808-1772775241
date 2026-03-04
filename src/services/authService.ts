@@ -1,181 +1,162 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { User, Session } from "@supabase/supabase-js";
-
-export interface AuthUser {
-  id: string;
-  email: string;
-  user_metadata?: any;
-  created_at?: string;
-}
-
-export interface AuthError {
-  message: string;
-  code?: string;
-}
-
-// Dynamic URL Helper
-const getURL = () => {
-  let url = process?.env?.NEXT_PUBLIC_VERCEL_URL ?? 
-           process?.env?.NEXT_PUBLIC_SITE_URL ?? 
-           'http://localhost:3000'
-  
-  // Handle undefined or null url
-  if (!url) {
-    url = 'http://localhost:3000';
-  }
-  
-  // Ensure url has protocol
-  url = url.startsWith('http') ? url : `https://${url}`
-  
-  // Ensure url ends with slash
-  url = url.endsWith('/') ? url : `${url}/`
-  
-  return url
-}
+import type { User } from "@supabase/supabase-js";
 
 export const authService = {
-  // Get current user
-  async getCurrentUser(): Promise<AuthUser | null> {
-    const { data: { user } } = await supabase.auth.getUser();
-    return user ? {
-      id: user.id,
-      email: user.email || "",
-      user_metadata: user.user_metadata,
-      created_at: user.created_at
-    } : null;
+  // Get current session
+  async getSession() {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    return { session, error };
   },
 
-  // Get current session
-  async getCurrentSession(): Promise<Session | null> {
-    const { data: { session } } = await supabase.auth.getSession();
-    return session;
+  // Get current user
+  async getCurrentUser(): Promise<{ user: User | null; error: any }> {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    return { user, error };
   },
 
   // Sign up with email and password
-  async signUp(email: string, password: string): Promise<{ user: AuthUser | null; error: AuthError | null }> {
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${getURL()}auth/confirm-email`
+  async signUp(email: string, password: string, fullName?: string) {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName || ""
         }
-      });
-
-      if (error) {
-        return { user: null, error: { message: error.message, code: error.status?.toString() } };
       }
+    });
 
-      const authUser = data.user ? {
+    if (data.user && !error) {
+      await supabase.from("profiles").upsert({
         id: data.user.id,
-        email: data.user.email || "",
-        user_metadata: data.user.user_metadata,
-        created_at: data.user.created_at
-      } : null;
-
-      return { user: authUser, error: null };
-    } catch (error) {
-      return { 
-        user: null, 
-        error: { message: "An unexpected error occurred during sign up" } 
-      };
+        email: data.user.email,
+        full_name: fullName || "",
+        avatar_url: null
+      });
     }
+
+    return { data, error };
   },
 
   // Sign in with email and password
-  async signIn(email: string, password: string): Promise<{ user: AuthUser | null; error: AuthError | null }> {
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        return { user: null, error: { message: error.message, code: error.status?.toString() } };
-      }
-
-      const authUser = data.user ? {
-        id: data.user.id,
-        email: data.user.email || "",
-        user_metadata: data.user.user_metadata,
-        created_at: data.user.created_at
-      } : null;
-
-      return { user: authUser, error: null };
-    } catch (error) {
-      return { 
-        user: null, 
-        error: { message: "An unexpected error occurred during sign in" } 
-      };
-    }
+  async signIn(email: string, password: string) {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+    return { data, error };
   },
 
   // Sign out
-  async signOut(): Promise<{ error: AuthError | null }> {
-    try {
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        return { error: { message: error.message } };
-      }
-
-      return { error: null };
-    } catch (error) {
-      return { 
-        error: { message: "An unexpected error occurred during sign out" } 
-      };
-    }
+  async signOut() {
+    const { error } = await supabase.auth.signOut();
+    return { error };
   },
 
-  // Reset password
-  async resetPassword(email: string): Promise<{ error: AuthError | null }> {
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${getURL()}auth/reset-password`,
-      });
-
-      if (error) {
-        return { error: { message: error.message } };
+  // Sign in with Google OAuth
+  async signInWithGoogle() {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`
       }
-
-      return { error: null };
-    } catch (error) {
-      return { 
-        error: { message: "An unexpected error occurred during password reset" } 
-      };
-    }
+    });
+    return { data, error };
   },
 
-  // Confirm email (REQUIRED)
-  async confirmEmail(token: string, type: 'signup' | 'recovery' | 'email_change' = 'signup'): Promise<{ user: AuthUser | null; error: AuthError | null }> {
-    try {
-      const { data, error } = await supabase.auth.verifyOtp({
-        token_hash: token,
-        type: type
-      });
+  // Get user profile
+  async getProfile(userId: string) {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .single();
 
-      if (error) {
-        return { user: null, error: { message: error.message, code: error.status?.toString() } };
-      }
-
-      const authUser = data.user ? {
-        id: data.user.id,
-        email: data.user.email || "",
-        user_metadata: data.user.user_metadata,
-        created_at: data.user.created_at
-      } : null;
-
-      return { user: authUser, error: null };
-    } catch (error) {
-      return { 
-        user: null, 
-        error: { message: "An unexpected error occurred during email confirmation" } 
-      };
-    }
+    return { data, error };
   },
 
-  // Listen to auth state changes
-  onAuthStateChange(callback: (event: string, session: Session | null) => void) {
-    return supabase.auth.onAuthStateChange(callback);
+  // Update user profile
+  async updateProfile(userId: string, updates: { full_name?: string; avatar_url?: string }) {
+    const { data, error } = await supabase
+      .from("profiles")
+      .update(updates)
+      .eq("id", userId)
+      .select()
+      .single();
+
+    return { data, error };
+  },
+
+  // Create or get guest user
+  async createGuestUser(displayName: string): Promise<{ guestUserId: string | null; error: any }> {
+    // Generate a unique guest ID
+    const guestId = `guest_${Math.random().toString(36).substring(2, 15)}`;
+    
+    // Insert guest user into guest_users table
+    const { data, error } = await supabase
+      .from("guest_users")
+      .insert({
+        guest_id: guestId,
+        display_name: displayName
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error creating guest user:", error);
+      return { guestUserId: null, error };
+    }
+
+    // Return the UUID from the database
+    return { guestUserId: data.id, error: null };
+  },
+
+  // Get guest user by guest_id string
+  async getGuestUser(guestId: string) {
+    const { data, error } = await supabase
+      .from("guest_users")
+      .select("*")
+      .eq("guest_id", guestId)
+      .single();
+
+    return { data, error };
+  },
+
+  // Check if user is authenticated or guest
+  async getUserInfo(): Promise<{ userId: string | null; displayName: string; isGuest: boolean }> {
+    // Try to get authenticated user first
+    const { user } = await this.getCurrentUser();
+    
+    if (user) {
+      const { data: profile } = await this.getProfile(user.id);
+      return {
+        userId: user.id,
+        displayName: profile?.full_name || user.email || "User",
+        isGuest: false
+      };
+    }
+
+    // Check if there's a guest user in localStorage
+    const guestData = localStorage.getItem("chaesa_guest_user");
+    if (guestData) {
+      const parsed = JSON.parse(guestData);
+      return {
+        userId: parsed.userId,
+        displayName: parsed.displayName,
+        isGuest: true
+      };
+    }
+
+    return { userId: null, displayName: "", isGuest: false };
+  },
+
+  // Set guest user in localStorage
+  setGuestUser(userId: string, displayName: string) {
+    localStorage.setItem("chaesa_guest_user", JSON.stringify({ userId, displayName }));
+  },
+
+  // Clear guest user
+  clearGuestUser() {
+    localStorage.removeItem("chaesa_guest_user");
   }
 };

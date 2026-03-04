@@ -15,6 +15,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      guest_users: {
+        Row: {
+          created_at: string | null
+          display_name: string
+          guest_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string | null
+          display_name: string
+          guest_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string | null
+          display_name?: string
+          guest_id?: string
+          id?: string
+        }
+        Relationships: []
+      }
       meeting_chat: {
         Row: {
           created_at: string | null

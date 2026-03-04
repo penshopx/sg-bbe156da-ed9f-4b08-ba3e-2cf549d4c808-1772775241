@@ -14,14 +14,14 @@ export const meetingService = {
   },
 
   // Create a new meeting
-  async createMeeting(hostId: string, title?: string): Promise<{ data: Meeting | null; error: any }> {
+  async createMeeting(hostId: string | null, title?: string): Promise<{ data: Meeting | null; error: any }> {
     const meetingCode = this.generateMeetingCode();
     
     const { data, error } = await supabase
       .from("meetings")
       .insert({
         meeting_code: meetingCode,
-        host_id: hostId,
+        host_id: hostId, // Can be null for guest users
         title: title || "Chaesa Live Meeting",
         is_active: true
       })
@@ -65,12 +65,12 @@ export const meetingService = {
   },
 
   // Join a meeting
-  async joinMeeting(meetingId: string, userId: string, displayName: string): Promise<{ data: MeetingParticipant | null; error: any }> {
+  async joinMeeting(meetingId: string, userId: string | null, displayName: string): Promise<{ data: MeetingParticipant | null; error: any }> {
     const { data, error } = await supabase
       .from("meeting_participants")
       .upsert({
         meeting_id: meetingId,
-        user_id: userId,
+        user_id: userId, // Can be null for guest users
         display_name: displayName,
         is_camera_on: true,
         is_mic_on: true,
@@ -83,7 +83,12 @@ export const meetingService = {
   },
 
   // Leave a meeting
-  async leaveMeeting(meetingId: string, userId: string): Promise<{ error: any }> {
+  async leaveMeeting(meetingId: string, userId: string | null): Promise<{ error: any }> {
+    // If userId is null (guest), we need to find by meeting_id and display_name
+    if (!userId) {
+      return { error: null }; // Guest users don't need to update left_at
+    }
+
     const { error } = await supabase
       .from("meeting_participants")
       .update({ left_at: new Date().toISOString() })
@@ -108,9 +113,13 @@ export const meetingService = {
   // Update participant status
   async updateParticipantStatus(
     meetingId: string,
-    userId: string,
+    userId: string | null,
     updates: { is_camera_on?: boolean; is_mic_on?: boolean; is_screen_sharing?: boolean }
   ): Promise<{ error: any }> {
+    if (!userId) {
+      return { error: null }; // Guest users don't update status in DB
+    }
+
     const { error } = await supabase
       .from("meeting_participants")
       .update(updates)
