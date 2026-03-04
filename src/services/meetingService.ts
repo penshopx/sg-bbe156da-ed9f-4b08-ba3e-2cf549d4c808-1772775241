@@ -66,11 +66,39 @@ export const meetingService = {
 
   // Join a meeting
   async joinMeeting(meetingId: string, userId: string | null, displayName: string): Promise<{ data: MeetingParticipant | null; error: any }> {
+    // First, check if participant already exists
+    const { data: existing } = await supabase
+      .from("meeting_participants")
+      .select("*")
+      .eq("meeting_id", meetingId)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (existing) {
+      // Update existing participant (rejoin scenario)
+      const { data, error } = await supabase
+        .from("meeting_participants")
+        .update({
+          display_name: displayName,
+          is_camera_on: true,
+          is_mic_on: true,
+          left_at: null,
+          joined_at: new Date().toISOString()
+        })
+        .eq("meeting_id", meetingId)
+        .eq("user_id", userId)
+        .select()
+        .single();
+
+      return { data, error };
+    }
+
+    // Insert new participant
     const { data, error } = await supabase
       .from("meeting_participants")
-      .upsert({
+      .insert({
         meeting_id: meetingId,
-        user_id: userId, // Can be null for guest users
+        user_id: userId,
         display_name: displayName,
         is_camera_on: true,
         is_mic_on: true,
