@@ -5,20 +5,79 @@ import { Video, Users, Share2, Calendar, Shield, Zap } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/router";
+import { meetingService } from "@/services/meetingService";
+import { authService } from "@/services/authService";
+import { useToast } from "@/hooks/use-toast";
 
 export default function HomePage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [meetingCode, setMeetingCode] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleJoinMeeting = () => {
-    if (meetingCode.trim()) {
-      router.push(`/meeting/${meetingCode}`);
+  const handleJoinMeeting = async () => {
+    if (!meetingCode.trim()) return;
+    
+    setIsLoading(true);
+    try {
+      const { data: meeting, error } = await meetingService.getMeetingByCode(meetingCode.toUpperCase());
+      
+      if (error || !meeting) {
+        toast({
+          title: "Meeting tidak ditemukan",
+          description: "Kode meeting tidak valid atau meeting sudah berakhir.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      router.push(`/meeting/${meeting.id}`);
+    } catch (error) {
+      console.error("Error joining meeting:", error);
+      toast({
+        title: "Error",
+        description: "Terjadi kesalahan saat bergabung ke meeting.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleNewMeeting = () => {
-    const newMeetingId = Math.random().toString(36).substring(2, 12);
-    router.push(`/meeting/${newMeetingId}`);
+  const handleNewMeeting = async () => {
+    setIsLoading(true);
+    try {
+      // Get or create anonymous user
+      let user = await authService.getCurrentUser();
+      
+      if (!user) {
+        // Create anonymous session
+        const anonymousId = `guest_${Math.random().toString(36).substring(2, 15)}`;
+        user = { id: anonymousId, email: `${anonymousId}@anonymous.com` };
+      }
+
+      const { data: meeting, error } = await meetingService.createMeeting(user.id, "Chaesa Live Meeting");
+      
+      if (error || !meeting) {
+        toast({
+          title: "Error",
+          description: "Gagal membuat meeting. Silakan coba lagi.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      router.push(`/meeting/${meeting.id}`);
+    } catch (error) {
+      console.error("Error creating meeting:", error);
+      toast({
+        title: "Error",
+        description: "Terjadi kesalahan saat membuat meeting.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -74,16 +133,17 @@ export default function HomePage() {
                     type="text"
                     placeholder="Enter meeting code"
                     value={meetingCode}
-                    onChange={(e) => setMeetingCode(e.target.value)}
+                    onChange={(e) => setMeetingCode(e.target.value.toUpperCase())}
                     onKeyPress={(e) => e.key === "Enter" && handleJoinMeeting()}
                     className="flex-1 bg-white/90 border-white/30 text-gray-900 placeholder:text-gray-500 h-14 text-lg"
+                    disabled={isLoading}
                   />
                   <Button
                     onClick={handleJoinMeeting}
-                    disabled={!meetingCode.trim()}
-                    className="bg-blue-500 hover:bg-blue-600 text-white h-14 px-8 text-lg font-semibold"
+                    disabled={!meetingCode.trim() || isLoading}
+                    className="bg-blue-500 hover:bg-blue-600 text-white h-14 px-8 text-lg font-semibold disabled:opacity-50"
                   >
-                    Join Meeting
+                    {isLoading ? "Joining..." : "Join Meeting"}
                   </Button>
                 </div>
                 <div className="flex items-center gap-4">
@@ -93,10 +153,11 @@ export default function HomePage() {
                 </div>
                 <Button
                   onClick={handleNewMeeting}
-                  className="w-full mt-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white h-14 text-lg font-semibold"
+                  disabled={isLoading}
+                  className="w-full mt-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white h-14 text-lg font-semibold disabled:opacity-50"
                 >
                   <Video className="w-5 h-5 mr-2" />
-                  Start New Meeting
+                  {isLoading ? "Creating..." : "Start New Meeting"}
                 </Button>
               </div>
             </div>

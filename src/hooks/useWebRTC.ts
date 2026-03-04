@@ -75,7 +75,7 @@ export function useWebRTC(meetingId: string, userId: string) {
           from_user_id: userId,
           to_user_id: peerId,
           signal_type: "ice-candidate",
-          signal_data: event.candidate
+          signal_data: event.candidate.toJSON() as any
         });
       }
     };
@@ -97,7 +97,7 @@ export function useWebRTC(meetingId: string, userId: string) {
         from_user_id: userId,
         to_user_id: peerId,
         signal_type: "offer",
-        signal_data: offer
+        signal_data: offer as any
       });
     } catch (error) {
       console.error("Error creating offer:", error);
@@ -118,7 +118,7 @@ export function useWebRTC(meetingId: string, userId: string) {
         from_user_id: userId,
         to_user_id: peerId,
         signal_type: "answer",
-        signal_data: answer
+        signal_data: answer as any
       });
     } catch (error) {
       console.error("Error handling offer:", error);
