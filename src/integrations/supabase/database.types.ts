@@ -66,13 +66,6 @@ export type Database = {
             referencedRelation: "meetings"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "meeting_chat_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       meeting_participants: {
@@ -117,13 +110,6 @@ export type Database = {
             referencedRelation: "meetings"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "meeting_participants_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       meetings: {
@@ -154,15 +140,7 @@ export type Database = {
           meeting_code?: string
           title?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "meetings_host_id_fkey"
-            columns: ["host_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -221,24 +199,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "webrtc_signals_from_user_id_fkey"
-            columns: ["from_user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "webrtc_signals_meeting_id_fkey"
             columns: ["meeting_id"]
             isOneToOne: false
             referencedRelation: "meetings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "webrtc_signals_to_user_id_fkey"
-            columns: ["to_user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]

@@ -189,10 +189,7 @@ export const meetingService = {
   async getChatMessages(meetingId: string): Promise<{ data: ChatMessage[] | null; error: any }> {
     const { data, error } = await supabase
       .from("meeting_chat")
-      .select(`
-        *,
-        profiles!meeting_chat_user_id_fkey(full_name, avatar_url)
-      `)
+      .select("*")
       .eq("meeting_id", meetingId)
       .order("created_at", { ascending: true });
 
