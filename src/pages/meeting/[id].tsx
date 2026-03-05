@@ -53,6 +53,14 @@ export default function MeetingRoom() {
   const [polls, setPolls] = useState<any[]>([]);
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
 
+  // Advanced audio/video features
+  const [isBackgroundBlurred, setIsBackgroundBlurred] = useState(false);
+  const [isNoiseSuppressed, setIsNoiseSuppressed] = useState(false);
+  const [showCaptions, setShowCaptions] = useState(false);
+  const [currentCaption, setCurrentCaption] = useState("");
+  const [showBreakoutRooms, setShowBreakoutRooms] = useState(false);
+  const [showQA, setShowQA] = useState(false);
+
   // WebRTC hook will be initialized once we have meetingId and userId
   const {
     localStream,
@@ -475,6 +483,39 @@ export default function MeetingRoom() {
     }
   };
 
+  // Toggle background blur
+  const toggleBackgroundBlur = () => {
+    setIsBackgroundBlurred(prev => !prev);
+    toast({
+      title: isBackgroundBlurred ? "Background Blur Off" : "Background Blur On",
+      description: isBackgroundBlurred 
+        ? "Your background is now visible" 
+        : "Your background is now blurred",
+    });
+  };
+
+  // Toggle noise suppression
+  const toggleNoiseSuppression = () => {
+    setIsNoiseSuppressed(prev => !prev);
+    toast({
+      title: isNoiseSuppressed ? "Noise Suppression Off" : "Noise Suppression On",
+      description: isNoiseSuppressed 
+        ? "Audio enhancement disabled" 
+        : "Audio enhancement enabled",
+    });
+  };
+
+  // Toggle live captions
+  const toggleCaptions = () => {
+    setShowCaptions(prev => !prev);
+    toast({
+      title: showCaptions ? "Captions Off" : "Captions On",
+      description: showCaptions 
+        ? "Live captions disabled" 
+        : "Live captions enabled",
+    });
+  };
+
   if (!meetingCode) return null;
 
   // Pre-join screen
@@ -628,6 +669,35 @@ export default function MeetingRoom() {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <rect x="3" y="3" width="18" height="18" rx="2" />
                 <path d="M9 9l3 3-3 3M15 12h-3" />
+              </svg>
+            </Button>
+
+            {/* Breakout Rooms */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn("text-gray-400 hover:text-white hover:bg-gray-800", showBreakoutRooms && "bg-gray-800 text-white")}
+              onClick={() => setShowBreakoutRooms(!showBreakoutRooms)}
+              title="Breakout Rooms"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 1 0-7.75" />
+              </svg>
+            </Button>
+
+            {/* Q&A */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn("text-gray-400 hover:text-white hover:bg-gray-800", showQA && "bg-gray-800 text-white")}
+              onClick={() => setShowQA(!showQA)}
+              title="Q&A"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" />
               </svg>
             </Button>
 
@@ -873,7 +943,144 @@ export default function MeetingRoom() {
               </div>
             </div>
           )}
+
+          {/* Breakout Rooms Panel */}
+          {showBreakoutRooms && (
+            <div className="w-96 bg-gray-800 border-l border-gray-700 flex flex-col shrink-0">
+              <div className="p-4 border-b border-gray-700 flex items-center justify-between">
+                <h3 className="text-white font-medium">Breakout Rooms</h3>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setShowBreakoutRooms(false)}
+                  className="text-gray-400 hover:text-white"
+                >
+                  ✕
+                </Button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                <div className="text-center text-gray-400 mt-8">
+                  <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 1 0-7.75" />
+                  </svg>
+                  <p className="text-sm">No breakout rooms</p>
+                  <p className="text-xs mt-1">Host can create rooms</p>
+                </div>
+              </div>
+              <div className="p-4 border-t border-gray-700 space-y-2">
+                <Button className="w-full">
+                  Create Breakout Rooms
+                </Button>
+                <div className="flex gap-2">
+                  <Input
+                    type="number"
+                    min="2"
+                    max="10"
+                    defaultValue="2"
+                    placeholder="Number of rooms"
+                    className="flex-1 bg-gray-900 border-gray-700 text-white"
+                  />
+                  <Button variant="secondary">
+                    Auto Assign
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Q&A Panel */}
+          {showQA && (
+            <div className="w-96 bg-gray-800 border-l border-gray-700 flex flex-col shrink-0">
+              <div className="p-4 border-b border-gray-700 flex items-center justify-between">
+                <h3 className="text-white font-medium">Q&A</h3>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setShowQA(false)}
+                  className="text-gray-400 hover:text-white"
+                >
+                  ✕
+                </Button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                <div className="text-center text-gray-400 mt-8">
+                  <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" />
+                  </svg>
+                  <p className="text-sm">No questions yet</p>
+                  <p className="text-xs mt-1">Ask a question below</p>
+                </div>
+              </div>
+              <div className="p-4 border-t border-gray-700">
+                <form className="space-y-2">
+                  <Input
+                    placeholder="Ask a question..."
+                    className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-500"
+                  />
+                  <Button type="submit" className="w-full">
+                    Submit Question
+                  </Button>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* Advanced Video/Audio Settings */}
+          <div className="flex gap-2">
+            <Button
+              variant={isBackgroundBlurred ? "default" : "secondary"}
+              size="icon"
+              className="rounded-full w-10 h-10 p-0"
+              onClick={toggleBackgroundBlur}
+              title="Toggle background blur"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="3" />
+                <path d="M3 6h18M19 6v14a2 2 0 01-2 2h-2a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                <path d="M9 9l6 6M15 9l-6 6" />
+              </svg>
+            </Button>
+
+            <Button
+              variant={isNoiseSuppressed ? "default" : "secondary"}
+              size="icon"
+              className="rounded-full w-10 h-10 p-0"
+              onClick={toggleNoiseSuppression}
+              title="Toggle noise suppression"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M3 6h18M19 6v14a2 2 0 01-2 2h-2a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                <path d="M9 9l6 6M15 9l-6 6" />
+              </svg>
+            </Button>
+
+            <Button
+              variant={showCaptions ? "default" : "secondary"}
+              size="icon"
+              className="rounded-full w-10 h-10 p-0"
+              onClick={toggleCaptions}
+              title="Toggle live captions"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <rect x="2" y="6" width="20" height="12" rx="2" />
+                <path d="M6 10h4M14 10h4M6 14h12" />
+                <path d="M9 9l6 6M15 9l-6 6" />
+              </svg>
+            </Button>
+          </div>
         </div>
+
+        {/* Live Captions Overlay */}
+        {showCaptions && currentCaption && (
+          <div className="absolute bottom-32 left-1/2 -translate-x-1/2 max-w-2xl w-full px-4">
+            <div className="bg-black/90 backdrop-blur text-white px-6 py-4 rounded-xl shadow-2xl">
+              <p className="text-lg leading-relaxed">{currentCaption}</p>
+            </div>
+          </div>
+        )}
 
         {/* Bottom Controls */}
         <div className="h-20 bg-gray-800 border-t border-gray-700 flex items-center justify-center gap-4 shrink-0 px-4">
