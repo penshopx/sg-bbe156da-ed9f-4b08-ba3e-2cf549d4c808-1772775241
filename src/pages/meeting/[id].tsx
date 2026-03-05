@@ -602,6 +602,37 @@ export default function MeetingRoom() {
               </svg>
             </Button>
 
+            <div className="w-px h-8 bg-gray-700 mx-2" />
+
+            {/* Polls */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn("text-gray-400 hover:text-white hover:bg-gray-800", showPolls && "bg-gray-800 text-white")}
+              onClick={() => setShowPolls(!showPolls)}
+              title="Polls"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M3 13h4v8H3zM10 3h4v18h-4zM17 8h4v13h-4z" />
+              </svg>
+            </Button>
+
+            {/* Whiteboard */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn("text-gray-400 hover:text-white hover:bg-gray-800", showWhiteboard && "bg-gray-800 text-white")}
+              onClick={() => setShowWhiteboard(!showWhiteboard)}
+              title="Whiteboard"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <path d="M9 9l3 3-3 3M15 12h-3" />
+              </svg>
+            </Button>
+
+            <div className="w-px h-8 bg-gray-700 mx-2" />
+
             <Button
               variant="ghost"
               size="icon"
@@ -738,6 +769,108 @@ export default function MeetingRoom() {
                   </form>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Polls Panel */}
+          {showPolls && (
+            <div className="w-96 bg-gray-800 border-l border-gray-700 flex flex-col shrink-0">
+              <div className="p-4 border-b border-gray-700 flex items-center justify-between">
+                <h3 className="text-white font-medium">Polls</h3>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setShowPolls(false)}
+                  className="text-gray-400 hover:text-white"
+                >
+                  ✕
+                </Button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {polls.length === 0 ? (
+                  <div className="text-center text-gray-400 mt-8">
+                    <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path d="M3 13h4v8H3zM10 3h4v18h-4zM17 8h4v13h-4z" />
+                    </svg>
+                    <p className="text-sm">No polls yet</p>
+                    <p className="text-xs mt-1">Host can create polls</p>
+                  </div>
+                ) : (
+                  polls.map((poll) => (
+                    <div key={poll.id} className="bg-gray-900 rounded-lg p-4 space-y-3">
+                      <div className="flex items-start justify-between">
+                        <h4 className="text-white font-medium">{poll.question}</h4>
+                        {poll.is_active && (
+                          <span className="text-xs bg-green-600 text-white px-2 py-0.5 rounded">Active</span>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        {poll.options?.map((option: any) => (
+                          <button
+                            key={option.id}
+                            className="w-full text-left bg-gray-800 hover:bg-gray-700 rounded p-3 transition-colors"
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="text-gray-200">{option.option_text}</span>
+                              <span className="text-sm text-gray-400">{option.vote_count || 0} votes</span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+              <div className="p-4 border-t border-gray-700">
+                <Button className="w-full">
+                  Create New Poll
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Whiteboard Panel */}
+          {showWhiteboard && (
+            <div className="w-96 bg-gray-800 border-l border-gray-700 flex flex-col shrink-0">
+              <div className="p-4 border-b border-gray-700 flex items-center justify-between">
+                <h3 className="text-white font-medium">Whiteboard</h3>
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-gray-400 hover:text-white"
+                    title="Clear whiteboard"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                    </svg>
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setShowWhiteboard(false)}
+                    className="text-gray-400 hover:text-white"
+                  >
+                    ✕
+                  </Button>
+                </div>
+              </div>
+              <div className="flex-1 bg-white relative">
+                <canvas
+                  className="w-full h-full cursor-crosshair"
+                  style={{ touchAction: "none" }}
+                />
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-gray-900 rounded-lg p-2 flex gap-2 shadow-xl">
+                  {["black", "red", "blue", "green", "yellow"].map((color) => (
+                    <button
+                      key={color}
+                      className="w-8 h-8 rounded-full border-2 border-gray-700 hover:scale-110 transition-transform"
+                      style={{ backgroundColor: color }}
+                      title={color}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
           )}
         </div>
