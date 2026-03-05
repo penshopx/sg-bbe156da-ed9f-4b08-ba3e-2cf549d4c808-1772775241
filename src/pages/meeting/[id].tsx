@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Mic, MicOff, Video, VideoOff, Monitor, MonitorOff, 
-  PhoneOff, Users, MessageSquare, Copy, Check, Send
+  PhoneOff, Users, MessageSquare, Copy, Check, Send, Circle
 } from "lucide-react";
 import { meetingService } from "@/services/meetingService";
 import { authService } from "@/services/authService";
@@ -29,6 +29,13 @@ export default function MeetingRoom() {
   const [hasCopied, setHasCopied] = useState(false);
   const [isJoined, setIsJoined] = useState(false);
   const [joinName, setJoinName] = useState("");
+  
+  // Recording states
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<Blob[]>([]);
+  const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // WebRTC hook will be initialized once we have meetingId and userId
   const {
@@ -225,6 +232,101 @@ export default function MeetingRoom() {
     });
   };
 
+  const startRecording = async () => {
+    if (!localStream) {
+      toast({
+        title: "Cannot Start Recording",
+        description: "Please enable your camera and microphone first.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Create MediaRecorder with the local stream
+      const options = { mimeType: "video/webm;codecs=vp9,opus" };
+      
+      // Fallback to vp8 if vp9 is not supported
+      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+        options.mimeType = "video/webm;codecs=vp8,opus";
+      }
+
+      const mediaRecorder = new MediaRecorder(localStream, options);
+      mediaRecorderRef.current = mediaRecorder;
+      recordedChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+          recordedChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(recordedChunksRef.current, { type: "video/webm" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `chaesa-meeting-${meetingCode}-${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.webm`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        toast({
+          title: "Recording Saved",
+          description: "Your recording has been downloaded successfully.",
+        });
+      };
+
+      mediaRecorder.start(1000); // Collect data every second
+      setIsRecording(true);
+      setRecordingDuration(0);
+
+      // Start recording duration timer
+      recordingIntervalRef.current = setInterval(() => {
+        setRecordingDuration((prev) => prev + 1);
+      }, 1000);
+
+      toast({
+        title: "Recording Started",
+        description: "Your meeting is now being recorded.",
+      });
+    } catch (error) {
+      console.error("Error starting recording:", error);
+      toast({
+        title: "Recording Failed",
+        description: "Could not start recording. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+
+      if (recordingIntervalRef.current) {
+        clearInterval(recordingIntervalRef.current);
+        recordingIntervalRef.current = null;
+      }
+
+      toast({
+        title: "Recording Stopped",
+        description: "Processing your recording...",
+      });
+    }
+  };
+
+  const formatRecordingDuration = (seconds: number): string => {
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    
+    if (hrs > 0) {
+      return `${hrs.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+    }
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
+
   if (!meetingCode) return null;
 
   // Pre-join screen
@@ -277,8 +379,16 @@ export default function MeetingRoom() {
                 {hasCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               </button>
             </div>
+            {isRecording && (
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-red-600/20 rounded-lg border border-red-600/50 animate-pulse">
+                <Circle className="w-3 h-3 fill-red-500 text-red-500" />
+                <span className="text-red-400 font-medium text-sm">
+                  REC {formatRecordingDuration(recordingDuration)}
+                </span>
+              </div>
+            )}
             <span className="text-gray-400 text-sm hidden sm:inline">
-              {participants.length} participant{participants.length !== 1 && 's'}
+              {participants.length} participant{participants.length !== 1 && "s"}
             </span>
           </div>
           
@@ -450,6 +560,21 @@ export default function MeetingRoom() {
             onClick={isScreenSharing ? stopScreenShare : startScreenShare}
           >
             {isScreenSharing ? <MonitorOff className="w-5 h-5" /> : <Monitor className="w-5 h-5" />}
+          </Button>
+
+          <div className="w-px h-8 bg-gray-700 mx-2" />
+
+          <Button
+            variant={isRecording ? "destructive" : "secondary"}
+            size="lg"
+            className={cn(
+              "rounded-full w-12 h-12 p-0",
+              isRecording && "animate-pulse"
+            )}
+            onClick={isRecording ? stopRecording : startRecording}
+            title={isRecording ? "Stop Recording" : "Start Recording"}
+          >
+            <Circle className={cn("w-5 h-5", isRecording && "fill-current")} />
           </Button>
 
           <div className="w-px h-8 bg-gray-700 mx-2" />
