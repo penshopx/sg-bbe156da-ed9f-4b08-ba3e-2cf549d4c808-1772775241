@@ -18,6 +18,7 @@ export function useWebRTC(meetingId: string, userId: string) {
 
   const peerConnections = useRef<Map<string, RTCPeerConnection>>(new Map());
   const localStreamRef = useRef<MediaStream | null>(null);
+  const remoteStreamsRef = useRef<Map<string, MediaStream>>(new Map());
 
   const configuration: RTCConfiguration = {
     iceServers: [
@@ -56,11 +57,14 @@ export function useWebRTC(meetingId: string, userId: string) {
 
     // Handle incoming tracks
     pc.ontrack = (event) => {
+      const stream = event.streams[0];
+      remoteStreamsRef.current.set(peerId, stream);
+      
       setParticipants((prev) => {
         const newMap = new Map(prev);
         const participant = newMap.get(peerId);
         if (participant) {
-          participant.stream = event.streams[0];
+          participant.stream = stream;
           newMap.set(peerId, participant);
         }
         return newMap;
@@ -240,6 +244,29 @@ export function useWebRTC(meetingId: string, userId: string) {
     peerConnections.current.clear();
   }, []);
 
+  // Get composite stream for recording (all participants)
+  const getCompositeStream = useCallback((): { videoStream: MediaStream | null; audioContext: AudioContext | null; allStreams: MediaStream[] } => {
+    const allStreams: MediaStream[] = [];
+    
+    // Add local stream
+    if (localStreamRef.current) {
+      allStreams.push(localStreamRef.current);
+    }
+    
+    // Add all remote streams
+    remoteStreamsRef.current.forEach((stream) => {
+      allStreams.push(stream);
+    });
+
+    // Create audio context for mixing
+    let audioContext: AudioContext | null = null;
+    if (allStreams.length > 0 && allStreams.some(s => s.getAudioTracks().length > 0)) {
+      audioContext = new AudioContext();
+    }
+
+    return { videoStream: localStreamRef.current, audioContext, allStreams };
+  }, []);
+
   useEffect(() => {
     return () => {
       cleanup();
@@ -262,6 +289,7 @@ export function useWebRTC(meetingId: string, userId: string) {
     startScreenShare,
     stopScreenShare,
     setParticipants,
+    getCompositeStream,
     cleanup
   };
 }

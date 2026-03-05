@@ -77,10 +77,13 @@ export default function MeetingRoom() {
     handleOffer,
     handleAnswer,
     handleIceCandidate,
+    getCompositeStream,
     cleanup
   } = useWebRTC(meetingId || "", currentUser?.id || "");
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
+  const compositeCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const compositeStreamRef = useRef<MediaStream | null>(null);
 
   // Initial setup: Validate meeting code and check user session
   useEffect(() => {
@@ -267,15 +270,129 @@ export default function MeetingRoom() {
     }
 
     try {
-      // Create MediaRecorder with the local stream
+      // Get all streams for composite recording
+      const { audioContext, allStreams } = getCompositeStream();
+
+      // Create hidden canvas for composite video
+      const canvas = document.createElement("canvas");
+      canvas.width = 1920;
+      canvas.height = 1080;
+      compositeCanvasRef.current = canvas;
+      const ctx = canvas.getContext("2d");
+
+      if (!ctx) {
+        throw new Error("Cannot create canvas context");
+      }
+
+      // Create video elements for all participants
+      const videoElements: Map<string, HTMLVideoElement> = new Map();
+      
+      // Add local video
+      const localVideo = document.createElement("video");
+      localVideo.srcObject = localStream;
+      localVideo.play();
+      videoElements.set("local", localVideo);
+
+      // Add remote videos
+      Array.from(rtcParticipants.values()).forEach((participant) => {
+        if (participant.stream) {
+          const video = document.createElement("video");
+          video.srcObject = participant.stream;
+          video.play();
+          videoElements.set(participant.userId, video);
+        }
+      });
+
+      // Calculate grid layout
+      const totalParticipants = videoElements.size;
+      const cols = Math.ceil(Math.sqrt(totalParticipants));
+      const rows = Math.ceil(totalParticipants / cols);
+      const cellWidth = canvas.width / cols;
+      const cellHeight = canvas.height / rows;
+
+      // Draw composite video at 30fps
+      let animationFrameId: number;
+      const drawComposite = () => {
+        ctx.fillStyle = "#1a1a1a";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        let index = 0;
+        videoElements.forEach((video) => {
+          const col = index % cols;
+          const row = Math.floor(index / cols);
+          const x = col * cellWidth;
+          const y = row * cellHeight;
+
+          // Draw video with aspect ratio
+          const videoAspect = video.videoWidth / video.videoHeight;
+          const cellAspect = cellWidth / cellHeight;
+          
+          let drawWidth = cellWidth;
+          let drawHeight = cellHeight;
+          let drawX = x;
+          let drawY = y;
+
+          if (videoAspect > cellAspect) {
+            drawHeight = cellWidth / videoAspect;
+            drawY = y + (cellHeight - drawHeight) / 2;
+          } else {
+            drawWidth = cellHeight * videoAspect;
+            drawX = x + (cellWidth - drawWidth) / 2;
+          }
+
+          ctx.drawImage(video, drawX, drawY, drawWidth, drawHeight);
+          
+          // Draw border
+          ctx.strokeStyle = "#404040";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(x, y, cellWidth, cellHeight);
+          
+          index++;
+        });
+
+        animationFrameId = requestAnimationFrame(drawComposite);
+      };
+      drawComposite();
+
+      // Get canvas stream
+      const canvasStream = canvas.captureStream(30);
+
+      // Mix audio from all streams
+      let mixedAudioTrack: MediaStreamTrack | null = null;
+      if (audioContext && allStreams.some(s => s.getAudioTracks().length > 0)) {
+        const destination = audioContext.createMediaStreamDestination();
+        
+        allStreams.forEach((stream) => {
+          const audioTracks = stream.getAudioTracks();
+          if (audioTracks.length > 0) {
+            const source = audioContext.createMediaStreamSource(new MediaStream([audioTracks[0]]));
+            source.connect(destination);
+          }
+        });
+
+        const mixedAudioTracks = destination.stream.getAudioTracks();
+        if (mixedAudioTracks.length > 0) {
+          mixedAudioTrack = mixedAudioTracks[0];
+        }
+      }
+
+      // Combine video from canvas and mixed audio
+      const recordingStream = new MediaStream();
+      canvasStream.getVideoTracks().forEach(track => recordingStream.addTrack(track));
+      if (mixedAudioTrack) {
+        recordingStream.addTrack(mixedAudioTrack);
+      }
+
+      compositeStreamRef.current = recordingStream;
+
+      // Create MediaRecorder
       const options = { mimeType: "video/webm;codecs=vp9,opus" };
       
-      // Fallback to vp8 if vp9 is not supported
       if (!MediaRecorder.isTypeSupported(options.mimeType)) {
         options.mimeType = "video/webm;codecs=vp8,opus";
       }
 
-      const mediaRecorder = new MediaRecorder(localStream, options);
+      const mediaRecorder = new MediaRecorder(recordingStream, options);
       mediaRecorderRef.current = mediaRecorder;
       recordedChunksRef.current = [];
 
@@ -286,6 +403,24 @@ export default function MeetingRoom() {
       };
 
       mediaRecorder.onstop = () => {
+        // Stop animation
+        if (animationFrameId) {
+          cancelAnimationFrame(animationFrameId);
+        }
+
+        // Stop all tracks
+        recordingStream.getTracks().forEach(track => track.stop());
+        if (audioContext) {
+          audioContext.close();
+        }
+
+        // Clean up video elements
+        videoElements.forEach(video => {
+          video.pause();
+          video.srcObject = null;
+        });
+
+        // Create download
         const blob = new Blob(recordedChunksRef.current, { type: "video/webm" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -296,22 +431,21 @@ export default function MeetingRoom() {
 
         toast({
           title: "Recording Saved",
-          description: "Your recording has been downloaded successfully.",
+          description: `Meeting recording with ${totalParticipants} participant(s) has been downloaded.`,
         });
       };
 
-      mediaRecorder.start(1000); // Collect data every second
+      mediaRecorder.start(1000);
       setIsRecording(true);
       setRecordingDuration(0);
 
-      // Start recording duration timer
       recordingIntervalRef.current = setInterval(() => {
         setRecordingDuration((prev) => prev + 1);
       }, 1000);
 
       toast({
-        title: "Recording Started",
-        description: "Your meeting is now being recorded.",
+        title: "Composite Recording Started",
+        description: `Recording ${totalParticipants} participant(s) in grid layout.`,
       });
     } catch (error) {
       console.error("Error starting recording:", error);
@@ -624,7 +758,7 @@ export default function MeetingRoom() {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <rect x="5" y="11" width="14" height="10" rx="2" />
                   <path d="M7 11V7a5 5 0 0 1 9 0" />
-                  <path d="M16 7v4" />
+                  <path d="M16 7h.01" />
                 </svg>
               )}
             </Button>
@@ -912,7 +1046,7 @@ export default function MeetingRoom() {
                     title="Clear whiteboard"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                      <path d="M3 6h18M19 6v14a2 2 0 01-2 2h-2a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
                     </svg>
                   </Button>
                   <Button
