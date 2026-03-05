@@ -147,7 +147,7 @@ export const meetingService = {
   async updateParticipantStatus(
     meetingId: string,
     userId: string | null,
-    updates: { is_camera_on?: boolean; is_mic_on?: boolean; is_screen_sharing?: boolean }
+    updates: { is_camera_on?: boolean; is_mic_on?: boolean; is_screen_sharing?: boolean; hand_raised?: boolean }
   ): Promise<{ error: any }> {
     if (!userId) {
       return { error: null }; // Guest users don't update status in DB
