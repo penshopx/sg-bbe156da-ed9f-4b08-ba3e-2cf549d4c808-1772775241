@@ -1,4 +1,4 @@
- 
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 export type Json =
   | string
   | number
@@ -71,6 +71,7 @@ export type Database = {
       meeting_participants: {
         Row: {
           display_name: string
+          hand_raised: boolean | null
           id: string
           is_camera_on: boolean | null
           is_mic_on: boolean | null
@@ -82,6 +83,7 @@ export type Database = {
         }
         Insert: {
           display_name: string
+          hand_raised?: boolean | null
           id?: string
           is_camera_on?: boolean | null
           is_mic_on?: boolean | null
@@ -93,6 +95,7 @@ export type Database = {
         }
         Update: {
           display_name?: string
+          hand_raised?: boolean | null
           id?: string
           is_camera_on?: boolean | null
           is_mic_on?: boolean | null
@@ -119,6 +122,7 @@ export type Database = {
           host_id: string | null
           id: string
           is_active: boolean | null
+          is_locked: boolean | null
           meeting_code: string
           title: string | null
         }
@@ -128,6 +132,7 @@ export type Database = {
           host_id?: string | null
           id?: string
           is_active?: boolean | null
+          is_locked?: boolean | null
           meeting_code: string
           title?: string | null
         }
@@ -137,6 +142,7 @@ export type Database = {
           host_id?: string | null
           id?: string
           is_active?: boolean | null
+          is_locked?: boolean | null
           meeting_code?: string
           title?: string | null
         }
