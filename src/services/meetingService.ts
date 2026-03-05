@@ -111,17 +111,22 @@ export const meetingService = {
   },
 
   // Leave a meeting
-  async leaveMeeting(meetingId: string, userId: string | null): Promise<{ error: any }> {
-    // If userId is null (guest), we need to find by meeting_id and display_name
-    if (!userId) {
-      return { error: null }; // Guest users don't need to update left_at
-    }
-
+  async leaveMeeting(meetingId: string, userId: string): Promise<{ error: any }> {
     const { error } = await supabase
       .from("meeting_participants")
       .update({ left_at: new Date().toISOString() })
       .eq("meeting_id", meetingId)
       .eq("user_id", userId);
+
+    return { error };
+  },
+
+  // Update meeting settings
+  async updateMeeting(meetingId: string, updates: { is_locked?: boolean }): Promise<{ error: any }> {
+    const { error } = await supabase
+      .from("meetings")
+      .update(updates)
+      .eq("id", meetingId);
 
     return { error };
   },

@@ -13,6 +13,7 @@ import { authService } from "@/services/authService";
 import { useWebRTC } from "@/hooks/useWebRTC";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { KeyboardShortcutsDialog } from "@/components/KeyboardShortcutsDialog";
 
 export default function MeetingRoom() {
   const router = useRouter();
@@ -36,6 +37,21 @@ export default function MeetingRoom() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // NEW: Powerful features states
+  const [viewMode, setViewMode] = useState<"grid" | "speaker">("grid");
+  const [isHandRaised, setIsHandRaised] = useState(false);
+  const [reactions, setReactions] = useState<Map<string, { emoji: string; timestamp: number }>>(new Map());
+  const [meetingLocked, setMeetingLocked] = useState(false);
+  const [waitingRoom, setWaitingRoom] = useState<any[]>([]);
+  const [showWaitingRoom, setShowWaitingRoom] = useState(false);
+  const [isPipMode, setIsPipMode] = useState(false);
+  const [showReactionsMenu, setShowReactionsMenu] = useState(false);
+  const [showPolls, setShowPolls] = useState(false);
+  const [showWhiteboard, setShowWhiteboard] = useState(false);
+  const [activeSpeaker, setActiveSpeaker] = useState<string | null>(null);
+  const [polls, setPolls] = useState<any[]>([]);
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
 
   // WebRTC hook will be initialized once we have meetingId and userId
   const {
@@ -327,6 +343,138 @@ export default function MeetingRoom() {
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyboard = (e: KeyboardEvent) => {
+      // Ctrl/Cmd + D: Toggle mic
+      if ((e.ctrlKey || e.metaKey) && e.key === "d") {
+        e.preventDefault();
+        toggleMic();
+      }
+      // Ctrl/Cmd + E: Toggle camera
+      if ((e.ctrlKey || e.metaKey) && e.key === "e") {
+        e.preventDefault();
+        toggleCamera();
+      }
+      // Ctrl/Cmd + Shift + H: Toggle hand raise
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "H") {
+        e.preventDefault();
+        toggleHandRaise();
+      }
+      // Ctrl/Cmd + Shift + C: Toggle chat
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "C") {
+        e.preventDefault();
+        setShowChat(prev => !prev);
+      }
+      // Ctrl/Cmd + Shift + P: Toggle participants
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "P") {
+        e.preventDefault();
+        setShowParticipants(prev => !prev);
+      }
+      // ?: Show keyboard shortcuts
+      if (e.key === "?" && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        setShowKeyboardShortcuts(true);
+      }
+    };
+
+    if (isJoined) {
+      window.addEventListener("keydown", handleKeyboard);
+      return () => window.removeEventListener("keydown", handleKeyboard);
+    }
+  }, [isJoined, toggleMic, toggleCamera]);
+
+  // Toggle hand raise
+  const toggleHandRaise = async () => {
+    if (!meetingId || !currentUser?.id) return;
+    
+    const newState = !isHandRaised;
+    setIsHandRaised(newState);
+    
+    await meetingService.updateParticipantStatus(meetingId, currentUser.id, {
+      hand_raised: newState
+    });
+
+    toast({
+      title: newState ? "Hand Raised ✋" : "Hand Lowered",
+      description: newState ? "The host will be notified" : "Your hand has been lowered",
+    });
+  };
+
+  // Send reaction
+  const sendReaction = async (emoji: string) => {
+    if (!meetingId || !currentUser?.id) return;
+
+    // Add reaction locally with timeout
+    const reactionId = `${currentUser.id}-${Date.now()}`;
+    setReactions(prev => {
+      const newMap = new Map(prev);
+      newMap.set(reactionId, { emoji, timestamp: Date.now() });
+      return newMap;
+    });
+
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+      setReactions(prev => {
+        const newMap = new Map(prev);
+        newMap.delete(reactionId);
+        return newMap;
+      });
+    }, 3000);
+
+    // Send to other participants via chat as system message
+    await meetingService.sendChatMessage(
+      meetingId, 
+      currentUser.id, 
+      `__REACTION__${emoji}__${currentUser.name}`
+    );
+
+    setShowReactionsMenu(false);
+  };
+
+  // Toggle meeting lock (host only)
+  const toggleMeetingLock = async () => {
+    if (!meetingId) return;
+    
+    const newState = !meetingLocked;
+    setMeetingLocked(newState);
+
+    // Update meeting in database
+    await meetingService.updateMeeting(meetingId, { is_locked: newState });
+
+    toast({
+      title: newState ? "🔒 Meeting Locked" : "🔓 Meeting Unlocked",
+      description: newState 
+        ? "No new participants can join" 
+        : "New participants can now join",
+    });
+  };
+
+  // Toggle view mode
+  const toggleViewMode = () => {
+    setViewMode(prev => prev === "grid" ? "speaker" : "grid");
+    toast({
+      title: `${viewMode === "grid" ? "Speaker" : "Grid"} View`,
+      description: `Switched to ${viewMode === "grid" ? "speaker" : "grid"} view`,
+    });
+  };
+
+  // Enter Picture-in-Picture mode
+  const enterPipMode = async () => {
+    if (localVideoRef.current && document.pictureInPictureEnabled) {
+      try {
+        await localVideoRef.current.requestPictureInPicture();
+        setIsPipMode(true);
+        toast({
+          title: "Picture-in-Picture Enabled",
+          description: "Video window will float above other windows",
+        });
+      } catch (error) {
+        console.error("PiP error:", error);
+      }
+    }
+  };
+
   if (!meetingCode) return null;
 
   // Pre-join screen
@@ -393,6 +541,67 @@ export default function MeetingRoom() {
           </div>
           
           <div className="flex items-center gap-2">
+            {/* View Mode Toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-gray-400 hover:text-white hover:bg-gray-800"
+              onClick={toggleViewMode}
+              title={`Switch to ${viewMode === "grid" ? "speaker" : "grid"} view`}
+            >
+              {viewMode === "grid" ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <rect x="3" y="3" width="7" height="7" rx="1" />
+                  <rect x="14" y="3" width="7" height="7" rx="1" />
+                  <rect x="3" y="14" width="7" height="7" rx="1" />
+                  <rect x="14" y="14" width="7" height="7" rx="1" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <rect x="3" y="3" width="18" height="13" rx="1" />
+                  <rect x="3" y="18" width="5" height="3" rx="1" />
+                  <rect x="10" y="18" width="5" height="3" rx="1" />
+                  <rect x="17" y="18" width="4" height="3" rx="1" />
+                </svg>
+              )}
+            </Button>
+
+            {/* Meeting Lock Toggle (Host) */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn("text-gray-400 hover:text-white hover:bg-gray-800", meetingLocked && "text-red-400")}
+              onClick={toggleMeetingLock}
+              title={meetingLocked ? "Unlock meeting" : "Lock meeting"}
+            >
+              {meetingLocked ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <rect x="5" y="11" width="14" height="10" rx="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <rect x="5" y="11" width="14" height="10" rx="2" />
+                  <path d="M7 11V7a5 5 0 0 1 9 0" />
+                  <path d="M16 7v4" />
+                </svg>
+              )}
+            </Button>
+
+            {/* Keyboard Shortcuts Help */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-gray-400 hover:text-white hover:bg-gray-800"
+              onClick={() => setShowKeyboardShortcuts(true)}
+              title="Keyboard shortcuts (?)"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <rect x="2" y="6" width="20" height="12" rx="2" />
+                <path d="M6 10h4M14 10h4M6 14h12" />
+              </svg>
+            </Button>
+
             <Button
               variant="ghost"
               size="icon"
@@ -564,6 +773,60 @@ export default function MeetingRoom() {
 
           <div className="w-px h-8 bg-gray-700 mx-2" />
 
+          {/* Hand Raise */}
+          <Button
+            variant={isHandRaised ? "default" : "secondary"}
+            size="lg"
+            className={cn("rounded-full w-12 h-12 p-0", isHandRaised && "bg-yellow-500 hover:bg-yellow-600")}
+            onClick={toggleHandRaise}
+            title="Raise hand (Ctrl+Shift+H)"
+          >
+            <span className="text-xl">✋</span>
+          </Button>
+
+          {/* Reactions Menu */}
+          <div className="relative">
+            <Button
+              variant="secondary"
+              size="lg"
+              className="rounded-full w-12 h-12 p-0"
+              onClick={() => setShowReactionsMenu(!showReactionsMenu)}
+              title="Send reaction"
+            >
+              <span className="text-xl">😊</span>
+            </Button>
+            
+            {showReactionsMenu && (
+              <div className="absolute bottom-16 left-0 bg-gray-800 border border-gray-700 rounded-xl p-2 flex gap-2 shadow-xl">
+                {["👍", "❤️", "😂", "👏", "🎉", "🤔", "👋", "🔥"].map((emoji) => (
+                  <button
+                    key={emoji}
+                    onClick={() => sendReaction(emoji)}
+                    className="text-2xl hover:scale-125 transition-transform p-2 hover:bg-gray-700 rounded-lg"
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Picture-in-Picture */}
+          <Button
+            variant="secondary"
+            size="lg"
+            className="rounded-full w-12 h-12 p-0"
+            onClick={enterPipMode}
+            title="Picture-in-Picture"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <rect x="2" y="3" width="20" height="14" rx="2" />
+              <rect x="13" y="12" width="7" height="6" rx="1" />
+            </svg>
+          </Button>
+
+          <div className="w-px h-8 bg-gray-700 mx-2" />
+
           <Button
             variant={isRecording ? "destructive" : "secondary"}
             size="lg"
@@ -589,6 +852,27 @@ export default function MeetingRoom() {
             End Call
           </Button>
         </div>
+
+        {/* Reactions Overlay */}
+        <div className="fixed bottom-32 left-1/2 -translate-x-1/2 flex gap-4 pointer-events-none z-50">
+          {Array.from(reactions.values()).map((reaction, i) => (
+            <div
+              key={i}
+              className="text-6xl animate-bounce"
+              style={{
+                animation: "bounce 0.5s ease-out, fadeOut 3s ease-out"
+              }}
+            >
+              {reaction.emoji}
+            </div>
+          ))}
+        </div>
+
+        {/* Keyboard Shortcuts Dialog */}
+        <KeyboardShortcutsDialog 
+          open={showKeyboardShortcuts} 
+          onOpenChange={setShowKeyboardShortcuts}
+        />
       </div>
     </>
   );
