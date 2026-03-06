@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Video } from "lucide-react";
+import { ChaesaLogo } from "@/components/ChaesaLogo";
 
 export function Footer() {
   return (
@@ -53,9 +53,9 @@ export function Footer() {
         <div className="border-t border-gray-200 dark:border-white/10 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex flex-col items-center md:items-start gap-2">
-              <div className="flex items-center gap-2">
-                <Video className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-                <span className="text-lg font-bold text-gray-900 dark:text-white">Chaesa Live</span>
+              <div className="flex items-center gap-2.5">
+                <ChaesaLogo size={32} />
+                <span className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">Chaesa Live</span>
               </div>
               <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs text-center md:text-left">
                 Platform all-in-one untuk mengubah meeting jadi kursus micro-learning yang menghasilkan.

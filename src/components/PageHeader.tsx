@@ -2,9 +2,10 @@ import Link from "next/link";
 import { ThemeSwitch } from "@/components/ThemeSwitch";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { useAuth } from "@/hooks/useAuth";
-import { Video, ArrowLeft, LogIn, Search } from "lucide-react";
+import { ArrowLeft, LogIn, Search } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
+import { ChaesaLogo } from "@/components/ChaesaLogo";
 
 interface PageHeaderProps {
   title: string;
@@ -33,7 +34,7 @@ export function PageHeader({
             href="/"
             className="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-bold text-lg shrink-0"
           >
-            <Video className="w-5 h-5" />
+            <ChaesaLogo size={28} />
             <span className="hidden sm:inline">Chaesa Live</span>
           </Link>
           <span className="text-gray-300 dark:text-gray-600 shrink-0">|</span>

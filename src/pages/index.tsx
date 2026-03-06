@@ -17,6 +17,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { toast } from "@/hooks/use-toast";
 import { Footer } from "@/components/Footer";
+import { ChaesaLogo } from "@/components/ChaesaLogo";
 
 export default function Home() {
   const router = useRouter();
@@ -113,9 +114,11 @@ export default function Home() {
             <div className="flex items-center justify-between h-16">
               {/* Logo */}
               <Link href="/">
-                <div className="flex items-center gap-2 cursor-pointer">
-                  <Video className="w-8 h-8 text-purple-600 dark:text-purple-400" />
-                  <span className="text-xl font-bold text-gray-900 dark:text-white">Chaesa Live</span>
+                <div className="flex items-center gap-3 cursor-pointer">
+                  <ChaesaLogo size={40} />
+                  <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+                    Chaesa Live
+                  </span>
                 </div>
               </Link>
 
@@ -204,9 +207,11 @@ export default function Home() {
               <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
                 <SheetContent side="left" className="w-[300px] overflow-y-auto">
                   <SheetHeader className="mb-4">
-                    <SheetTitle className="flex items-center gap-2">
-                      <Video className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-                      Chaesa Live
+                    <SheetTitle className="flex items-center gap-3">
+                      <ChaesaLogo size={36} />
+                      <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
+                        Chaesa Live
+                      </span>
                     </SheetTitle>
                   </SheetHeader>
 

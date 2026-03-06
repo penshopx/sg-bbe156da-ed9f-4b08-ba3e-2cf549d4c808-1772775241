@@ -113,13 +113,20 @@ supabase/         - Supabase configuration
 - WebRTC-based video/audio, recording, reactions, polls, whiteboard, breakout rooms
 
 ## PWA (Progressive Web App)
-- Manifest: `public/manifest.json` — app name, icons, shortcuts, theme color
+- Manifest: `public/manifest.json` — app name, icons, shortcuts, theme color (#7C3AED purple)
 - Service Worker: `public/sw.js` — network-first caching with offline fallback
 - Offline page: `public/offline.html` — Indonesian offline message with retry button
-- Icons: `public/icons/icon-{72,96,128,144,152,192,384,512}x*.png`
+- Icons: `public/icons/icon-{72,96,128,144,152,192,384,512}x*.png` — purple-to-pink gradient with video frame + play button + live dot
 - Viewport meta in `_app.tsx` with `viewport-fit=cover` for safe-area support
 - Service worker registered in `_app.tsx` on mount
 - App installable on Android (Chrome) and iOS (Safari Add to Home Screen)
+
+## Branding & Logo
+- Custom SVG logo component: `src/components/ChaesaLogo.tsx`
+- `ChaesaLogo` — full-color app icon (purple-pink gradient bg, white video frame + play button + text lines + green live dot)
+- `ChaesaLogoMark` — monochrome version using currentColor (for inline text contexts)
+- Used in: Landing page navbar (size 40), PageHeader (size 28), Footer (size 32), mobile drawer (size 36)
+- Text "Chaesa Live" rendered with `bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent`
 
 ## HRD & Training Tools
 ### Certification & Exam Center (`/sertifikasi`)
