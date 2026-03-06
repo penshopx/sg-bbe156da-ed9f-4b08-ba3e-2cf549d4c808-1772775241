@@ -126,6 +126,9 @@ export default function Home() {
                 <Link href="/micro-learning" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors">
                   Micro-Learning
                 </Link>
+                <Link href="/schedule" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors">
+                  Jadwal Live
+                </Link>
               </nav>
 
               {/* Theme Toggle & Auth Buttons */}

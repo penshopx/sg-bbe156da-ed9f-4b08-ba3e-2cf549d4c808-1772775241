@@ -47,9 +47,20 @@ supabase/         - Supabase configuration
 
 ## Chatbot
 - ChatWidget component (`src/components/ChatWidget.tsx`) rendered globally via `_app.tsx`
-- API endpoint: `src/pages/api/chat/ask.ts` with OpenAI GPT-4 integration
+- API endpoint: `src/pages/api/chat/ask.ts` with AI (Replit AI Integrations / OpenAI)
+- Uses `gpt-5-mini` model via `AI_INTEGRATIONS_OPENAI_BASE_URL` and `AI_INTEGRATIONS_OPENAI_API_KEY`
+- Falls back to keyword-based knowledge base if AI unavailable
+- Sends conversation history for multi-turn context
 - Persona: Santai tapi sopan (casual but polite), uses "saya/aku" and "Kamu/Anda"
 - All UI strings in Indonesian
+
+## Live Schedule
+- Page: `src/pages/schedule.tsx` — Create, edit, delete live sessions
+- Data stored in localStorage (client-side)
+- Features: Share via WhatsApp, Email, copy link/invite text
+- Auto-generates meeting codes (format: XXXX-XXXX-XXXX)
+- Status tracking: upcoming, live, ended
+- Linked from navbar on index page as "Jadwal Live"
 
 ## Notes
 - Supabase client handles missing env vars gracefully (warns instead of crashing)

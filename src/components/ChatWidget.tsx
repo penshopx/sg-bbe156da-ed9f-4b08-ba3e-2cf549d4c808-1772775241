@@ -60,11 +60,16 @@ export function ChatWidget() {
     setIsLoading(true);
 
     try {
+      const chatHistory = messages
+        .filter(m => m.id !== "welcome" && (m.role === "user" || m.role === "bot"))
+        .map(m => ({ role: m.role === "user" ? "user" : "bot", text: m.text }));
+
       const response = await fetch("/api/chat/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          message: userMsg.text
+          message: userMsg.text,
+          history: chatHistory,
         })
       });
 

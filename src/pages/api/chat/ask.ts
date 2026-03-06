@@ -1,4 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
+  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+});
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
@@ -6,45 +12,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { message } = req.body;
+    const { message, history } = req.body;
 
     if (!message) {
       return res.status(400).json({ error: "Missing message" });
     }
 
     let botReply: string;
-    const openaiApiKey = process.env.OPENAI_API_KEY;
 
-    if (openaiApiKey && openaiApiKey !== "your_openai_api_key_here") {
-      try {
-        const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${openaiApiKey}`,
-          },
-          body: JSON.stringify({
-            model: "gpt-4",
-            messages: [
-              { role: "system", content: CHAESA_LIVE_SYSTEM_PROMPT },
-              { role: "user", content: message },
-            ],
-            temperature: 0.7,
-            max_tokens: 600,
-          }),
-        });
+    try {
+      const chatHistory = (history || []).slice(-10).map((m: any) => ({
+        role: m.role === "user" ? "user" as const : "assistant" as const,
+        content: m.text,
+      }));
 
-        if (!openaiResponse.ok) {
-          throw new Error("OpenAI API error");
-        }
+      const response = await openai.chat.completions.create({
+        model: "gpt-5-mini",
+        messages: [
+          { role: "system", content: CHAESA_LIVE_SYSTEM_PROMPT },
+          ...chatHistory,
+          { role: "user", content: message },
+        ],
+        max_completion_tokens: 8192,
+      });
 
-        const openaiData = await openaiResponse.json();
-        botReply = openaiData.choices[0].message.content;
-      } catch (error) {
-        console.error("OpenAI API error, falling back to knowledge base:", error);
-        botReply = generateSmartResponse(message);
-      }
-    } else {
+      botReply = response.choices[0]?.message?.content || generateSmartResponse(message);
+    } catch (error) {
+      console.error("OpenAI API error, falling back to knowledge base:", error);
       botReply = generateSmartResponse(message);
     }
 
