@@ -117,27 +117,11 @@ export default function MeetingRoom() {
 
     const setupMeeting = async () => {
       try {
-        // 1. Get meeting details
-        const { data: meeting, error } = await meetingService.getMeetingByCode(meetingCode);
+        console.log("Setting up meeting with code:", meetingCode);
         
-        if (error || !meeting) {
-          // Only show error once and redirect
-          toast({
-            title: "Meeting Tidak Ditemukan",
-            description: "Kode meeting tidak valid atau meeting sudah berakhir.",
-            variant: "destructive"
-          });
-          // Give user time to read error before redirect
-          setTimeout(() => {
-            router.push("/");
-          }, 2000);
-          return;
-        }
-
-        setMeetingId(meeting.id);
-
-        // 2. Check user session
+        // 1. Check user session first
         const { userId, displayName, isGuest } = await authService.getUserInfo();
+        console.log("User info:", { userId, displayName, isGuest });
         
         if (userId || displayName) {
           setCurrentUser({ id: userId, name: displayName });
@@ -152,6 +136,35 @@ export default function MeetingRoom() {
             }
           }
         }
+
+        // 2. Get or create meeting
+        let { data: meeting, error } = await meetingService.getMeetingByCode(meetingCode);
+        
+        if (error || !meeting) {
+          console.log("Meeting not found, creating new one...");
+          // Auto-create meeting if not found
+          const { data: newMeeting, error: createError } = await meetingService.createMeeting(
+            userId || "guest",
+            meetingCode
+          );
+          
+          if (createError || !newMeeting) {
+            console.error("Failed to create meeting:", createError);
+            toast({
+              title: "Error",
+              description: "Tidak bisa membuat meeting. Silakan coba lagi.",
+              variant: "destructive"
+            });
+            return;
+          }
+          
+          meeting = newMeeting;
+          console.log("New meeting created:", meeting);
+        }
+
+        setMeetingId(meeting.id);
+        console.log("Meeting ID set:", meeting.id);
+        
       } catch (error) {
         console.error("Error setting up meeting:", error);
         toast({
@@ -159,9 +172,6 @@ export default function MeetingRoom() {
           description: "Terjadi kesalahan saat memuat meeting",
           variant: "destructive"
         });
-        setTimeout(() => {
-          router.push("/");
-        }, 2000);
       }
     };
 
@@ -316,31 +326,60 @@ export default function MeetingRoom() {
   };
 
   const handleJoin = async () => {
-    if (!joinName.trim() || !meetingId) return;
-
     try {
+      console.log("Attempting to join meeting...", { meetingId, joinName, currentUser });
+      
+      // Auto-generate guest name if empty
+      let finalName = joinName.trim();
+      if (!finalName) {
+        finalName = `Guest ${Math.random().toString(36).substring(2, 8)}`;
+        setJoinName(finalName);
+      }
+      
+      if (!meetingId) {
+        toast({
+          title: "Error",
+          description: "Meeting ID tidak ditemukan. Silakan refresh halaman.",
+          variant: "destructive"
+        });
+        return;
+      }
+
       let userId = currentUser?.id;
 
       // If no user ID (new guest), create one
       if (!userId) {
-        const { guestUserId, error } = await authService.createGuestUser(joinName);
-        if (error || !guestUserId) throw error || new Error("Failed to create guest user");
+        console.log("Creating guest user...");
+        const { guestUserId, error } = await authService.createGuestUser(finalName);
+        if (error || !guestUserId) {
+          console.error("Failed to create guest:", error);
+          throw error || new Error("Failed to create guest user");
+        }
         
         userId = guestUserId;
-        authService.setGuestUser(userId, joinName);
+        authService.setGuestUser(userId, finalName);
+        console.log("Guest user created:", userId);
       }
 
-      setCurrentUser({ id: userId, name: joinName });
+      setCurrentUser({ id: userId, name: finalName });
 
       // Join meeting in DB
-      await meetingService.joinMeeting(meetingId, userId, joinName);
+      console.log("Joining meeting in DB...", { meetingId, userId, finalName });
+      await meetingService.joinMeeting(meetingId, userId, finalName);
+      
+      console.log("Successfully joined meeting!");
       setIsJoined(true);
+      
+      toast({
+        title: "Berhasil Bergabung!",
+        description: `Selamat datang ${finalName}`,
+      });
       
     } catch (error) {
       console.error("Error joining meeting:", error);
       toast({
         title: "Error Joining",
-        description: "Could not join the meeting. Please try again.",
+        description: "Tidak bisa join meeting. Silakan coba lagi.",
         variant: "destructive"
       });
     }
@@ -820,31 +859,57 @@ export default function MeetingRoom() {
     return (
       <>
         <SEO title="Join Meeting - Chaesa Live" />
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-          <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 space-y-8">
-            <div className="text-center space-y-2">
-              <h1 className="text-2xl font-bold text-gray-900">Join Meeting</h1>
-              <p className="text-gray-500">Code: {meetingCode}</p>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-4">
+          <div className="max-w-md w-full bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 space-y-8 border border-white/20">
+            <div className="text-center space-y-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full mx-auto flex items-center justify-center">
+                <Video className="w-8 h-8 text-white" />
+              </div>
+              <h1 className="text-3xl font-bold text-white">Join Meeting</h1>
+              <p className="text-purple-200">Meeting Code: <span className="font-mono font-bold text-white">{meetingCode}</span></p>
             </div>
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Display Name</label>
+                <label className="text-sm font-medium text-purple-200">Your Name (Optional)</label>
                 <Input
                   value={joinName}
                   onChange={(e) => setJoinName(e.target.value)}
-                  placeholder="Enter your name"
-                  className="h-12"
+                  placeholder="Enter your name or leave empty for Guest"
+                  className="h-12 bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleJoin();
+                    }
+                  }}
                 />
+                <p className="text-xs text-purple-300">
+                  Press Enter or click Join to continue
+                </p>
               </div>
 
               <Button 
                 onClick={handleJoin} 
-                className="w-full h-12 text-lg bg-indigo-600 hover:bg-indigo-700"
-                disabled={!joinName.trim()}
+                className="w-full h-14 text-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold"
               >
-                Join Now
+                <Video className="w-5 h-5 mr-2" />
+                Join Meeting
               </Button>
+              
+              <div className="text-center">
+                <button
+                  onClick={() => router.push("/")}
+                  className="text-purple-300 hover:text-white text-sm transition-colors"
+                >
+                  ← Back to Home
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-white/10 space-y-2">
+              <p className="text-xs text-purple-300 text-center">
+                Your camera and microphone will be requested after joining
+              </p>
             </div>
           </div>
         </div>
@@ -885,7 +950,7 @@ export default function MeetingRoom() {
                 )}>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <circle cx="12" cy="12" r="10" />
-                    <path d="M12 6v6l4 2" />
+                    <path d="M12 6v6l4 2M16 12h4l-2 3" />
                   </svg>
                   <span className={cn(
                     "font-medium text-sm",
@@ -1267,26 +1332,24 @@ export default function MeetingRoom() {
             <div className="w-96 bg-gray-800 border-l border-gray-700 flex flex-col shrink-0">
               <div className="p-4 border-b border-gray-700 flex items-center justify-between">
                 <h3 className="text-white font-medium">Whiteboard</h3>
-                <div className="flex items-center gap-2">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="text-gray-400 hover:text-white"
-                    title="Clear whiteboard"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path d="M3 6h18M19 6v14a2 2 0 01-2 2h-2a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
-                    </svg>
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setShowWhiteboard(false)}
-                    className="text-gray-400 hover:text-white"
-                  >
-                    ✕
-                  </Button>
-                </div>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-gray-400 hover:text-white"
+                  title="Clear whiteboard"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M3 6h18M19 6v14a2 2 0 01-2 2h-2a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                  </svg>
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setShowWhiteboard(false)}
+                  className="text-gray-400 hover:text-white"
+                >
+                  ✕
+                </Button>
               </div>
               <div className="flex-1 bg-white relative">
                 <canvas
