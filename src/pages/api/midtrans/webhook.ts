@@ -103,20 +103,24 @@ export default async function handler(
 
     const metadata = transactionData.metadata as TransactionMetadata;
 
+    // Fix: Use explicit any type for payload to prevent deep type instantiation error
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const updatePayload: any = {
+      status: finalStatus,
+      payment_method: payment_type,
+      metadata: {
+        ...metadata,
+        midtrans_status: transaction_status,
+        fraud_status: fraud_status,
+        payment_type: payment_type,
+        settlement_time: statusResponse.settlement_time,
+      },
+    };
+
     // Update transaction status
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error: updateError } = await (supabase.from("payment_transactions") as any)
-      .update({
-        status: finalStatus,
-        payment_method: payment_type,
-        metadata: {
-          ...metadata,
-          midtrans_status: transaction_status,
-          fraud_status: fraud_status,
-          payment_type: payment_type,
-          settlement_time: statusResponse.settlement_time,
-        },
-      })
+      .update(updatePayload)
       .eq("transaction_id", order_id);
 
     if (updateError) {
