@@ -10,6 +10,7 @@ import {
   BarChart3, Brain, ChevronRight, ChevronDown, Star,
   Lightbulb, User, Video, X, Edit2, Save, Eye
 } from "lucide-react";
+import { useAuth, getUserStorageKey } from "@/hooks/useAuth";
 
 interface Skill {
   id: string;
@@ -230,6 +231,7 @@ function StarRating({ value, onChange, readonly = false }: { value: number; onCh
 }
 
 export default function SkillsMatrix() {
+  const { user, isLoggedIn, isLoading: authLoading, userName, userId } = useAuth();
   const [categories, setCategories] = useState<SkillCategory[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [activeTab, setActiveTab] = useState<"matrix" | "passport" | "gap">("matrix");
@@ -246,21 +248,23 @@ export default function SkillsMatrix() {
   const [editingRequired, setEditingRequired] = useState<string | null>(null);
 
   useEffect(() => {
+    if (authLoading) return;
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+      const saved = localStorage.getItem(getUserStorageKey(userId, "skills-matrix"));
       if (saved) {
         const data = JSON.parse(saved);
         setCategories(data.categories || []);
         setTeamMembers(data.teamMembers || []);
       }
     } catch {}
-  }, []);
+  }, [userId, authLoading]);
 
   useEffect(() => {
+    if (authLoading) return;
     if (categories.length > 0 || teamMembers.length > 0) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ categories, teamMembers }));
+      localStorage.setItem(getUserStorageKey(userId, "skills-matrix"), JSON.stringify({ categories, teamMembers }));
     }
-  }, [categories, teamMembers]);
+  }, [categories, teamMembers, userId, authLoading]);
 
   const loadFramework = (frameworkName: string) => {
     const fw = FRAMEWORKS.find((f) => f.name === frameworkName);
@@ -496,6 +500,11 @@ export default function SkillsMatrix() {
               </h1>
             </div>
             <div className="flex items-center gap-3">
+              {isLoggedIn ? (
+                <span className="text-xs text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-full">Halo, {userName}</span>
+              ) : !authLoading ? (
+                <Link href="/auth" className="text-xs text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400">Login untuk menyimpan progress</Link>
+              ) : null}
               <ThemeSwitch />
               <Link href="/">
                 <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400">

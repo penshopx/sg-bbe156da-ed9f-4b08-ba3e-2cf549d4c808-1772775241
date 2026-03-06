@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useRouter } from "next/router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageSquare, X, Send, User, Bot, Loader2, HelpCircle, GripVertical } from "lucide-react";
+import { MessageSquare, X, Send, User, Bot, Loader2, HelpCircle, GripVertical, ExternalLink, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import Link from "next/link";
 
 interface Message {
   id: string;
@@ -14,6 +16,43 @@ interface Message {
   isHelpful?: boolean;
   metadata?: any;
 }
+
+interface FeatureLink {
+  label: string;
+  path: string;
+}
+
+const PAGE_GREETINGS: Record<string, string> = {
+  "/": "Halo Kak! Saya **Chaesa**, konsultan AI Kamu. Saya bisa membantu Kamu menemukan fitur yang tepat. Kamu di sini sebagai **Pembelajar**, **Content Creator**, atau **HRD/Trainer**?",
+  "/storybook": "Halo Kak! Kamu sedang di **Storybook Visual** — belajar lewat cerita bergambar. Mau saya bantu pilihkan cerita yang cocok, atau buat cerita baru dari topik tertentu?",
+  "/sertifikasi": "Halo Kak! Kamu di halaman **Ujian & Sertifikasi**. Mau buat ujian baru, ambil ujian, atau generate soal otomatis dengan AI?",
+  "/sertifikat": "Halo Kak! Ini halaman **Sertifikat Digital**. Saya bisa bantu cara membuat sertifikat, memverifikasi keasliannya, atau menjelaskan cara kerjanya.",
+  "/skills-matrix": "Halo Kak! Kamu di **Skills Matrix & Gap Analysis**. Mau saya bantu pilih framework kompetensi atau jelaskan cara mapping skill tim?",
+  "/learning-path": "Halo Kak! Ini **Learning Path Builder**. Mau mulai dari template yang sudah jadi atau buat jalur belajar custom?",
+  "/broadcast": "Halo Kak! Kamu di **Broadcast Hub**. Mau kirim WhatsApp blast, email campaign, atau generate caption AI untuk sosmed?",
+  "/creator-dashboard": "Halo Kak! Ini **Dashboard Kreator**. Ada pertanyaan tentang analytics, engagement, atau strategi konten?",
+  "/content-calendar": "Halo Kak! Kamu di **Content Calendar**. Perlu bantuan merencanakan jadwal konten atau tips konsistensi posting?",
+  "/micro-learning": "Halo Kak! Ini halaman **Micro-Learning**. Mau buat kursus dari rekaman meeting atau belajar kursus yang tersedia?",
+  "/schedule": "Halo Kak! Kamu di **Jadwal Live**. Mau buat jadwal live baru atau tanya tentang fitur meeting?",
+  "/pricing": "Halo Kak! Ini halaman **Harga**. Mau saya jelaskan perbedaan paket atau bantu pilih yang paling cocok untuk kebutuhan Kamu?",
+  "/ai-studio": "Halo Kak! Kamu di **AI Studio**. Mau generate kursus dari meeting, atau tanya tentang fitur AI lainnya?",
+};
+
+const PAGE_SUGGESTIONS: Record<string, string[]> = {
+  "/": ["Saya mau belajar", "Saya content creator", "Untuk HRD/Training", "Fitur apa saja?"],
+  "/storybook": ["Buat cerita baru", "Cerita apa saja?", "Cara kerja Storybook"],
+  "/sertifikasi": ["Buat ujian baru", "AI generate soal", "Kategori ujian apa saja?"],
+  "/sertifikat": ["Cara buat sertifikat", "Verifikasi sertifikat", "Format sertifikat"],
+  "/skills-matrix": ["Framework apa saja?", "Cara mapping skill", "Export laporan"],
+  "/learning-path": ["Template apa saja?", "Buat path custom", "Cara kerja gamifikasi"],
+  "/broadcast": ["AI Caption Generator", "WhatsApp blast", "Template broadcast"],
+  "/creator-dashboard": ["Tips engagement", "Strategi konten", "Fitur analytics"],
+  "/content-calendar": ["Tips jadwal posting", "Cara pakai kalender", "Rencana konten"],
+  "/micro-learning": ["Buat kursus baru", "Format konten", "Cara kerja AI"],
+  "/schedule": ["Buat jadwal live", "Fitur meeting", "Share jadwal"],
+  "/pricing": ["Paket mana yang cocok?", "Bandingkan dengan Zoom", "Daftar gratis"],
+  "/ai-studio": ["Generate kursus", "Fitur AI lainnya", "Cara mulai"],
+};
 
 function BotMarkdown({ content }: { content: string }) {
   return (
@@ -51,11 +90,20 @@ function BotMarkdown({ content }: { content: string }) {
             {children}
           </blockquote>
         ),
-        a: ({ href, children }) => (
-          <a href={href} target="_blank" rel="noopener noreferrer" className="text-green-600 dark:text-green-400 underline hover:text-green-700">
-            {children}
-          </a>
-        ),
+        a: ({ href, children }) => {
+          if (href && href.startsWith("/")) {
+            return (
+              <Link href={href} className="text-green-600 dark:text-green-400 underline hover:text-green-700 font-medium">
+                {children}
+              </Link>
+            );
+          }
+          return (
+            <a href={href} target="_blank" rel="noopener noreferrer" className="text-green-600 dark:text-green-400 underline hover:text-green-700">
+              {children}
+            </a>
+          );
+        },
         table: ({ children }) => (
           <div className="overflow-x-auto my-2 rounded-lg border border-gray-200 dark:border-gray-700">
             <table className="w-full text-xs border-collapse">{children}</table>
@@ -86,17 +134,13 @@ function BotMarkdown({ content }: { content: string }) {
 }
 
 export function ChatWidget() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "welcome",
-      role: "bot",
-      text: "Halo Kak! 👋 Saya Chaesa, asisten AI Kamu. Ada yang bisa saya bantu hari ini?",
-    }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const hasGreetedRef = useRef<string>("");
 
   const [btnPos, setBtnPos] = useState({ x: -1, y: -1 });
   const [isDragging, setIsDragging] = useState(false);
@@ -129,6 +173,28 @@ export function ChatWidget() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  useEffect(() => {
+    const currentPath = router.pathname;
+    if (hasGreetedRef.current === currentPath) return;
+
+    const greeting = PAGE_GREETINGS[currentPath] || PAGE_GREETINGS["/"]!;
+    const suggestions = PAGE_SUGGESTIONS[currentPath] || PAGE_SUGGESTIONS["/"]!;
+
+    const welcomeMsg: Message = {
+      id: "welcome_" + currentPath,
+      role: "bot",
+      text: greeting,
+      metadata: { quickReplies: suggestions },
+    };
+
+    if (!hasGreetedRef.current) {
+      setMessages([welcomeMsg]);
+    } else {
+      setMessages(prev => [...prev, welcomeMsg]);
+    }
+    hasGreetedRef.current = currentPath;
+  }, [router.pathname]);
 
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     setIsDragging(true);
@@ -175,13 +241,14 @@ export function ChatWidget() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const handleSend = async () => {
-    if (!input.trim()) return;
+  const handleSend = async (messageText?: string) => {
+    const text = messageText || input.trim();
+    if (!text) return;
 
     const userMsg: Message = {
       id: Date.now().toString(),
       role: "user",
-      text: input
+      text,
     };
 
     setMessages(prev => [...prev, userMsg]);
@@ -197,8 +264,9 @@ export function ChatWidget() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          message: userMsg.text,
+          message: text,
           history: chatHistory,
+          currentPage: router.pathname,
         })
       });
 
@@ -210,7 +278,8 @@ export function ChatWidget() {
         text: data.reply || "Maaf, ada gangguan. Coba lagi ya.",
         metadata: {
           quickReplies: data.quick_replies,
-          relatedArticles: data.related_articles
+          relatedArticles: data.related_articles,
+          featureLinks: data.feature_links,
         }
       };
 
@@ -229,7 +298,7 @@ export function ChatWidget() {
   };
 
   const handleQuickReply = (text: string) => {
-    setInput(text);
+    handleSend(text);
   };
 
   const [chatPanelStyle, setChatPanelStyle] = useState<React.CSSProperties>({});
@@ -259,19 +328,19 @@ export function ChatWidget() {
     <>
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 bg-white dark:bg-gray-900 flex flex-col md:inset-auto md:w-[400px] md:h-[600px] md:rounded-2xl md:border md:border-gray-200 md:dark:border-gray-800 md:shadow-2xl overflow-hidden"
+          className="fixed inset-0 z-50 bg-white dark:bg-gray-900 flex flex-col md:inset-auto md:w-[420px] md:h-[620px] md:rounded-2xl md:border md:border-gray-200 md:dark:border-gray-800 md:shadow-2xl overflow-hidden"
           style={chatPanelStyle}
         >
           <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-4 flex items-center justify-between text-white safe-area-top">
             <div className="flex items-center gap-3">
               <div className="bg-white/20 p-2 rounded-full">
-                <Bot className="w-5 h-5" />
+                <Sparkles className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-bold">Chaesa Helpdesk</h3>
+                <h3 className="font-bold">Chaesa AI Consultant</h3>
                 <p className="text-xs text-white/80 flex items-center gap-1">
                   <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                  AI Aktif
+                  Atentif & Proaktif
                 </p>
               </div>
             </div>
@@ -299,7 +368,7 @@ export function ChatWidget() {
                     "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1",
                     msg.role === "user" ? "bg-gray-200 dark:bg-gray-700" : "bg-green-100 dark:bg-green-900/50"
                   )}>
-                    {msg.role === "user" ? <User className="w-4 h-4 text-gray-600" /> : <Bot className="w-4 h-4 text-green-600 dark:text-green-400" />}
+                    {msg.role === "user" ? <User className="w-4 h-4 text-gray-600" /> : <Sparkles className="w-4 h-4 text-green-600 dark:text-green-400" />}
                   </div>
 
                   <div className="flex flex-col gap-2">
@@ -311,6 +380,21 @@ export function ChatWidget() {
                     )}>
                       {msg.role === "user" ? msg.text : <BotMarkdown content={msg.text} />}
                     </div>
+
+                    {msg.metadata?.featureLinks?.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {msg.metadata.featureLinks.map((link: FeatureLink) => (
+                          <Link
+                            key={link.path}
+                            href={link.path}
+                            className="inline-flex items-center gap-1 text-xs bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 px-2.5 py-1.5 rounded-lg border border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors"
+                          >
+                            <ExternalLink className="w-3 h-3" />
+                            {link.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
 
                     {msg.metadata?.relatedArticles?.length > 0 && (
                       <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-xl border border-green-100 dark:border-green-800/30">
@@ -328,7 +412,7 @@ export function ChatWidget() {
                     )}
 
                     {msg.metadata?.quickReplies?.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-1">
+                      <div className="flex flex-wrap gap-1.5 mt-1">
                         {msg.metadata.quickReplies.map((reply: string) => (
                           <button
                             key={reply}
@@ -346,11 +430,15 @@ export function ChatWidget() {
               {isLoading && (
                 <div className="flex gap-3">
                   <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center">
-                    <Bot className="w-4 h-4 text-green-600" />
+                    <Sparkles className="w-4 h-4 text-green-600" />
                   </div>
                   <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl rounded-tl-none border shadow-sm flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-green-500" />
-                    <span className="text-xs text-gray-400">Sedang mengetik...</span>
+                    <div className="flex gap-1">
+                      <span className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                      <span className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                      <span className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                    </div>
+                    <span className="text-xs text-gray-400 ml-1">Chaesa sedang berpikir...</span>
                   </div>
                 </div>
               )}
@@ -363,11 +451,11 @@ export function ChatWidget() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                placeholder="Tulis pertanyaan Kamu..."
+                placeholder="Tanya apapun ke Chaesa..."
                 className="flex-1 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus-visible:ring-green-500"
               />
               <Button
-                onClick={handleSend}
+                onClick={() => handleSend()}
                 disabled={!input.trim() || isLoading}
                 size="icon"
                 className="bg-green-600 hover:bg-green-700"
@@ -376,7 +464,7 @@ export function ChatWidget() {
               </Button>
             </div>
             <div className="text-[10px] text-center text-gray-400 mt-2">
-              Didukung oleh Chaesa AI • Jawaban dihasilkan secara otomatis
+              Chaesa AI Consultant — Atentif, Proaktif, Konsultatif
             </div>
           </div>
         </div>

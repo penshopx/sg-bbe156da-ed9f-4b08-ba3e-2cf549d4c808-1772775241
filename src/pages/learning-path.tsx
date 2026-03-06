@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth, getUserStorageKey } from "@/hooks/useAuth";
 import {
   Map,
   Plus,
@@ -431,6 +433,7 @@ function getLevelColor(level: string) {
 export default function LearningPathPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const { user, isLoggedIn, isLoading: authLoading, userName, userId } = useAuth();
   const [activeTab, setActiveTab] = useState("paths");
   const [paths, setPaths] = useState<LearningPath[]>([]);
   const [selectedPath, setSelectedPath] = useState<LearningPath | null>(null);
@@ -463,12 +466,13 @@ export default function LearningPathPage() {
   });
 
   useEffect(() => {
+    if (authLoading) return;
     loadPaths();
-  }, []);
+  }, [userId, authLoading]);
 
   const loadPaths = () => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
+      const stored = localStorage.getItem(getUserStorageKey(userId, "learning_paths"));
       if (stored) {
         setPaths(JSON.parse(stored));
       }
@@ -478,9 +482,9 @@ export default function LearningPathPage() {
   };
 
   const savePaths = useCallback((updatedPaths: LearningPath[]) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedPaths));
+    localStorage.setItem(getUserStorageKey(userId, "learning_paths"), JSON.stringify(updatedPaths));
     setPaths(updatedPaths);
-  }, []);
+  }, [userId]);
 
   const handleUseTemplate = (template: LearningPath) => {
     const newLearningPath: LearningPath = {
@@ -655,9 +659,18 @@ export default function LearningPathPage() {
       <div className="min-h-screen bg-gray-50 dark:bg-gradient-to-br dark:from-blue-900 dark:via-purple-900 dark:to-pink-900">
         <div className="container mx-auto px-4 py-8">
           <div className="mb-8">
-            <Button variant="ghost" onClick={() => router.push("/")} className="mb-4 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-white/10">
-              ← Back to Home
-            </Button>
+            <div className="flex items-center justify-between mb-4">
+              <Button variant="ghost" onClick={() => router.push("/")} className="text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-white/10">
+                ← Back to Home
+              </Button>
+              <div className="flex items-center gap-3">
+                {isLoggedIn ? (
+                  <span className="text-xs text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-full">Halo, {userName}</span>
+                ) : !authLoading ? (
+                  <Link href="/auth" className="text-xs text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400">Login untuk menyimpan progress</Link>
+                ) : null}
+              </div>
+            </div>
             <div className="flex items-center gap-3 mb-2">
               <Map className="w-10 h-10 text-emerald-400" />
               <h1 className="text-4xl font-bold text-gray-900 dark:text-white">Learning Path Builder</h1>

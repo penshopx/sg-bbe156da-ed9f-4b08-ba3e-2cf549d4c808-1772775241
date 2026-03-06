@@ -8,8 +8,10 @@ import {
   Video, Users, Lock, Share2, Award, MessageSquare, 
   Mic, MonitorPlay, Shield, Sparkles, ArrowRight, 
   Zap, TrendingUp, DollarSign, Clock, CheckCircle,
-  Star, PlayCircle, Rocket, Brain, Target, Gift
+  Star, PlayCircle, Rocket, Brain, Target, Gift, Menu
 } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -21,6 +23,7 @@ export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [showDebug, setShowDebug] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [stats, setStats] = useState({
     creators: 1234,
     courses: 5678,
@@ -185,17 +188,163 @@ export default function Home() {
                 </div>
               </nav>
 
+              <button
+                className="lg:hidden p-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"
+                onClick={() => setMobileMenuOpen(true)}
+                aria-label="Open menu"
+              >
+                <Menu className="w-6 h-6" />
+              </button>
+
+              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                <SheetContent side="left" className="w-[300px] overflow-y-auto">
+                  <SheetHeader className="mb-4">
+                    <SheetTitle className="flex items-center gap-2">
+                      <Video className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                      Chaesa Live
+                    </SheetTitle>
+                  </SheetHeader>
+
+                  <div className="flex flex-col gap-2 mb-4">
+                    <Link href="/pricing" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+                      Harga
+                    </Link>
+                    <Link href="/schedule" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+                      Jadwal Live
+                    </Link>
+                  </div>
+
+                  <Accordion type="multiple" className="w-full">
+                    <AccordionItem value="belajar">
+                      <AccordionTrigger className="px-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <span className="flex items-center gap-2"><Award className="w-4 h-4" /> Belajar</span>
+                      </AccordionTrigger>
+                      <AccordionContent className="pl-3">
+                        <div className="flex flex-col gap-1">
+                          <Link href="/micro-learning" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+                            Micro-Learning
+                          </Link>
+                          <Link href="/learning-path" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+                            Learning Path
+                          </Link>
+                          <Link href="/sertifikasi" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+                            Ujian & Sertifikasi
+                          </Link>
+                          <Link href="/sertifikat" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+                            Sertifikat Saya
+                          </Link>
+                          <Link href="/storybook" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+                            Storybook Visual
+                          </Link>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="hrd">
+                      <AccordionTrigger className="px-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <span className="flex items-center gap-2"><Shield className="w-4 h-4" /> HRD & Training</span>
+                      </AccordionTrigger>
+                      <AccordionContent className="pl-3">
+                        <div className="flex flex-col gap-1">
+                          <Link href="/skills-matrix" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+                            Skills Matrix & Gap Analysis
+                          </Link>
+                          <Link href="/sertifikasi" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+                            Exam Center
+                          </Link>
+                          <Link href="/learning-path" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+                            Training Path
+                          </Link>
+                          <Link href="/sertifikat" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+                            Digital Certificate
+                          </Link>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="creator">
+                      <AccordionTrigger className="px-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <span className="flex items-center gap-2"><Sparkles className="w-4 h-4" /> Creator Tools</span>
+                      </AccordionTrigger>
+                      <AccordionContent className="pl-3">
+                        <div className="flex flex-col gap-1">
+                          <Link href="/ai-studio" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+                            AI Studio
+                          </Link>
+                          <Link href="/creator-dashboard" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+                            Dashboard Kreator
+                          </Link>
+                          <Link href="/broadcast" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+                            Broadcast & Marketing
+                          </Link>
+                          <Link href="/content-calendar" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+                            Kalender Konten
+                          </Link>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+
+                  <div className="border-t border-gray-200 dark:border-gray-700 mt-4 pt-4 flex flex-col gap-2">
+                    {!isLoggedIn ? (
+                      <>
+                        <Link href="/auth?mode=login" onClick={() => setMobileMenuOpen(false)}>
+                          <Button variant="outline" className="w-full">
+                            Masuk
+                          </Button>
+                        </Link>
+                        <Link href="/auth?mode=register" onClick={() => setMobileMenuOpen(false)}>
+                          <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+                            Daftar Gratis
+                          </Button>
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <div className="px-3 py-2 text-sm text-gray-600 dark:text-gray-300">{userEmail || "User"}</div>
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={async () => {
+                            setMobileMenuOpen(false);
+                            try {
+                              await supabase.auth.signOut();
+                              setIsLoggedIn(false);
+                              setUserEmail("");
+                              toast({
+                                title: "Logout Berhasil",
+                                description: "Anda telah keluar dari akun",
+                              });
+                              router.reload();
+                            } catch (error) {
+                              console.error("Logout error:", error);
+                              toast({
+                                title: "Error",
+                                description: "Gagal logout, silakan coba lagi",
+                                variant: "destructive",
+                              });
+                            }
+                          }}
+                        >
+                          Keluar
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </SheetContent>
+              </Sheet>
+
               {/* Theme Toggle & Auth Buttons */}
               <div className="flex items-center gap-3">
                 <ThemeSwitch />
                 {!isLoggedIn ? (
                   <>
-                    <Link href="/auth?mode=login">
+                    <Link href="/auth?mode=login" className="hidden lg:block">
                       <Button variant="ghost" className="text-gray-700 hover:bg-gray-200 dark:text-white dark:hover:bg-white/10">
                         Masuk
                       </Button>
                     </Link>
-                    <Link href="/auth?mode=register">
+                    <Link href="/auth?mode=register" className="hidden lg:block">
                       <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
                         Daftar Gratis
                       </Button>

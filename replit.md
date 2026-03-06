@@ -47,7 +47,7 @@ supabase/         - Supabase configuration
 - Toggle component: `src/components/ThemeSwitch.tsx` (in navbar on index page)
 - Options: Terang (Light), Gelap (Dark), Sistem (System)
 
-## Chatbot
+## Chatbot (Agentic AI)
 - ChatWidget component (`src/components/ChatWidget.tsx`) rendered globally via `_app.tsx`
 - Draggable floating button — user can move it anywhere on screen (drag & drop)
 - On mobile: opens full-screen; on desktop: opens as floating panel near button position
@@ -56,6 +56,14 @@ supabase/         - Supabase configuration
 - Falls back to keyword-based knowledge base if AI unavailable
 - Sends conversation history for multi-turn context
 - Renders bot messages as rich markdown (tables, headings, code blocks, lists)
+- **Agentic Behavior**: Atentif, Proaktif, Konsultatif persona
+  - Page-aware greetings: detects current page and shows relevant welcome message
+  - Contextual quick reply suggestions per page
+  - Feature link cards: clickable navigation buttons in chat responses
+  - Role-based consultation: detects if user is Learner, Creator, or HRD
+  - Internal links rendered as Next.js Links for SPA navigation
+  - API returns `feature_links` array for clickable feature navigation cards
+  - Full knowledge base covers ALL features: Storybook, Sertifikasi, Skills Matrix, Learning Path, Broadcast, Creator Dashboard, Content Calendar, AI Studio, etc.
 
 ## Creator Tools
 ### Creator Dashboard (`/creator-dashboard`)
@@ -172,13 +180,21 @@ supabase/         - Supabase configuration
 - Industries: Construction, Business, Technology, Health, Education, Marketing
 - localStorage persistence
 
+## Auth Hook
+- Shared hook: `src/hooks/useAuth.ts`
+- Returns: `{ user, isLoggedIn, isLoading, userName, userId, isGuest }`
+- Uses Supabase auth + localStorage guest user fallback
+- `getUserStorageKey(userId, key)` — generates user-scoped localStorage keys
+- All feature pages use this hook to show user info and persist data per-user
+
 ## Navigation
 - Homepage navbar (segment-based):
   - Harga, Jadwal Live
   - "Belajar" dropdown: Micro-Learning, Learning Path, Ujian & Sertifikasi, Sertifikat Saya, Storybook Visual
   - "HRD & Training" dropdown: Skills Matrix & Gap Analysis, Exam Center, Training Path, Digital Certificate
   - "Creator Tools" dropdown: AI Studio, Dashboard Kreator, Broadcast & Marketing, Kalender Konten
-- All new pages have consistent header with back-to-home link and theme toggle
+- **Mobile hamburger menu**: Sheet drawer (left slide) with accordion sections for all nav groups, auth buttons, closes on navigation
+- All new pages have consistent header with back-to-home link, theme toggle, and auth indicator
 
 ## Notes
 - Supabase client handles missing env vars gracefully (warns instead of crashing)

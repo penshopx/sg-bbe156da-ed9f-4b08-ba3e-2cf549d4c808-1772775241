@@ -13,6 +13,7 @@ import {
   Star, Hash, Building2, FileText, QrCode, Tags,
   Plus, Trash2, ChevronRight
 } from "lucide-react";
+import { useAuth, getUserStorageKey } from "@/hooks/useAuth";
 
 interface Certificate {
   id: string;
@@ -47,19 +48,19 @@ function generateId(): string {
   return result;
 }
 
-function loadCertificates(): Certificate[] {
+function loadCertificates(uid: string | null): Certificate[] {
   if (typeof window === "undefined") return [];
   try {
-    const data = localStorage.getItem(STORAGE_KEY);
+    const data = localStorage.getItem(getUserStorageKey(uid, "certificates"));
     return data ? JSON.parse(data) : [];
   } catch {
     return [];
   }
 }
 
-function saveCertificates(certs: Certificate[]) {
+function saveCertificates(uid: string | null, certs: Certificate[]) {
   if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(certs));
+  localStorage.setItem(getUserStorageKey(uid, "certificates"), JSON.stringify(certs));
 }
 
 function QRCodeSVG({ value, size = 120 }: { value: string; size?: number }) {
@@ -262,6 +263,7 @@ function CertificateView({
 }
 
 export default function SertifikatPage() {
+  const { user, isLoggedIn, isLoading: authLoading, userName, userId } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<ActiveTab>("my-certificates");
   const [certificates, setCertificates] = useState<Certificate[]>([]);
@@ -281,14 +283,15 @@ export default function SertifikatPage() {
   const [formTags, setFormTags] = useState("");
 
   useEffect(() => {
-    setCertificates(loadCertificates());
-  }, []);
+    if (authLoading) return;
+    setCertificates(loadCertificates(userId));
+  }, [userId, authLoading]);
 
   useEffect(() => {
     if (router.query.verify && typeof router.query.verify === "string") {
       setVerifyId(router.query.verify);
       setActiveTab("verify");
-      const certs = loadCertificates();
+      const certs = loadCertificates(userId);
       const found = certs.find((c) => c.id === router.query.verify);
       setVerifyResult(found || "not_found");
     }
@@ -318,7 +321,7 @@ export default function SertifikatPage() {
 
     const updated = [newCert, ...certificates];
     setCertificates(updated);
-    saveCertificates(updated);
+    saveCertificates(userId, updated);
 
     setSelectedCert(newCert);
     setActiveTab("view");
@@ -334,7 +337,7 @@ export default function SertifikatPage() {
   const handleDelete = (id: string) => {
     const updated = certificates.filter((c) => c.id !== id);
     setCertificates(updated);
-    saveCertificates(updated);
+    saveCertificates(userId, updated);
   };
 
   const handleVerify = () => {
@@ -408,6 +411,11 @@ export default function SertifikatPage() {
               </h1>
             </div>
             <div className="flex items-center gap-3">
+              {isLoggedIn ? (
+                <span className="text-xs text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-full">Halo, {userName}</span>
+              ) : !authLoading ? (
+                <Link href="/auth" className="text-xs text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400">Login untuk menyimpan progress</Link>
+              ) : null}
               <ThemeSwitch />
               <Link href="/">
                 <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400">

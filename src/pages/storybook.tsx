@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ThemeSwitch } from "@/components/ThemeSwitch";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth, getUserStorageKey } from "@/hooks/useAuth";
 import {
   BookOpen, Plus, ChevronLeft, ChevronRight, Search,
   Play, Star, Clock, Users, Award, ArrowLeft,
@@ -373,10 +374,12 @@ export default function StorybookPage() {
   const [isGenerating, setIsGenerating] = useState(false);
 
   const { toast } = useToast();
+  const { user, isLoggedIn, isLoading: authLoading, userName, userId } = useAuth();
 
   useEffect(() => {
+    if (authLoading) return;
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+      const saved = localStorage.getItem(getUserStorageKey(userId, "storybooks"));
       if (saved) {
         const parsed = JSON.parse(saved);
         const merged = [...SAMPLE_STORIES];
@@ -390,14 +393,14 @@ export default function StorybookPage() {
     } catch {
       setStories(SAMPLE_STORIES);
     }
-  }, []);
+  }, [userId, authLoading]);
 
   const saveStories = useCallback((updated: Story[]) => {
     setStories(updated);
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      localStorage.setItem(getUserStorageKey(userId, "storybooks"), JSON.stringify(updated));
     } catch { /* ignore */ }
-  }, []);
+  }, [userId]);
 
   const handleGenerateStory = async () => {
     if (!createTopic.trim()) {
@@ -806,6 +809,11 @@ export default function StorybookPage() {
               <span className="text-gray-600 dark:text-gray-400">Storybook</span>
             </div>
             <div className="flex items-center gap-3">
+              {isLoggedIn ? (
+                <span className="text-xs text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-full">Halo, {userName}</span>
+              ) : !authLoading ? (
+                <Link href="/auth" className="text-xs text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400">Login untuk menyimpan progress</Link>
+              ) : null}
               <ThemeSwitch />
               <Link href="/" className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 flex items-center gap-1">
                 <ArrowLeft className="w-4 h-4" /> Beranda

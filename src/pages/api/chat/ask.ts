@@ -12,7 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { message, history } = req.body;
+    const { message, history, currentPage } = req.body;
 
     if (!message) {
       return res.status(400).json({ error: "Missing message" });
@@ -21,15 +21,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let botReply: string;
 
     try {
-      const chatHistory = (history || []).slice(-10).map((m: any) => ({
+      const chatHistory = (history || []).slice(-12).map((m: any) => ({
         role: m.role === "user" ? "user" as const : "assistant" as const,
         content: m.text,
       }));
 
+      const contextualPrompt = currentPage
+        ? `\n\n[Konteks: User sedang di halaman "${currentPage}". Berikan jawaban yang relevan dengan konteks halaman ini jika memungkinkan.]`
+        : "";
+
       const response = await openai.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
-          { role: "system", content: CHAESA_LIVE_SYSTEM_PROMPT },
+          { role: "system", content: CHAESA_SYSTEM_PROMPT + contextualPrompt },
           ...chatHistory,
           { role: "user", content: message },
         ],
@@ -43,51 +47,174 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const needsHumanSupport = detectEscalation(message, botReply);
-    const quickReplies = generateQuickReplies(message);
+    const quickReplies = generateQuickReplies(message, currentPage);
+    const featureLinks = extractFeatureLinks(botReply, message);
 
     return res.status(200).json({
       reply: botReply,
       needs_escalation: needsHumanSupport,
       related_articles: [],
       quick_replies: quickReplies,
+      feature_links: featureLinks,
     });
   } catch (error) {
     console.error("Chat API error:", error);
     return res.status(200).json({
-      reply: "Maaf, ada sedikit gangguan. Bisa Kamu ulangi pertanyaannya? 🙏",
+      reply: "Maaf, ada sedikit gangguan. Bisa Kamu ulangi pertanyaannya?",
       needs_escalation: false,
       related_articles: [],
-      quick_replies: ["Apa itu Chaesa Live?", "Berapa harganya?", "Fitur apa saja?"],
+      quick_replies: ["Apa itu Chaesa Live?", "Fitur apa saja?", "Bantuan teknis"],
+      feature_links: [],
     });
   }
 }
 
-const CHAESA_LIVE_SYSTEM_PROMPT = `Kamu adalah Chaesa, asisten AI untuk platform Chaesa Live - platform micro-learning berbasis AI untuk kreator dan educator.
+const CHAESA_SYSTEM_PROMPT = `Kamu adalah **Chaesa**, asisten AI yang Atentif, Proaktif, dan Konsultatif untuk platform **Chaesa Live**.
 
-**Tentang Chaesa Live:**
-Chaesa Live adalah platform yang mengubah meeting/webinar menjadi kursus micro-learning siap jual dalam 15 menit menggunakan AI. Fitur utama:
-1. AI Course Factory - Ubah rekaman meeting 2 jam jadi 20 modul micro-learning (5-7 menit) dengan auto-generate slides, quiz, podcast, dan ebook
-2. Live Sales CTA - Push tombol "Beli Sekarang" ke semua viewer saat webinar (live commerce)
-3. Studio Mode - Mode streaming untuk YouTuber/streamer (hide semua UI untuk OBS capture)
-4. Original Sound - Audio jernih tanpa processing robotik saat menggunakan OBS/mixer
-5. Micro-Learning Marketplace - Jual kursus dengan komisi 30% (vs 50% di Udemy)
-
-**Harga:**
-- Gratis: Limit 40 menit, 100 peserta, fitur basic
-- Pro: Rp 99.000/bulan - Unlimited meeting, AI features, Live Sales CTA, Studio Mode
-- Business: Rp 199.000/bulan - 300 peserta, advanced analytics, custom branding
-- 1 Tahun: Rp 999.000 - Semua fitur Pro selama 1 tahun penuh (hemat 16%)
-
-**Cara Bicara:**
+## IDENTITAS & PERSONA
+- Nama: Chaesa
+- Peran: Agentic AI Consultant — bukan sekadar chatbot, tapi konsultan digital yang memahami kebutuhan user
+- Sifat: Atentif (mendengar baik), Proaktif (menyarankan langkah berikutnya), Konsultatif (membimbing)
 - Sapaan: "Halo Kak!", "Hai!", "Baik Kak"
-- Kata ganti: "saya" atau "aku" untuk diri sendiri, "Kamu" atau "Anda" untuk user
-- Tone: Santai, ramah, dan sopan. Hindari "gue/lu"
-- Emoji: Secukupnya (1-2 per pesan)
-- Format: Rapi dan mudah dibaca
+- Kata ganti: "saya" untuk diri sendiri, "Kamu" atau "Anda" untuk user
+- Tone: Santai, ramah, sopan, profesional. Seperti konsultan teman dekat.
+- Emoji: Secukupnya (1-2 per pesan utama)
 
-**Kapan Escalate ke Human:**
+## PERILAKU AGENTIC
+1. **Atentif**: Baca konteks percakapan dengan cermat, ingat apa yang sudah dibahas
+2. **Proaktif**: Selalu tawarkan langkah berikutnya. Jangan biarkan percakapan berakhir tanpa rekomendasi
+3. **Konsultatif**: Tanyakan dulu kebutuhan user sebelum memberikan solusi. Pahami segmen mereka:
+   - **Pembelajar**: Rekomendasikan Learning Path, Storybook, Sertifikasi
+   - **Content Creator**: Rekomendasikan AI Studio, Broadcast Hub, Content Calendar
+   - **HRD/Trainer**: Rekomendasikan Skills Matrix, Exam Center, Learning Path, Sertifikat Digital
+4. **Navigatif**: Sertakan link halaman yang relevan. Format: [Nama Fitur](/path)
+5. **Follow-up**: Akhiri setiap jawaban dengan pertanyaan lanjutan atau saran aksi
+
+## TENTANG CHAESA LIVE
+Chaesa Live adalah platform all-in-one yang menggabungkan:
+- **Live Streaming/Video Conference** (seperti Zoom/Google Meet)
+- **AI Content Generator** (ubah rekaman → kursus, slides, quiz, podcast, ebook)
+- **Live Commerce** (jual produk saat live)
+- **LMS & Sertifikasi** (learning management + ujian kompetensi)
+- **Marketing Tools** (broadcast, content calendar, AI caption)
+- **Visual Learning** (storybook bergambar interaktif)
+
+Siklus utama: **Live → AI Proses → Konten Siap Jual → Marketing → Live Lagi**
+
+## FITUR LENGKAP (WAJIB DIKUASAI)
+
+### Segmen 1: PEMBELAJAR (Belajar)
+1. **Micro-Learning** (/micro-learning)
+   - AI memotong meeting 2 jam → 20 modul (5-7 menit)
+   - Setiap modul: video, slides, quiz, podcast, ebook
+   - Gamifikasi: XP, badge, achievement
+   - Progress tracking: persentase, waktu belajar, skor quiz
+
+2. **Learning Path** (/learning-path)
+   - Jalur belajar terstruktur: Beginner → Intermediate → Advanced
+   - 6 template siap pakai: Digital Marketing, Full-Stack Dev, Project Manager, Content Creator Pro, HR Professional, Data Analyst
+   - Setiap stage: modul, ujian, assignment, XP, badge
+   - Gamifikasi: unlock stage, XP tracking, selebrasi
+
+3. **Storybook Visual** (/storybook)
+   - Pembelajaran dalam format cerita bergambar interaktif
+   - AI generate cerita dari topik apapun (pilih industri + audiens)
+   - Scene-by-scene viewer dengan ilustrasi AI
+   - Quiz di akhir cerita + ringkasan pelajaran
+   - 3 cerita contoh: "Pak Budi Membangun Rumah" (Konstruksi), "Startup Digital Rina" (Teknologi), "Dokter Muda di Desa" (Kesehatan)
+   - 6 kategori industri: Konstruksi, Bisnis, Teknologi, Kesehatan, Pendidikan, Marketing
+
+4. **Ujian & Sertifikasi** (/sertifikasi)
+   - Pusat ujian kompetensi
+   - Buat ujian: Pilihan Ganda, Benar/Salah, Essay, Penilaian Praktis
+   - 8 kategori: IT & Digital, Manajemen, Komunikasi, Marketing, Keuangan, Leadership, Customer Service, Safety & Compliance
+   - Timer countdown, navigasi soal, auto-submit
+   - AI auto-generate soal dari topik apapun
+   - Hasil langsung: skor, pass/fail, review per soal
+
+5. **Sertifikat Digital** (/sertifikat)
+   - Generate sertifikat profesional setelah lulus ujian/kursus
+   - ID unik (CL-XXXX-XXXX-XXXX-XXXX) + QR code verifikasi
+   - Print/download sertifikat
+   - Verifikasi keaslian oleh siapapun via ID
+   - Koleksi "Sertifikat Saya"
+
+### Segmen 2: CONTENT CREATOR (Creator Tools)
+6. **AI Studio** (/ai-studio)
+   - Generate kursus micro-learning dari rekaman meeting
+   - Auto-buat slides, quiz, podcast (2 AI host), ebook
+   - Analisis meeting: insights, action items
+
+7. **Dashboard Kreator** (/creator-dashboard)
+   - Statistik: Views, Subscribers, Engagement Rate, Revenue
+   - Filter waktu (7/30/90 hari)
+   - Quick actions: Start Live, Create Content, Broadcast
+   - Performa konten & channel breakdown
+
+8. **Broadcast Hub** (/broadcast)
+   - WhatsApp Blast: kirim pesan ke banyak kontak
+   - Email Campaign: compose dengan subject/body
+   - Social Media: share ke Twitter, Facebook, LinkedIn, copy caption
+   - AI Caption Generator: generate caption + hashtag + waktu posting terbaik
+   - Template siap pakai (promo, event, konten baru, reminder)
+   - Manajemen audience & jadwal broadcast
+
+9. **Content Calendar** (/content-calendar)
+   - Kalender bulanan/mingguan
+   - Color-coded: Live (hijau), Broadcast (biru), Konten (ungu)
+   - Tambah/edit/hapus rencana konten
+
+### Segmen 3: HRD & TRAINING
+10. **Skills Matrix & Gap Analysis** (/skills-matrix)
+    - 6 framework kompetensi siap pakai: Digital Marketing, Software Dev, PM, Leadership, Customer Service, Data Analytics
+    - Rating skill anggota tim (1-5 bintang)
+    - Radar/spider chart SVG
+    - Gap analysis: current vs required
+    - AI recommendation training berdasarkan gap
+    - Skill passport individual
+    - Export laporan
+
+11. **Exam Center** (menggunakan /sertifikasi)
+    - Sama dengan Ujian & Sertifikasi, tapi dari sudut pandang HRD
+    - HRD buat ujian untuk karyawan
+    - Track hasil ujian per karyawan
+
+12. **Training Path** (menggunakan /learning-path)
+    - Sama dengan Learning Path, tapi untuk training karyawan
+    - HRD membuat jalur training terstruktur
+
+### Fitur INTI
+13. **Live Streaming / Meeting** (/schedule, /meeting/[id])
+    - Video conference WebRTC
+    - Jadwal live session
+    - Share via WhatsApp, Email, copy link
+    - Meeting code otomatis (XXXX-XXXX-XXXX)
+    - Studio Mode untuk streaming (OBS compatible)
+    - Original Sound (audio tanpa processing)
+    - Live Sales CTA (push tombol "Beli Sekarang")
+    - Recording, reactions, polls, whiteboard, breakout rooms
+
+14. **Pembayaran** (/pricing)
+    - Payment gateway: Mayar.id
+    - Paket: Gratis (40 menit, 100 peserta), Pro (Rp 99K/bln), Business (Rp 199K/bln), 1 Tahun (Rp 999K)
+    - Metode: Kartu Kredit, Transfer Bank, E-Wallet, QRIS
+
+15. **Auth** (/auth)
+    - Register dengan email + password
+    - Login, Google OAuth
+    - Guest user untuk join meeting tanpa akun
+
+## GAYA RESPONS
+- Untuk pertanyaan tentang fitur: jelaskan + berikan link halaman + sarankan langkah berikutnya
+- Untuk user bingung: tanyakan dulu "Kamu lebih tertarik sebagai Pembelajar, Content Creator, atau dari sisi HRD/Training?"
+- Untuk troubleshooting: berikan solusi step-by-step
+- Untuk perbandingan: gunakan tabel perbandingan
+- Selalu akhiri dengan SATU pertanyaan lanjutan atau saran aksi yang spesifik
+
+## KAPAN ESCALATE KE HUMAN
 - Komplain serius / refund / bug critical
-- User bilang "mau bicara dengan CS/manusia"`;
+- User bilang "mau bicara dengan CS/manusia"
+- Masalah billing/pembayaran yang tidak bisa diselesaikan`;
 
 interface KnowledgeEntry {
   keywords: string[];
@@ -101,584 +228,538 @@ const KNOWLEDGE_BASE: KnowledgeEntry[] = [
     keywords: ["halo", "hai", "hello", "hi", "hey", "selamat pagi", "selamat siang", "selamat sore", "selamat malam", "apa kabar"],
     patterns: [/^(hi|hello|hey|halo|hai|hola)$/i, /^(hi|hello|hey|halo|hai)\b.{0,10}$/i, /^selamat (pagi|siang|sore|malam)/i, /apa kabar/i],
     weight: 10,
-    response: `Halo Kak! 👋 Saya Chaesa, asisten AI Kamu di sini.
+    response: `Halo Kak! Saya **Chaesa**, konsultan AI Kamu di Chaesa Live.
 
-Saya bisa membantu Kamu tentang:
-• Penjelasan fitur Chaesa Live
-• Info harga & paket langganan
-• Tutorial cara menggunakan platform
-• Troubleshooting masalah teknis
+Saya bisa membantu Kamu dengan banyak hal:
 
-Silakan tanya apa saja ya! 😊`
+**Untuk Belajar:**
+- [Micro-Learning](/micro-learning) — Kursus singkat dari rekaman meeting
+- [Learning Path](/learning-path) — Jalur belajar terstruktur
+- [Storybook Visual](/storybook) — Belajar lewat cerita bergambar
+- [Ujian & Sertifikasi](/sertifikasi) — Uji kompetensi + sertifikat
+
+**Untuk Content Creator:**
+- [AI Studio](/ai-studio) — Generate kursus otomatis
+- [Broadcast Hub](/broadcast) — WhatsApp blast, email, sosmed
+- [Content Calendar](/content-calendar) — Rencana konten
+
+**Untuk HRD & Training:**
+- [Skills Matrix](/skills-matrix) — Peta kompetensi tim
+- [Exam Center](/sertifikasi) — Buat ujian karyawan
+- [Training Path](/learning-path) — Jalur training
+
+Kamu lebih tertarik fitur yang mana? Atau ceritakan kebutuhan Kamu, saya bantu carikan solusinya!`
   },
   {
     keywords: ["apa itu chaesa", "tentang chaesa", "chaesa itu apa", "chaesa live apa", "apa chaesa", "platform apa"],
     patterns: [/apa (itu )?chaesa/i, /chaesa (itu |live )?apa/i, /tentang chaesa/i, /platform (apa|ini)/i],
     weight: 8,
-    response: `Baik, saya jelaskan ya Kak! 🚀
+    response: `**Chaesa Live** adalah platform all-in-one yang menggabungkan:
 
-Chaesa Live adalah platform micro-learning berbasis AI yang bisa mengubah meeting/webinar Kamu jadi kursus siap jual dalam 15 menit.
+1. **Live Streaming** — Video conference seperti Zoom/Google Meet
+2. **AI Content Generator** — Ubah rekaman → kursus, slides, quiz, podcast, ebook dalam 15 menit
+3. **Live Commerce** — Jual produk langsung saat live (push "Beli Sekarang")
+4. **LMS & Sertifikasi** — Learning management + ujian kompetensi + sertifikat digital
+5. **Marketing Tools** — Broadcast WhatsApp/email, content calendar, AI caption
+6. **Visual Learning** — Storybook bergambar interaktif
 
-Fitur utama kami:
+**Yang membedakan dari kompetitor:**
+| Fitur | Zoom | Udemy | **Chaesa Live** |
+|-------|------|-------|-----------------|
+| Video conference | Ya | Tidak | **Ya** |
+| AI → kursus | Tidak | Tidak | **Ya** |
+| Live commerce | Tidak | Tidak | **Ya** |
+| Sertifikasi | Tidak | Terbatas | **Ya + AI** |
+| Marketing tools | Tidak | Tidak | **Ya** |
 
-🤖 AI Course Factory
-Rekam meeting → AI otomatis potong jadi modul 5-7 menit, lengkap dengan slides, quiz, podcast, dan ebook.
+Kamu mau tahu lebih detail tentang fitur tertentu?`
+  },
+  {
+    keywords: ["fitur", "feature", "bisa apa", "apa aja", "apa saja", "kemampuan"],
+    patterns: [/fitur/i, /bisa apa/i, /apa (aja|saja)/i, /kemampuan/i, /feature/i],
+    weight: 8,
+    response: `Berikut semua fitur Chaesa Live:
 
-💰 Live Sales CTA
-Push tombol "Beli Sekarang" langsung ke layar semua viewer saat webinar. Konversi naik 3-5x!
+**Untuk Pembelajar:**
+- [Micro-Learning](/micro-learning) — Kursus 5-7 menit dari rekaman meeting
+- [Learning Path](/learning-path) — Jalur belajar Beginner→Advanced + gamifikasi
+- [Storybook Visual](/storybook) — Cerita bergambar AI interaktif
+- [Ujian & Sertifikasi](/sertifikasi) — Ujian kompetensi 8 kategori
+- [Sertifikat Digital](/sertifikat) — Sertifikat + QR verification
 
-🎬 Studio Mode
-Khusus untuk content creator & streamer. UI tersembunyi, audio jernih, OBS-friendly.
+**Untuk Content Creator:**
+- [AI Studio](/ai-studio) — Generate kursus dari meeting (slides, quiz, podcast, ebook)
+- [Dashboard Kreator](/creator-dashboard) — Analytics, views, revenue
+- [Broadcast Hub](/broadcast) — WA blast + email + sosmed + AI caption
+- [Content Calendar](/content-calendar) — Jadwal konten bulanan/mingguan
 
-📚 Micro-Learning Marketplace
-Jual kursus Kamu dengan komisi hanya 30% (di Udemy komisi 50%!).
+**Untuk HRD & Training:**
+- [Skills Matrix](/skills-matrix) — Radar chart kompetensi + gap analysis
+- [Exam Center](/sertifikasi) — Buat ujian untuk karyawan
+- [Training Path](/learning-path) — Jalur training terstruktur
+- [Sertifikat Digital](/sertifikat) — Sertifikat + verifikasi
 
-Singkatnya: Meeting + AI Content Creator + Live Commerce, semua dalam satu platform.
+**Fitur Inti:**
+- [Jadwal Live](/schedule) — Buat & kelola jadwal live streaming
+- [Harga](/pricing) — Paket mulai GRATIS sampai Rp 999K/tahun
 
-Mau tahu lebih detail tentang fitur tertentu?`
+Mau saya jelaskan fitur tertentu lebih detail?`
   },
   {
     keywords: ["harga", "biaya", "paket", "price", "berapa", "langganan", "subscribe", "bayar berapa", "cost", "tarif"],
     patterns: [/harga/i, /berapa (biaya|harga|bulan)/i, /paket.*(harga|apa)/i, /(biaya|tarif)/i, /berapa.*bayar/i, /bayar.*berapa/i],
     weight: 8,
-    response: `Baik Kak, berikut info harga lengkap kami! 💰
+    response: `Berikut info harga lengkap:
 
-🆓 GRATIS — Rp 0/bulan
-• Limit 40 menit per meeting
-• Maks 100 peserta
-• Fitur basic (cocok untuk coba-coba dulu)
+| Paket | Harga | Fitur Utama |
+|-------|-------|-------------|
+| **Gratis** | Rp 0 | 40 menit, 100 peserta, fitur basic |
+| **Pro** | Rp 99K/bln | Unlimited meeting, AI features, Live Sales CTA, Studio Mode |
+| **Business** | Rp 199K/bln | 300 peserta, analytics, custom branding |
+| **1 Tahun** | Rp 999K | Semua fitur Pro, hemat 16% |
 
-⭐ PRO — Rp 99.000/bulan
-• Meeting UNLIMITED (tanpa batas waktu)
-• AI Course Generator
-• Live Sales CTA
-• Studio Mode & Original Sound
-• Micro-Learning Marketplace
+Perbandingan: Zoom Pro = Rp 240K/bln (tanpa AI). Chaesa Pro = Rp 99K/bln + semua fitur AI.
 
-🚀 BUSINESS — Rp 199.000/bulan
-• Semua fitur Pro
-• Maks 300 peserta
-• Advanced analytics & custom branding
-• Priority support
+Lihat detail di halaman [Harga](/pricing).
 
-💎 1 TAHUN — Rp 999.000 (bayar sekali)
-• Semua fitur Pro selama 1 tahun penuh
-• Hemat 16% dibanding bayar bulanan
-• Update fitur baru gratis
-
-Sebagai perbandingan, Zoom Pro saja Rp 240.000/bulan tanpa fitur AI.
-
-Mau langsung berlangganan atau ada pertanyaan lain?`
+Mau langsung berlangganan atau ada pertanyaan tentang paket tertentu?`
   },
   {
-    keywords: ["ai", "kursus", "course", "generate", "otomatis", "modul", "konten", "content", "buat kursus", "bikin kursus"],
-    patterns: [/ai.*(course|kursus|factory|generate)/i, /(course|kursus).*(factory|ai|otomatis|generate)/i, /buat.*(kursus|course|konten|modul)/i, /bikin.*(kursus|course|konten)/i, /cara.*(generate|buat|bikin).*(kursus|course)/i, /otomatis/i],
-    weight: 7,
-    response: `Ini fitur andalan kami, Kak! AI Course Factory 🤖
+    keywords: ["storybook", "cerita", "visual learning", "cerita bergambar", "story", "storytelling"],
+    patterns: [/storybook/i, /cerita.*bergambar/i, /visual.*learning/i, /story.*telling/i, /belajar.*cerita/i, /cerita.*belajar/i],
+    weight: 8,
+    response: `**Storybook Visual** — belajar melalui cerita bergambar interaktif!
 
-Cara kerjanya sangat simpel:
+Fitur ini mengubah topik pembelajaran yang membosankan jadi cerita yang menarik dengan karakter, alur, dan ilustrasi AI.
 
-1️⃣ Rekam meeting/webinar Kamu (bebas berapa jam)
-2️⃣ AI memproses rekaman secara otomatis
-3️⃣ Dalam 15 menit, Kamu dapat:
-   • 20 modul micro-learning (5-7 menit per modul)
-   • Slides PowerPoint otomatis
-   • PDF ebook & study guide
-   • Quiz + penjelasan jawaban
-   • Podcast dengan 2 AI host
-   • Klip pendek untuk TikTok/Reels
+**Contoh cerita yang tersedia:**
+- "Pak Budi Membangun Rumah Impian" — belajar Project Management
+- "Startup Digital Rina" — belajar Entrepreneurship
+- "Dokter Muda di Desa" — belajar Leadership & Empati
 
-Perbandingan waktu:
-❌ Manual: 12+ jam (download, transcribe, edit, buat slides, buat quiz)
-✅ Chaesa AI: 15 menit saja!
+**Fitur Storybook:**
+- AI generate cerita dari topik APAPUN
+- Ilustrasi AI per scene
+- Navigasi scene-by-scene
+- Quiz interaktif di akhir
+- Ringkasan pelajaran
+- 6 kategori industri
 
-Hemat hingga 90% waktu Kamu.
+Coba langsung di [Storybook Visual](/storybook)!
 
-Fitur ini tersedia di paket Pro (Rp 99K/bulan) ke atas.
-
-Mau tahu cara memulainya atau ada pertanyaan teknis?`
+Mau buat cerita tentang topik apa?`
   },
   {
-    keywords: ["studio", "obs", "stream", "streaming", "youtuber", "streamer", "live stream", "broadcast"],
-    patterns: [/studio.*mode/i, /obs/i, /stream(ing|er)?/i, /youtuber/i, /live.*stream/i, /broadcast/i],
-    weight: 7,
-    response: `Studio Mode ini favorit content creator & streamer! 🎬
+    keywords: ["sertifikasi", "ujian", "exam", "sertifikat", "kompetensi", "certificate", "test kompetensi"],
+    patterns: [/sertifika/i, /ujian/i, /exam/i, /kompetensi/i, /certificate/i, /test.*kompetensi/i],
+    weight: 8,
+    response: `**Ujian & Sertifikasi** — sistem kompetensi lengkap!
 
-Masalah yang sering terjadi:
-❌ Platform meeting + OBS = audio robotik
-❌ UI meeting terlihat di stream
-❌ Setup rumit dan ribet
+**Buat Ujian** (untuk HRD/Trainer):
+- 4 jenis soal: Pilihan Ganda, Benar/Salah, Essay, Penilaian Praktis
+- 8 kategori: IT, Manajemen, Komunikasi, Marketing, Keuangan, Leadership, Customer Service, Safety
+- AI auto-generate soal dari topik apapun
+- Set passing score & time limit
 
-Solusi dari Chaesa:
+**Ambil Ujian** (untuk Learner):
+- Timer countdown, navigasi soal
+- Auto-submit saat waktu habis
+- Hasil langsung: skor, pass/fail
+- Review jawaban per soal
 
-1. Join meeting seperti biasa
-2. Tekan Ctrl+Shift+U (atau klik tombol Studio Mode)
-3. Semua UI langsung tersembunyi
-4. Aktifkan 'Original Sound' di Audio Settings
-5. Audio jernih, tampilan bersih!
+**Sertifikat Digital:**
+- Otomatis setelah lulus ujian
+- ID unik + QR code verifikasi
+- Print/download PDF
+- Siapapun bisa verifikasi keaslian
 
-Fitur teknis:
-• Bypass audio processing (raw audio)
-• Sembunyikan semua overlay & control
-• Shortcut keyboard untuk kemudahan
-• Kompatibel dengan OBS, Streamlabs, dll
-• Tidak konflik dengan audio mixer eksternal
+Coba di [Ujian & Sertifikasi](/sertifikasi) atau lihat [Sertifikat Saya](/sertifikat).
 
-Cocok untuk live streaming, podcast recording, dan webinar profesional.
-
-Ada pertanyaan spesifik tentang setup OBS atau streaming?`
+Kamu mau buat ujian atau ambil ujian?`
   },
   {
-    keywords: ["audio", "suara", "original sound", "robotik", "robot", "mic", "mikrofon", "microphone"],
-    patterns: [/audio.*(robotik|robot|jelek|masalah)/i, /suara.*(robot|jelek|aneh|masalah)/i, /original.*sound/i, /(mic|mikrofon|microphone)/i],
-    weight: 7,
-    response: `Masalah audio memang sering terjadi di platform meeting lain. Chaesa punya solusinya! 🎵
+    keywords: ["skills matrix", "gap analysis", "kompetensi tim", "peta kompetensi", "radar chart", "skill", "hrd"],
+    patterns: [/skills?\s*matrix/i, /gap\s*analysis/i, /kompetensi\s*tim/i, /peta\s*kompetensi/i, /radar\s*chart/i, /\bhrd\b/i],
+    weight: 8,
+    response: `**Skills Matrix & Gap Analysis** — peta kompetensi tim untuk HRD!
 
-Original Sound Mode:
-Platform meeting biasanya memproses audio (noise cancellation, compression) — ini bikin suara jadi robotik kalau pakai mixer/OBS.
+**Fitur:**
+- 6 framework kompetensi siap pakai (Digital Marketing, Software Dev, PM, Leadership, Customer Service, Data Analytics)
+- Rating skill anggota tim (1-5 bintang)
+- Radar/spider chart visual
+- Gap analysis: bandingkan current vs required level
+- AI recommendation training berdasarkan gap
+- Skill passport individual per anggota
+- Export laporan sebagai teks
 
-Chaesa Live punya "Original Sound" yang melewati semua processing, jadi audio Kamu terdengar jernih dan natural.
+**Cocok untuk:**
+- HR Manager yang mau mapping kompetensi tim
+- Training Manager yang perlu identifikasi gap
+- Team Lead yang mau track perkembangan anggota
 
-Cara mengaktifkan:
-1. Buka Audio Settings di meeting
-2. Centang "Original Sound"
-3. Selesai! Audio langsung jernih
+Coba langsung di [Skills Matrix](/skills-matrix)!
 
-Tips tambahan:
-• Tutup aplikasi lain yang pakai mic (Zoom, Discord, dll)
-• Gunakan headset/mic dedicated
-• Kalau pakai OBS, aktifkan juga Studio Mode
-• Test dulu di meeting percobaan sebelum acara penting
-
-Masih ada masalah audio spesifik yang Kamu alami?`
+Sudah punya tim yang mau dianalisis?`
   },
   {
-    keywords: ["cta", "jual", "sales", "monetisasi", "duit", "konversi", "uang", "jualan", "live commerce", "beli sekarang"],
-    patterns: [/live.*sales/i, /sales.*cta/i, /cta/i, /jual(an)?/i, /monetisasi/i, /live.*commerce/i, /beli.*sekarang/i, /konversi/i, /cara.*(jual|monetis)/i],
-    weight: 7,
-    response: `Live Sales CTA ini bisa meningkatkan konversi hingga 3-5x lipat! 💰
+    keywords: ["learning path", "jalur belajar", "roadmap", "training path", "path belajar"],
+    patterns: [/learning\s*path/i, /jalur\s*belajar/i, /roadmap/i, /training\s*path/i, /path\s*belajar/i],
+    weight: 8,
+    response: `**Learning Path Builder** — jalur belajar terstruktur!
 
-Cara lama vs Chaesa:
-❌ Webinar → share link di chat → peserta jarang klik → konversi 1-2%
-✅ Chaesa → demo produk live → push CTA → tombol "BELI" muncul di layar semua viewer → konversi 5-8%!
+**6 Template Siap Pakai:**
+- Digital Marketing Specialist
+- Full-Stack Developer
+- Project Manager
+- Content Creator Pro
+- HR Professional
+- Data Analyst
 
-Cara kerjanya:
-1. Kamu presentasi/demo produk secara live
-2. Di momen yang tepat, tekan tombol "Push CTA"
-3. Tombol "BELI SEKARANG" muncul di layar semua viewer
-4. Countdown timer untuk urgensi
-5. Viewer klik → langsung ke checkout
+**Fitur:**
+- Buat path custom: Beginner → Intermediate → Advanced
+- Setiap stage: modul, ujian, assignment
+- Minimum score untuk unlock stage berikutnya
+- Gamifikasi: XP, badge, selebrasi
+- Visual timeline/roadmap progression
 
-Fitur lengkap:
-• Push CTA ke semua viewer sekaligus
-• Countdown timer otomatis
-• Tracking real-time (berapa yang klik)
-• Kustomisasi warna, teks, posisi
-• Direct checkout via payment gateway
+Coba di [Learning Path](/learning-path)!
 
-Cocok untuk: Product launch, course launch, flash sale, demo produk.
-
-Mau tips agar konversinya maksimal?`
+Mau mulai dari template atau buat path sendiri?`
   },
   {
-    keywords: ["marketplace", "jual kursus", "komisi", "udemy", "pendapatan", "passive income"],
-    patterns: [/marketplace/i, /jual.*kursus/i, /komisi/i, /udemy/i, /passive.*income/i, /pendapatan/i],
+    keywords: ["broadcast", "whatsapp blast", "email campaign", "marketing", "caption", "hashtag"],
+    patterns: [/broadcast/i, /whatsapp.*blast/i, /email.*campaign/i, /caption/i, /hashtag/i, /blast/i],
     weight: 7,
-    response: `Micro-Learning Marketplace Chaesa Live! 📚
+    response: `**Broadcast Hub** — kirim pesan ke banyak orang sekaligus!
 
-Kamu bisa menjual kursus micro-learning yang sudah di-generate oleh AI langsung di marketplace kami.
+**3 Channel:**
+- WhatsApp Blast — kirim ke banyak kontak via WA
+- Email Campaign — compose + kirim email massal
+- Social Media — share ke Twitter, Facebook, LinkedIn
 
-Keunggulan:
-• Komisi hanya 30% (Kamu dapat 70%!)
-• Di Udemy komisi 50% — di Chaesa jauh lebih hemat
-• Kursus sudah jadi otomatis dari AI (tinggal publish)
-• Format micro-learning (5-7 menit) lebih diminati learner
-• Pembayaran langsung ke rekening Kamu
+**AI Caption Generator:**
+- Ketik topik → AI buatkan caption + hashtag + waktu posting terbaik
+- Support 5 platform: Instagram, TikTok, YouTube, LinkedIn, Twitter
+- 3 tone: Fun, Professional, Viral
 
-Potensi penghasilan:
-• Buat 1 course dari 1 meeting → AI generate otomatis
-• Jual Rp 100K-500K per course
-• 10 pembeli = Rp 1-5 juta
-• Bisa buat banyak course dari berbagai meeting
-• Passive income setiap bulan!
+**Fitur Lain:**
+- Template siap pakai (promo, event, konten baru, reminder)
+- Manajemen audience (import CSV)
+- Jadwal broadcast
 
-Cara memulai:
+Coba di [Broadcast Hub](/broadcast)!
+
+Mau kirim broadcast atau generate caption AI dulu?`
+  },
+  {
+    keywords: ["creator", "kreator", "dashboard", "analytics", "content calendar", "kalender", "konten"],
+    patterns: [/creator/i, /kreator/i, /dashboard/i, /analytics/i, /content.*calendar/i, /kalender.*konten/i],
+    weight: 7,
+    response: `**Creator Tools** — tools lengkap untuk content creator!
+
+**Dashboard Kreator** (/creator-dashboard):
+- Statistik: Views, Subscribers, Engagement Rate, Revenue
+- Filter waktu (7/30/90 hari)
+- Quick actions: Start Live, Create Content, Broadcast
+- Performa konten & channel breakdown
+
+**Content Calendar** (/content-calendar):
+- Kalender bulanan & mingguan
+- Color-coded: Live (hijau), Broadcast (biru), Konten (ungu)
+- Tambah/edit/hapus rencana konten
+
+**Broadcast Hub** (/broadcast):
+- WhatsApp blast, email campaign, social media sharing
+- AI Caption Generator
+
+Coba di [Dashboard Kreator](/creator-dashboard) atau [Content Calendar](/content-calendar)!
+
+Fitur mana yang mau Kamu coba duluan?`
+  },
+  {
+    keywords: ["micro learning", "micro-learning", "microlearning", "modul micro", "modul belajar", "kursus"],
+    patterns: [/micro.?learning/i, /modul.*(belajar|learning|micro)/i, /apa itu micro/i, /kursus/i],
+    weight: 7,
+    response: `**Micro-Learning** — belajar efektif dalam modul pendek!
+
+AI otomatis memotong meeting 2 jam jadi 20 modul (5-7 menit), lengkap dengan:
+- Video tiap modul
+- Slides otomatis
+- Quiz + penjelasan jawaban
+- Podcast dengan 2 AI host
+- PDF summary
+
+**Gamifikasi:**
+- XP dan badge per modul
+- Achievement: First Steps (10 XP), Quick Learner (50 XP), Course Master (100 XP)
+- Progress tracking: persentase, waktu belajar, skor
+
+**Kenapa efektif?**
+- Attention span manusia ~7 menit
+- Completion rate lebih tinggi
+- Bisa diulang kapan saja
+- Hemat 90% waktu vs manual
+
+Coba di [Micro-Learning](/micro-learning)!
+
+Mau buat kursus dari meeting atau belajar kursus yang sudah ada?`
+  },
+  {
+    keywords: ["cara mulai", "getting started", "tutorial", "mulai", "daftar", "register", "sign up", "buat akun", "login", "masuk"],
+    patterns: [/cara (mulai|daftar|buat akun|register|login|masuk)/i, /getting started/i, /tutorial/i, /bagaimana.*(mulai|daftar)/i],
+    weight: 7,
+    response: `Sangat mudah, Kak!
+
+**Cara Daftar:**
+1. Klik [Daftar Gratis](/auth?mode=register) di website
+2. Masukkan nama, email & password
+3. Atau daftar via Google (lebih cepat)
+4. Akun langsung aktif!
+
+**Setelah Daftar, Coba:**
+- [Jadwal Live](/schedule) — buat jadwal live pertama
+- [Micro-Learning](/micro-learning) — coba buat kursus dari meeting
+- [Storybook](/storybook) — baca cerita bergambar interaktif
+- [Skills Matrix](/skills-matrix) — mapping kompetensi tim
+
+**Tips Pemula:**
+- Mulai dari paket Gratis (40 menit, 100 peserta)
+- Coba semua fitur dulu sebelum upgrade
+- Gunakan Chrome/Edge untuk performa terbaik
+
+Mau langsung [Daftar](/auth?mode=register) atau ada pertanyaan lain?`
+  },
+  {
+    keywords: ["ai", "artificial intelligence", "ai studio", "generate", "otomatis"],
+    patterns: [/ai.*(studio|course|factory|generate)/i, /(course|kursus).*(ai|otomatis|generate)/i, /ai studio/i, /artificial intelligence/i],
+    weight: 7,
+    response: `**AI Studio** — pusat AI content generation!
+
+**Cara Kerja:**
 1. Rekam meeting/webinar Kamu
-2. AI generate jadi kursus micro-learning
-3. Review & edit sesuai keinginan
-4. Publish di marketplace
-5. Promosikan & dapatkan pembeli!
+2. AI memproses rekaman otomatis
+3. Dalam 15 menit, Kamu dapat:
+   - 20 modul micro-learning (5-7 menit)
+   - Slides presentasi otomatis
+   - Quiz + penjelasan jawaban
+   - Podcast dengan 2 AI host
+   - PDF ebook & study guide
 
-Tertarik memulai? Atau ada pertanyaan lain?`
+**Perbandingan:**
+- Manual: 12+ jam kerja
+- Chaesa AI: 15 menit saja!
+
+**AI Lainnya di Chaesa:**
+- AI Caption Generator — caption + hashtag + waktu posting
+- AI Exam Generator — auto-generate soal ujian
+- AI Story Generator — buat cerita bergambar dari topik
+- AI Training Recommendation — rekomendasi training dari gap analysis
+
+Coba di [AI Studio](/ai-studio)!
+
+Mau generate kursus atau gunakan fitur AI lainnya?`
   },
   {
-    keywords: ["cara mulai", "getting started", "bikin meeting", "tutorial", "mulai", "daftar", "register", "sign up", "buat akun"],
-    patterns: [/cara (mulai|daftar|buat akun|register)/i, /getting started/i, /bikin.*meeting/i, /tutorial/i, /bagaimana.*(mulai|daftar)/i, /gimana.*(mulai|daftar)/i, /langkah.*(mulai|daftar)/i, /cara pakai(?!.*(?:obs|studio|audio|stream|cta|ai|course|kursus|marketplace))/i],
+    keywords: ["live", "meeting", "webinar", "video conference", "jadwal", "schedule", "streaming"],
+    patterns: [/live.*(stream|meeting|webinar)/i, /jadwal.*(live|meeting)/i, /video.*conference/i, /schedule/i, /streaming/i],
     weight: 7,
-    response: `Sangat mudah, Kak! 🚀
+    response: `**Live Streaming & Meeting** — inti dari Chaesa Live!
 
-Cara Daftar:
-1. Buka website Chaesa Live
-2. Klik "Daftar Gratis"
-3. Masukkan email & password
-4. Verifikasi email
-5. Selesai! Akun langsung aktif
+**Fitur Meeting:**
+- Video conference WebRTC
+- Auto-generate meeting code (XXXX-XXXX-XXXX)
+- Share via WhatsApp, Email, copy link
+- Recording, reactions, polls, whiteboard
+- Breakout rooms
 
-Cara Memulai Meeting:
-1. Login ke dashboard
-2. Klik "Start New Meeting"
-3. Meeting room langsung terbuka
-4. Bagikan kode meeting ke peserta
-5. Peserta masukkan kode → Join
+**Fitur Pro:**
+- Studio Mode — hide UI untuk streaming OBS
+- Original Sound — audio tanpa processing
+- Live Sales CTA — push "Beli Sekarang" ke viewer
+- Unlimited duration
 
-Cara Join Meeting Orang Lain:
-1. Minta kode meeting dari host
-2. Masukkan kode di homepage
-3. Klik "Join Meeting"
+**Jadwal Live:**
+- Buat jadwal live session
+- Kelola upcoming/live/ended
+- Share jadwal otomatis
 
-Tips agar lancar:
-• Test kamera & mic sebelum meeting penting
-• Gunakan Chrome/Edge (paling stabil)
-• Internet minimal 5 Mbps
-• Kalau mau streaming, aktifkan Studio Mode
+Coba di [Jadwal Live](/schedule)!
 
-Butuh panduan lebih lanjut? Tanya saja! 😊`
+Mau buat jadwal live atau tanya tentang fitur meeting tertentu?`
   },
   {
-    keywords: ["error", "masalah", "gak bisa", "tidak bisa", "rusak", "broken", "help", "bantuan", "kendala", "trouble", "gagal", "failed"],
-    patterns: [/gak bisa/i, /tidak bisa/i, /error/i, /masalah/i, /rusak/i, /broken/i, /help/i, /kendala/i, /trouble/i, /gagal/i, /failed/i, /stuck/i, /hang/i],
+    keywords: ["error", "masalah", "gak bisa", "tidak bisa", "rusak", "help", "bantuan", "kendala", "trouble", "gagal"],
+    patterns: [/gak bisa/i, /tidak bisa/i, /error/i, /masalah/i, /rusak/i, /help/i, /kendala/i, /trouble/i, /gagal/i],
     weight: 6,
-    response: `Ada kendala ya Kak? Tenang, saya bantu! 🔧
+    response: `Ada kendala ya Kak? Tenang, saya bantu!
 
-Solusi untuk masalah yang paling sering terjadi:
+**Kamera Tidak Muncul:**
+- Cek permission browser (izinkan akses kamera)
+- Coba browser Chrome/Edge
+- Restart browser
 
-📷 Kamera Tidak Muncul:
-• Cek permission browser (izinkan akses kamera)
-• Coba browser lain (Chrome paling stabil)
-• Restart browser atau perangkat
-• Cek apakah antivirus memblokir
+**Masalah Audio:**
+- Aktifkan 'Original Sound' mode
+- Cek permission microphone
+- Tutup app lain yang pakai mic
 
-🎤 Masalah Audio:
-• Aktifkan 'Original Sound' mode
-• Cek permission microphone di browser
-• Tutup aplikasi lain yang pakai mic
-• Kalau pakai OBS: aktifkan Studio Mode
+**Koneksi Terputus:**
+- Cek internet (minimal 5 Mbps)
+- Matikan VPN sementara
+- Kurangi tab browser
 
-🌐 Koneksi Terputus:
-• Cek kecepatan internet (minimal 5 Mbps)
-• Matikan VPN sementara
-• Kurangi jumlah tab browser
-• Pindah ke WiFi yang lebih stabil
+**AI Tidak Bisa Generate:**
+- Pastikan meeting sudah direkam
+- Tunggu 2-3 menit untuk processing
+- Cek paket Kamu (harus Pro/Business)
 
-🤖 AI Tidak Bisa Generate:
-• Pastikan meeting sudah direkam
-• Tunggu 2-3 menit untuk processing
-• Cek paket Kamu (harus Pro/Business/1 Tahun)
-
-Bisa ceritakan masalah spesifiknya? Saya carikan solusinya! 💪`
+Bisa ceritakan masalah spesifiknya? Atau ketik "hubungi CS" untuk bicara dengan tim support.`
   },
   {
-    keywords: ["vs zoom", "banding", "compare", "beda", "lebih bagus", "zoom", "google meet", "teams", "perbandingan"],
-    patterns: [/vs.*(zoom|meet|teams)/i, /(zoom|meet|teams).*vs/i, /banding/i, /perbandingan/i, /beda.*(zoom|meet|platform)/i, /(lebih bagus|lebih baik)/i, /kenapa.*chaesa/i],
+    keywords: ["vs zoom", "banding", "compare", "beda", "zoom", "google meet", "teams", "perbandingan", "udemy"],
+    patterns: [/vs.*(zoom|meet|teams|udemy)/i, /(zoom|meet|teams|udemy).*vs/i, /banding/i, /perbandingan/i, /beda.*(zoom|meet|platform)/i],
     weight: 7,
-    response: `Pertanyaan bagus! Ini perbandingannya: 💪
+    response: `Perbandingan lengkap:
 
-Chaesa Live vs Platform Lain:
+| Fitur | Zoom | Google Meet | Udemy | **Chaesa Live** |
+|-------|------|-------------|-------|-----------------|
+| Video conference | Ya | Ya | Tidak | **Ya** |
+| AI → kursus | Tidak | Tidak | Tidak | **Ya** |
+| Live commerce | Tidak | Tidak | Tidak | **Ya** |
+| Sertifikasi | Tidak | Tidak | Terbatas | **Ya + AI** |
+| Skills matrix | Tidak | Tidak | Tidak | **Ya** |
+| Storybook visual | Tidak | Tidak | Tidak | **Ya** |
+| Broadcast marketing | Tidak | Tidak | Tidak | **Ya** |
+| Harga/bln | Rp 240K | Rp 150K | Free (50% komisi) | **Rp 99K** |
 
-📹 Platform Meeting Biasa (Zoom, Meet):
-• Harga: Rp 200-300K/bulan
-• Fitur: Video call saja
-• AI: Tidak ada
-• Monetisasi: Tidak ada
-
-📚 Platform Kursus Online (Udemy, dll):
-• Harga: Gratis upload
-• Komisi: 40-50% per penjualan!
-• Meeting: Tidak ada
-• Pembuatan konten: Manual (berjam-jam)
-
-⭐ Chaesa Live:
-• Harga: Rp 99K/bulan
-• Fitur: Meeting + AI + Marketplace (all-in-one)
-• AI: Otomatis generate kursus dari meeting
-• Komisi marketplace: Hanya 30%
-
-Kenapa Chaesa lebih worth it:
-1. Hemat Waktu — Manual 20 jam, Chaesa AI 15 menit
-2. Hemat Biaya — 60% lebih murah dari Zoom Pro
-3. Pendapatan Lebih — Komisi 30% vs 50% di Udemy
-4. All-in-One — Tidak perlu banyak tool terpisah
+Singkatnya: Chaesa = Meeting + AI + LMS + Marketing, semua dalam satu platform dengan harga lebih terjangkau.
 
 Mau coba langsung?`
   },
   {
-    keywords: ["bayar", "payment", "billing", "transfer", "kartu kredit", "pembayaran", "metode bayar", "gopay", "ovo", "dana", "qris"],
-    patterns: [/bayar/i, /payment/i, /billing/i, /transfer/i, /kartu.*(kredit|debit)/i, /pembayaran/i, /metode.*(bayar|pembayaran)/i, /(gopay|ovo|dana|qris|shopeepay)/i],
+    keywords: ["bayar", "payment", "pembayaran", "transfer", "kartu kredit", "gopay", "ovo", "dana", "qris"],
+    patterns: [/bayar/i, /payment/i, /pembayaran/i, /transfer/i, /kartu.*(kredit|debit)/i, /(gopay|ovo|dana|qris)/i],
     weight: 7,
-    response: `Saya jelaskan cara pembayarannya ya Kak! 💳
+    response: `Metode pembayaran yang tersedia:
 
-Metode Pembayaran yang Tersedia:
-✅ Kartu Kredit/Debit (Visa, Mastercard, JCB)
-✅ Transfer Bank (semua bank utama Indonesia)
-✅ E-Wallet (GoPay, OVO, Dana, ShopeePay)
-✅ QRIS (scan & bayar)
+- Kartu Kredit/Debit (Visa, Mastercard, JCB)
+- Transfer Bank (semua bank utama Indonesia)
+- E-Wallet (GoPay, OVO, Dana, ShopeePay)
+- QRIS (scan & bayar)
 
-Cara Berlangganan:
-1. Pilih paket di halaman Harga
-2. Klik "Subscribe Now"
-3. Pilih metode pembayaran
-4. Selesaikan pembayaran
-5. Akun langsung ter-upgrade otomatis! 🚀
+Proses via Mayar.id (certified secure). Data kartu TIDAK disimpan di server kami.
 
-Keamanan:
-• Proses pembayaran via Mayar (certified secure)
-• Data kartu TIDAK disimpan di server kami
-• Enkripsi SSL/TLS
-
-Info penting:
-• Paket 1 Tahun lebih hemat (Rp 999K vs Rp 1,188K/tahun)
-• Bisa dibatalkan kapan saja tanpa penalti
-• Invoice otomatis dikirim ke email
-• Garansi uang kembali 7 hari
+Lihat paket lengkap di [Halaman Harga](/pricing).
 
 Mau langsung berlangganan?`
   },
   {
-    keywords: ["kontak", "hubungi", "contact", "manusia", "support", "cs", "customer service", "komplain", "keluhan"],
-    patterns: [/kontak/i, /hubungi/i, /contact/i, /manusia/i, /support/i, /customer.*(service|support)/i, /\bcs\b/i, /komplain/i, /keluhan/i, /bicara.*(langsung|manusia|cs|orang)/i],
+    keywords: ["kontak", "hubungi", "contact", "manusia", "support", "cs", "customer service", "komplain"],
+    patterns: [/kontak/i, /hubungi/i, /contact/i, /manusia/i, /support/i, /customer.*service/i, /\bcs\b/i, /komplain/i, /bicara.*(manusia|cs)/i],
     weight: 8,
-    response: `Baik Kak, saya hubungkan ke tim support! 👨‍💼
+    response: `Baik Kak, berikut pilihan support:
 
-Pilihan Support:
+- Email: support@chaesa.live (response maks 24 jam)
+- Live Chat: Senin-Jumat, 09:00-17:00 WIB
+- Discord Community: 24/7
 
-📧 Email: support@chaesa.live
-⏰ Response: Maksimal 24 jam
-📝 Cocok untuk pertanyaan detail, komplain, bug report
-
-💬 Live Chat: Senin-Jumat, 09:00 - 17:00 WIB
-⚡ Response: Real-time
-📝 Cocok untuk masalah urgent
-
-📱 Discord Community: 24/7
-🤝 Diskusi tips & networking dengan pengguna lain
-
-🎥 Tutorial YouTube
-📺 Tutorial lengkap gratis kapan saja
-
-Mau saya hubungkan ke tim support sekarang? Atau ada yang bisa saya bantu terlebih dahulu? 😊`
+Mau saya hubungkan ke tim support sekarang?`
   },
   {
     keywords: ["refund", "batal", "cancel", "uang kembali", "pengembalian"],
     patterns: [/refund/i, /batal.*(langganan|subscribe)/i, /cancel/i, /uang.*kembali/i, /pengembalian/i],
     weight: 9,
-    response: `Untuk refund dan pembatalan, berikut informasinya Kak:
+    response: `Untuk refund dan pembatalan:
 
-💰 Kebijakan Refund:
-• Garansi uang kembali 7 hari setelah pembelian
-• Proses refund 3-5 hari kerja
-• Refund ke metode pembayaran yang sama
+- Garansi uang kembali 7 hari setelah pembelian
+- Proses refund 3-5 hari kerja
+- Pembatalan: Settings → Billing → Batalkan Langganan
+- Akses tetap aktif sampai masa berlaku habis
 
-❌ Cara Membatalkan Langganan:
-1. Login ke dashboard
-2. Buka Settings → Billing
-3. Klik "Batalkan Langganan"
-4. Konfirmasi pembatalan
-5. Akses tetap aktif sampai masa berlaku habis
-
-Untuk proses refund atau masalah billing yang lebih kompleks, silakan hubungi tim support kami:
-📧 Email: support@chaesa.live
-
-Tim CS kami akan membantu Kamu langsung. 🙏`
-  },
-  {
-    keywords: ["micro learning", "micro-learning", "microlearning", "modul micro", "modul belajar"],
-    patterns: [/micro.?learning/i, /modul.*(belajar|learning|micro)/i, /apa itu micro/i],
-    weight: 6,
-    response: `Micro-learning adalah metode belajar dengan modul pendek (5-7 menit per modul). Riset menunjukkan ini 50% lebih efektif dari belajar panjang! 📚
-
-Di Chaesa Live, AI otomatis memotong rekaman meeting Kamu jadi modul-modul micro-learning:
-
-Contoh:
-Meeting 2 jam tentang "Digital Marketing" → AI generate:
-• Modul 1: Pengenalan Digital Marketing (5 min)
-• Modul 2: SEO Basics (7 min)
-• Modul 3: Social Media Strategy (6 min)
-• ... dst hingga 20 modul
-
-Setiap modul dilengkapi:
-📊 Slides otomatis
-📝 Quiz & assessment
-🎙️ Podcast version
-📖 PDF summary
-
-Kenapa micro-learning lebih efektif?
-• Fokus lebih baik (attention span manusia ~7 menit)
-• Bisa belajar kapan saja, di mana saja
-• Mudah diulang bagian yang sulit
-• Completion rate lebih tinggi
-
-Mau tahu cara membuat kursus micro-learning pertama Kamu?`
-  },
-  {
-    keywords: ["gratis", "free", "trial", "coba", "gratisan"],
-    patterns: [/gratis/i, /free/i, /trial/i, /coba.*dulu/i, /gratisan/i, /tanpa.*bayar/i],
-    weight: 7,
-    response: `Kabar baik, Kak! Kamu bisa mulai GRATIS! 🎉
-
-Paket Gratis sudah termasuk:
-• Meeting hingga 40 menit
-• Maks 100 peserta
-• Fitur basic video conferencing
-• Akses ke AI Studio (sedang dalam masa trial!)
-
-Cara daftar gratis:
-1. Klik "Daftar Gratis" di website
-2. Masukkan email & password
-3. Verifikasi email
-4. Langsung bisa digunakan!
-
-Tidak perlu kartu kredit. Tidak ada biaya tersembunyi.
-
-Kalau sudah cocok, Kamu bisa upgrade ke Pro (Rp 99K/bulan) kapan saja untuk fitur unlimited.
-
-Mau langsung daftar? 😊`
-  },
-  {
-    keywords: ["podcast", "audio content", "ai podcast"],
-    patterns: [/podcast/i, /audio.*content/i, /ai.*podcast/i],
-    weight: 7,
-    response: `Fitur AI Podcast Generator kami sangat keren! 🎙️
-
-AI otomatis mengubah rekaman meeting Kamu jadi podcast dengan 2 AI host yang berdiskusi secara natural (mirip NotebookLM dari Google).
-
-Cara kerjanya:
-1. Rekam meeting/webinar
-2. AI memproses konten
-3. Generate podcast dengan 2 host AI
-4. Host AI mendiskusikan topik secara natural
-5. Hasilnya bisa langsung di-publish!
-
-Keunggulan:
-• Suara natural (bukan text-to-speech biasa)
-• 2 host yang saling berdiskusi
-• Otomatis dari rekaman meeting
-• Format yang populer dan diminati
-• Bisa jadi konten tambahan untuk dijual
-
-Podcast ini juga bisa Kamu jual di Micro-Learning Marketplace sebagai konten tambahan bersama kursus.
-
-Tertarik mencobanya?`
-  },
-  {
-    keywords: ["quiz", "assessment", "ujian", "test", "soal"],
-    patterns: [/quiz/i, /assessment/i, /ujian/i, /test/i, /soal/i],
-    weight: 6,
-    response: `AI Quiz Generator Chaesa Live! 📝
-
-AI otomatis membuat quiz dari konten meeting Kamu:
-
-Jenis quiz yang di-generate:
-• Pilihan ganda (multiple choice)
-• Benar/Salah (true/false)
-• Isian singkat
-
-Setiap pertanyaan dilengkapi:
-• Penjelasan jawaban yang benar
-• Referensi ke bagian materi terkait
-• Level kesulitan (mudah, sedang, sulit)
-
-Cara kerjanya:
-1. AI menganalisis konten meeting
-2. Identifikasi poin-poin penting
-3. Generate pertanyaan yang relevan
-4. Buat penjelasan untuk setiap jawaban
-
-Quiz ini menjadi bagian dari kursus micro-learning yang bisa Kamu jual di marketplace.
-
-Ada pertanyaan lain tentang fitur ini?`
-  },
-  {
-    keywords: ["slide", "slides", "presentasi", "powerpoint", "ppt"],
-    patterns: [/slide/i, /presentasi/i, /powerpoint/i, /ppt/i],
-    weight: 6,
-    response: `AI Slides Generator! 📊
-
-AI otomatis membuat slides presentasi dari rekaman meeting Kamu:
-
-Yang di-generate:
-• Slides PowerPoint profesional
-• Design yang menarik & konsisten
-• Poin-poin utama dari meeting
-• Grafik & diagram pendukung
-• Layout yang rapi
-
-Cara kerjanya:
-1. AI menganalisis rekaman meeting
-2. Ekstrak poin-poin utama
-3. Generate slides dengan design profesional
-4. Export ke format PowerPoint
-
-Slides ini menjadi bagian dari paket kursus micro-learning (bersama quiz, podcast, dan ebook).
-
-Fitur ini tersedia di paket Pro (Rp 99K/bulan) ke atas.
-
-Mau tahu lebih detail?`
-  },
-  {
-    keywords: ["peserta", "participant", "kapasitas", "berapa orang", "limit orang"],
-    patterns: [/peserta/i, /participant/i, /kapasitas/i, /berapa.*orang/i, /limit.*orang/i, /maksimal.*(orang|peserta)/i],
-    weight: 7,
-    response: `Berikut kapasitas peserta per paket, Kak:
-
-🆓 Gratis: Maks 100 peserta
-⭐ Pro: Maks 100 peserta + fitur unlimited lainnya
-🚀 Business: Maks 300 peserta + custom branding
-💎 1 Tahun: Sama seperti Pro (100 peserta)
-
-Kalau Kamu butuh lebih dari 300 peserta, bisa hubungi tim kami untuk paket Enterprise/custom.
-
-Tips:
-• Untuk webinar besar (300+ orang), paket Business paling cocok
-• Untuk meeting harian & content creation, paket Pro sudah cukup
-• Paket 1 Tahun cocok kalau sudah yakin dan mau hemat
-
-Ada pertanyaan lain?`
-  },
-  {
-    keywords: ["aman", "keamanan", "security", "privasi", "privacy", "data"],
-    patterns: [/aman/i, /keamanan/i, /security/i, /privasi/i, /privacy/i, /data.*(aman|protect)/i],
-    weight: 6,
-    response: `Keamanan data Kamu adalah prioritas kami! 🔒
-
-Keamanan Platform:
-• Enkripsi end-to-end untuk semua meeting
-• SSL/TLS untuk semua koneksi
-• Data disimpan di server yang aman
-• Compliance dengan standar keamanan internasional
-
-Keamanan Pembayaran:
-• Proses via Mayar (certified secure)
-• Data kartu TIDAK disimpan di server kami
-• PCI DSS compliant
-• Enkripsi SSL/TLS
-
-Privasi Data:
-• Data meeting Kamu milik Kamu sepenuhnya
-• Kami tidak menjual data ke pihak ketiga
-• Kamu bisa hapus data kapan saja
-• Kebijakan privasi yang transparan
-
-Ada pertanyaan lain tentang keamanan? 🙏`
+Untuk proses refund, hubungi tim support: support@chaesa.live`
   },
   {
     keywords: ["terima kasih", "makasih", "thanks", "thank you", "thx"],
     patterns: [/terima.*kasih/i, /makasih/i, /thanks/i, /thank.*you/i, /thx/i],
     weight: 10,
-    response: `Sama-sama, Kak! 😊
+    response: `Sama-sama, Kak!
 
-Senang bisa membantu. Kalau nanti ada pertanyaan lagi, jangan ragu untuk tanya ya!
+Senang bisa membantu. Jangan ragu tanya lagi kapan saja!
 
-Semoga sukses dengan Chaesa Live! 🚀`
+Btw, sudah coba fitur terbaru kami? [Storybook Visual](/storybook) — belajar lewat cerita bergambar AI. Sangat menarik!`
+  },
+  {
+    keywords: ["pembelajar", "belajar", "mau belajar", "student", "pelajar"],
+    patterns: [/pembelajar/i, /mau belajar/i, /student/i, /pelajar/i, /saya.*belajar/i],
+    weight: 7,
+    response: `Untuk Kamu yang mau belajar, berikut rekomendasi saya:
+
+**Mulai dari sini:**
+1. [Storybook Visual](/storybook) — Baca cerita bergambar interaktif, cara belajar paling menyenangkan!
+2. [Learning Path](/learning-path) — Pilih jalur belajar terstruktur (ada 6 template)
+3. [Micro-Learning](/micro-learning) — Kursus singkat 5-7 menit per modul
+
+**Setelah belajar:**
+4. [Ujian & Sertifikasi](/sertifikasi) — Uji kompetensi Kamu
+5. [Sertifikat Digital](/sertifikat) — Dapatkan sertifikat + QR verifikasi
+
+Semua gratis untuk dicoba!
+
+Mau mulai dari mana? Saya rekomendasikan Storybook Visual karena paling menyenangkan untuk pemula.`
+  },
+  {
+    keywords: ["content creator", "kreator konten", "influencer", "youtuber", "tiktoker"],
+    patterns: [/content.*creator/i, /kreator.*konten/i, /influencer/i, /youtuber/i, /tiktoker/i],
+    weight: 7,
+    response: `Untuk Content Creator, ini tools yang wajib Kamu coba:
+
+**Langkah 1: Buat Konten**
+- [AI Studio](/ai-studio) — Generate kursus dari meeting/webinar
+- [Jadwal Live](/schedule) — Buat jadwal live streaming
+
+**Langkah 2: Kelola & Analisis**
+- [Dashboard Kreator](/creator-dashboard) — Pantau views, engagement, revenue
+- [Content Calendar](/content-calendar) — Rencana konten bulanan
+
+**Langkah 3: Promosikan**
+- [Broadcast Hub](/broadcast) — WA blast, email campaign, sosmed
+- AI Caption Generator — Caption + hashtag otomatis
+
+**Bonus:**
+- Studio Mode — Streaming via OBS tanpa UI mengganggu
+- Live Sales CTA — Jual produk langsung saat live (konversi 3-5x!)
+- Marketplace — Jual kursus dengan komisi hanya 30%
+
+Mau mulai dari buat konten atau promosi dulu?`
+  },
+  {
+    keywords: ["training", "pelatihan", "employee", "karyawan", "onboarding"],
+    patterns: [/training/i, /pelatihan/i, /employee/i, /karyawan/i, /onboarding/i],
+    weight: 7,
+    response: `Untuk HRD & Training, Chaesa Live punya tools lengkap:
+
+**Assessment & Mapping:**
+- [Skills Matrix](/skills-matrix) — Mapping kompetensi tim, radar chart, gap analysis
+- AI Recommendation — Rekomendasi training berdasarkan gap
+
+**Training & Pembelajaran:**
+- [Training Path](/learning-path) — Jalur training terstruktur untuk karyawan
+- [Storybook Visual](/storybook) — Training via cerita interaktif
+- [Micro-Learning](/micro-learning) — Modul training singkat
+
+**Ujian & Sertifikasi:**
+- [Exam Center](/sertifikasi) — Buat ujian kompetensi karyawan
+- AI auto-generate soal — Hemat waktu buat soal
+- [Sertifikat Digital](/sertifikat) — Sertifikat + QR verifikasi
+
+**Workflow HRD:**
+1. Mapping kompetensi → Skills Matrix
+2. Identifikasi gap → Gap Analysis
+3. Buat training → Learning Path
+4. Ujian → Exam Center
+5. Sertifikasi → Sertifikat Digital
+
+Mau mulai dari mapping kompetensi tim atau buat program training?`
   },
 ];
 
@@ -686,7 +767,7 @@ function generateSmartResponse(message: string): string {
   const lowerMessage = message.toLowerCase().trim();
 
   if (!lowerMessage || lowerMessage.length < 2) {
-    return "Maaf, bisa Kamu ulangi pertanyaannya? Saya siap membantu! 😊";
+    return "Maaf, bisa Kamu ulangi pertanyaannya? Saya siap membantu!";
   }
 
   let bestMatch: KnowledgeEntry | null = null;
@@ -735,23 +816,21 @@ function generateSmartResponse(message: string): string {
     return bestMatch.response;
   }
 
-  return `Terima kasih sudah bertanya, Kak! 🤔
+  return `Terima kasih sudah bertanya, Kak!
 
-Saya belum punya jawaban spesifik untuk pertanyaan "${message}".
+Saya bisa membantu Kamu dengan banyak hal. Coba tanyakan tentang:
 
-Tapi saya bisa membantu Kamu tentang:
+**Fitur Platform:**
+- [Micro-Learning](/micro-learning), [Storybook](/storybook), [Learning Path](/learning-path)
+- [Ujian & Sertifikasi](/sertifikasi), [Skills Matrix](/skills-matrix)
+- [Broadcast Hub](/broadcast), [AI Studio](/ai-studio)
 
-📌 Tentang Platform — Apa itu Chaesa Live dan cara kerjanya
-💰 Harga & Paket — Info lengkap paket Gratis, Pro, Business, 1 Tahun
-🤖 AI Course Factory — Cara otomatis buat kursus dari meeting
-🎬 Studio Mode & Audio — Setup streaming dan audio jernih
-💳 Pembayaran — Metode bayar dan cara berlangganan
-🔧 Bantuan Teknis — Solusi masalah kamera, audio, koneksi
-📚 Marketplace — Cara jual kursus dan dapat penghasilan
+**Info Lain:**
+- Harga & paket langganan
+- Cara daftar & mulai
+- Troubleshooting teknis
 
-Coba tanya dengan topik di atas, atau ketik "harga", "fitur", "cara mulai", dll.
-
-Atau kalau mau bicara langsung dengan tim kami, ketik "hubungi CS". 😊`;
+Atau ceritakan kebutuhan Kamu — sebagai **Pembelajar**, **Content Creator**, atau **HRD/Trainer** — saya bantu carikan solusi terbaiknya!`;
 }
 
 function detectEscalation(userMessage: string, botReply: string): boolean {
@@ -775,32 +854,86 @@ function detectEscalation(userMessage: string, botReply: string): boolean {
   return false;
 }
 
-function generateQuickReplies(userMessage: string): string[] {
+const FEATURE_LINK_MAP: Record<string, { label: string; path: string }> = {
+  "micro-learning": { label: "Micro-Learning", path: "/micro-learning" },
+  "learning-path": { label: "Learning Path", path: "/learning-path" },
+  "storybook": { label: "Storybook Visual", path: "/storybook" },
+  "sertifikasi": { label: "Ujian & Sertifikasi", path: "/sertifikasi" },
+  "sertifikat": { label: "Sertifikat Digital", path: "/sertifikat" },
+  "skills-matrix": { label: "Skills Matrix", path: "/skills-matrix" },
+  "broadcast": { label: "Broadcast Hub", path: "/broadcast" },
+  "creator-dashboard": { label: "Dashboard Kreator", path: "/creator-dashboard" },
+  "content-calendar": { label: "Content Calendar", path: "/content-calendar" },
+  "ai-studio": { label: "AI Studio", path: "/ai-studio" },
+  "schedule": { label: "Jadwal Live", path: "/schedule" },
+  "pricing": { label: "Harga", path: "/pricing" },
+  "auth": { label: "Daftar/Login", path: "/auth" },
+};
+
+function extractFeatureLinks(botReply: string, userMessage: string): { label: string; path: string }[] {
+  const links: { label: string; path: string }[] = [];
+  const seen = new Set<string>();
+  const combined = (botReply + " " + userMessage).toLowerCase();
+
+  for (const [key, value] of Object.entries(FEATURE_LINK_MAP)) {
+    const keyNormalized = key.replace(/-/g, " ");
+    if (combined.includes(value.path) || combined.includes(keyNormalized) || combined.includes(value.label.toLowerCase())) {
+      if (!seen.has(value.path)) {
+        links.push(value);
+        seen.add(value.path);
+      }
+    }
+  }
+
+  return links.slice(0, 4);
+}
+
+function generateQuickReplies(userMessage: string, currentPage?: string): string[] {
   const lower = userMessage.toLowerCase();
 
   if (lower.match(/^(hi|hello|hey|halo|hai|p)\b/i) || lower.includes("selamat")) {
-    return ["Apa itu Chaesa Live?", "Berapa harganya?", "Cara mulai?"];
+    return ["Saya mau belajar", "Saya content creator", "Untuk HRD/Training", "Fitur apa saja?"];
   }
 
   if (lower.includes("harga") || lower.includes("biaya") || lower.includes("paket") || lower.includes("berapa")) {
-    return ["Fitur paket Pro?", "Paket 1 tahun?", "Bandingkan dengan Zoom?"];
+    return ["Daftar gratis", "Fitur paket Pro?", "Bandingkan dengan Zoom"];
   }
 
-  if (lower.includes("ai") || lower.includes("kursus") || lower.includes("course") || lower.includes("generate")) {
-    return ["Berapa lama prosesnya?", "Format apa saja?", "Cara mulai?"];
+  if (lower.includes("belajar") || lower.includes("pembelajar") || lower.includes("student")) {
+    return ["Storybook Visual", "Learning Path", "Ujian & Sertifikasi", "Micro-Learning"];
   }
 
-  if (lower.includes("obs") || lower.includes("audio") || lower.includes("studio") || lower.includes("stream")) {
-    return ["Cara aktifkan Studio Mode?", "Masalah audio OBS?", "Original Sound?"];
+  if (lower.includes("creator") || lower.includes("kreator") || lower.includes("konten")) {
+    return ["AI Studio", "Broadcast Hub", "Content Calendar", "Dashboard Kreator"];
   }
 
-  if (lower.includes("jual") || lower.includes("cta") || lower.includes("sales") || lower.includes("marketplace")) {
-    return ["Cara kerja Live CTA?", "Berapa komisi?", "Tips konversi?"];
+  if (lower.includes("hrd") || lower.includes("training") || lower.includes("karyawan")) {
+    return ["Skills Matrix", "Exam Center", "Training Path", "Sertifikat Digital"];
   }
 
-  if (lower.includes("error") || lower.includes("masalah") || lower.includes("gak bisa") || lower.includes("tidak bisa")) {
-    return ["Masalah kamera", "Masalah audio", "Hubungi CS"];
+  if (lower.includes("storybook") || lower.includes("cerita")) {
+    return ["Buat cerita baru", "Cerita apa saja?", "Cara kerja Storybook"];
   }
 
-  return ["Apa itu Chaesa Live?", "Berapa harganya?", "Fitur unggulan?"];
+  if (lower.includes("sertifika") || lower.includes("ujian") || lower.includes("exam")) {
+    return ["Buat ujian baru", "Ambil ujian", "Lihat sertifikat saya"];
+  }
+
+  if (lower.includes("error") || lower.includes("masalah") || lower.includes("gak bisa")) {
+    return ["Masalah kamera", "Masalah audio", "Koneksi terputus", "Hubungi CS"];
+  }
+
+  if (currentPage) {
+    const pageReplies: Record<string, string[]> = {
+      "/storybook": ["Buat cerita baru", "Topik cerita apa?", "Cara kerja Storybook"],
+      "/sertifikasi": ["Buat ujian baru", "Kategori ujian", "AI generate soal"],
+      "/skills-matrix": ["Cara pakai Skills Matrix", "Framework apa saja?", "Export laporan"],
+      "/learning-path": ["Template apa saja?", "Buat path custom", "Gamifikasi"],
+      "/broadcast": ["AI Caption Generator", "WhatsApp blast", "Template broadcast"],
+      "/micro-learning": ["Buat kursus baru", "Cara kerja AI", "Format konten"],
+    };
+    if (pageReplies[currentPage]) return pageReplies[currentPage];
+  }
+
+  return ["Fitur apa saja?", "Saya mau belajar", "Untuk HRD/Training", "Berapa harganya?"];
 }

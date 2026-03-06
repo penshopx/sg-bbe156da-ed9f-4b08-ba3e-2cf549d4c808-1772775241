@@ -15,6 +15,7 @@ import {
   BarChart3, Users, Star, Save, Copy
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useAuth, getUserStorageKey } from "@/hooks/useAuth";
 
 type QuestionType = "mcq" | "truefalse" | "essay" | "practical";
 type Difficulty = "beginner" | "intermediate" | "advanced";
@@ -135,6 +136,7 @@ function generateId(): string {
 type PageView = "catalog" | "builder" | "preview" | "take-exam" | "results" | "my-results";
 
 export default function SertifikasiPage() {
+  const { user, isLoggedIn, isLoading: authLoading, userName, userId } = useAuth();
   const [view, setView] = useState<PageView>("catalog");
   const [exams, setExams] = useState<Exam[]>([]);
   const [results, setResults] = useState<ExamResult[]>([]);
@@ -162,32 +164,35 @@ export default function SertifikasiPage() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    const storedExams = localStorage.getItem("chaesa_certification_exams");
-    const storedResults = localStorage.getItem("chaesa_certification_results");
+    if (authLoading) return;
+    const storedExams = localStorage.getItem(getUserStorageKey(userId, "certification_exams"));
+    const storedResults = localStorage.getItem(getUserStorageKey(userId, "certification_results"));
     if (storedExams) {
       try {
         setExams(JSON.parse(storedExams));
       } catch {}
     } else {
       setExams(SAMPLE_EXAMS);
-      localStorage.setItem("chaesa_certification_exams", JSON.stringify(SAMPLE_EXAMS));
+      localStorage.setItem(getUserStorageKey(userId, "certification_exams"), JSON.stringify(SAMPLE_EXAMS));
     }
     if (storedResults) {
       try {
         setResults(JSON.parse(storedResults));
       } catch {}
     }
-  }, []);
+  }, [userId, authLoading]);
 
   useEffect(() => {
+    if (authLoading) return;
     if (exams.length > 0) {
-      localStorage.setItem("chaesa_certification_exams", JSON.stringify(exams));
+      localStorage.setItem(getUserStorageKey(userId, "certification_exams"), JSON.stringify(exams));
     }
-  }, [exams]);
+  }, [exams, userId, authLoading]);
 
   useEffect(() => {
-    localStorage.setItem("chaesa_certification_results", JSON.stringify(results));
-  }, [results]);
+    if (authLoading) return;
+    localStorage.setItem(getUserStorageKey(userId, "certification_results"), JSON.stringify(results));
+  }, [results, userId, authLoading]);
 
   useEffect(() => {
     if (view === "take-exam" && timeRemaining > 0 && !examSubmitted) {
@@ -294,7 +299,7 @@ export default function SertifikasiPage() {
     setExams((prev) => {
       const updated = prev.filter((e) => e.id !== examId);
       if (updated.length === 0) {
-        localStorage.removeItem("chaesa_certification_exams");
+        localStorage.removeItem(getUserStorageKey(userId, "certification_exams"));
       }
       return updated;
     });
@@ -879,6 +884,11 @@ export default function SertifikasiPage() {
               <h1 className="text-gray-700 dark:text-gray-300 font-medium">Sertifikasi</h1>
             </div>
             <div className="flex items-center gap-3">
+              {isLoggedIn ? (
+                <span className="text-xs text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-full">Halo, {userName}</span>
+              ) : !authLoading ? (
+                <Link href="/auth" className="text-xs text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400">Login untuk menyimpan progress</Link>
+              ) : null}
               <ThemeSwitch />
               <Link href="/">
                 <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400">
