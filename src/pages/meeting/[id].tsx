@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { KeyboardShortcutsDialog } from "@/components/KeyboardShortcutsDialog";
 import Link from "next/link";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function MeetingRoom() {
   const router = useRouter();
@@ -138,10 +139,17 @@ export default function MeetingRoom() {
         }
 
         // 2. Get or create meeting
-        const { data: existingMeeting, error } = await meetingService.getMeetingByCode(meetingCode);
-        let meeting = existingMeeting;
+        // Fetch meeting details
+        const { data: meetingData, error: meetingError } = await supabase
+          .from("meetings")
+          .select("*")
+          .eq("meeting_code", meetingCode)
+          .eq("is_active", true)
+          .maybeSingle(); // Use maybeSingle() to handle missing meetings gracefully
+
+        let meeting = meetingData;
         
-        if (error || !meeting) {
+        if (meetingError || !meeting) {
           console.log("Meeting not found, creating new one...");
           // Auto-create meeting if not found
           const { data: newMeeting, error: createError } = await meetingService.createMeeting(
@@ -1361,7 +1369,7 @@ export default function MeetingRoom() {
                   {["black", "red", "blue", "green", "yellow"].map((color) => (
                     <button
                       key={color}
-                      className="w-8 h-8 rounded-full border-2 border-gray-700 hover:scale-110 transition-transform"
+                      className="w-8 h-8 bg-gray-900 border-gray-700 hover:scale-110 transition-transform"
                       style={{ backgroundColor: color }}
                       title={color}
                     />
