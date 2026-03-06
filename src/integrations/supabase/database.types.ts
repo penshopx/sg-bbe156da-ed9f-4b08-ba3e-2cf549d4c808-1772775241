@@ -1612,6 +1612,10 @@ export type Database = {
         Returns: string
       }
       get_meeting_stats: { Args: { meeting_uuid: string }; Returns: Json }
+      increment: {
+        Args: { column_name: string; row_id: string; table_name: string }
+        Returns: undefined
+      }
       increment_article_views: {
         Args: { article_uuid: string }
         Returns: undefined
