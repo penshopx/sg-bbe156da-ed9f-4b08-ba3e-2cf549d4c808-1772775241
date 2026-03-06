@@ -117,9 +117,8 @@ export default async function handler(
     };
 
     // Update transaction status
-    // @ts-ignore - Bypass deep type instantiation error on JSONB update
-    const { error: updateError } = await supabase
-      .from("payment_transactions")
+    const { error: updateError } = await (supabase
+      .from("payment_transactions") as any)
       .update(updatePayload)
       .eq("transaction_id", order_id);
 
