@@ -1039,6 +1039,7 @@ export type Database = {
           is_locked: boolean | null
           key_moments: Json | null
           meeting_code: string
+          metadata: Json | null
           started_at: string | null
           title: string | null
           transcription_data: Json | null
@@ -1057,6 +1058,7 @@ export type Database = {
           is_locked?: boolean | null
           key_moments?: Json | null
           meeting_code: string
+          metadata?: Json | null
           started_at?: string | null
           title?: string | null
           transcription_data?: Json | null
@@ -1075,6 +1077,7 @@ export type Database = {
           is_locked?: boolean | null
           key_moments?: Json | null
           meeting_code?: string
+          metadata?: Json | null
           started_at?: string | null
           title?: string | null
           transcription_data?: Json | null
