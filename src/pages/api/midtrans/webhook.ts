@@ -158,6 +158,8 @@ export default async function handler(
           billing_cycle: metadata.billing_cycle === "annual" ? "yearly" : "monthly",
         });
       }
+      
+      // Profile subscription cache will be auto-updated by trigger
     }
 
     return res.status(200).json({

@@ -12,6 +12,7 @@ import { meetingService } from "@/services/meetingService";
 import { authService } from "@/services/authService";
 import { subscriptionService } from "@/services/subscriptionService";
 import { ctaService } from "@/services/ctaService";
+import { meetingIntegrationService } from "@/services/meetingIntegrationService";
 import { useWebRTC } from "@/hooks/useWebRTC";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -630,7 +631,7 @@ export default function MeetingRoom() {
 
     const checkLimits = async () => {
       try {
-        const limits = await subscriptionService.checkMeetingLimits(meetingId, currentUser.id);
+        const limits = await meetingIntegrationService.monitorMeetingLimits(meetingId, currentUser.id);
         setMeetingLimits(limits);
 
         // Show warning at 10 minutes remaining for free users

@@ -27,6 +27,7 @@ import {
   Share2,
 } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
+import { supabase } from "@/integrations/supabase/client";
 
 type GeneratedContent = Database["public"]["Tables"]["generated_content"]["Row"];
 type AIProcessingJob = Database["public"]["Tables"]["ai_processing_jobs"]["Row"];
@@ -40,10 +41,61 @@ export default function AIStudio() {
   const [jobs, setJobs] = useState<AIProcessingJob[]>([]);
   const [meetings, setMeetings] = useState<any[]>([]);
   const [selectedMeeting, setSelectedMeeting] = useState<string | null>(null);
+  const [hasAccess, setHasAccess] = useState(false);
 
   useEffect(() => {
-    loadData();
+    checkAccess();
   }, []);
+
+  const checkAccess = async () => {
+    try {
+      // Check if user is authenticated
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Login Required",
+          description: "Please login to access AI Studio",
+          variant: "destructive",
+        });
+        router.push("/");
+        return;
+      }
+
+      // Check subscription (AI Studio requires Pro plan or higher)
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("subscription_plan, subscription_expires_at")
+        .eq("id", user.id)
+        .single();
+
+      const plan = profile?.subscription_plan || "free";
+      const expiresAt = profile?.subscription_expires_at;
+      const isActive = !expiresAt || new Date(expiresAt) > new Date();
+
+      if (plan === "free" || !isActive) {
+        toast({
+          title: "Upgrade Required",
+          description: "AI Studio requires Pro plan or higher",
+          variant: "destructive",
+        });
+        router.push("/pricing");
+        return;
+      }
+
+      setHasAccess(true);
+      loadData();
+    } catch (error) {
+      console.error("Error checking access:", error);
+      router.push("/");
+    }
+  };
+
+  useEffect(() => {
+    if (hasAccess) {
+      loadData();
+    }
+  }, [hasAccess]);
 
   const loadData = async () => {
     setIsLoading(true);

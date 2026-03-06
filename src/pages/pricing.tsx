@@ -141,7 +141,7 @@ export default function PricingPage() {
   const handleSubscribe = async (plan: Plan) => {
     // If free plan, just redirect to dashboard
     if (plan.price_monthly === 0) {
-      router.push("/dashboard");
+      router.push("/");
       return;
     }
 
@@ -152,12 +152,11 @@ export default function PricingPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast({
-          title: "Authentication required",
-          description: "Please login to subscribe to a plan",
+          title: "Perlu Login",
+          description: "Silakan login terlebih dahulu untuk berlangganan",
           variant: "destructive"
         });
-        // Redirect to login (assuming there's a login page/modal)
-        // router.push("/login?redirect=/pricing"); 
+        router.push("/");
         return;
       }
 
