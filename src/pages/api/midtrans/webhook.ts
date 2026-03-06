@@ -118,8 +118,6 @@ export default async function handler(
     };
 
     // Update transaction status
-     
-    // @ts-expect-error - Deep type instantiation issue with Supabase JSONB - safe to ignore
     const { error: updateError } = await (supabase.from("payment_transactions") as any)
       .update(updatePayload)
       .eq("transaction_id", order_id);
