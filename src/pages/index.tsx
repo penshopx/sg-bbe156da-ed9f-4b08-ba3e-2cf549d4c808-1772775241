@@ -48,8 +48,8 @@ export default function Home() {
   return (
     <>
       <SEO
-        title="Chaesa Live - Transform Meetings into Revenue-Generating Micro-Courses"
-        description="The only platform that combines video conferencing, AI course generation, and live commerce. Save 71% vs Zoom while earning more from your content."
+        title="Chaesa Live - Ubah Meeting Jadi Kursus Micro-Learning yang Menghasilkan"
+        description="Satu-satunya platform yang menggabungkan video conference, AI course generator, dan live commerce. Hemat 59% vs Zoom sambil cuan dari konten Anda."
       />
 
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
@@ -57,10 +57,10 @@ export default function Home() {
         <div className="bg-gradient-to-r from-yellow-600 to-orange-600 text-white py-3 px-4 text-center sticky top-0 z-50">
           <div className="flex items-center justify-center gap-2 text-sm md:text-base font-semibold">
             <Gift className="w-5 h-5 animate-bounce" />
-            <span>🎉 LIMITED TIME: Paket 1 Tahun Rp 999.000 (Hemat 16%!) - Serious Creators Only</span>
+            <span>🎉 PROMO TERBATAS: Paket 1 Tahun Rp 999.000 (Hemat 16%!) - Khusus Kreator Serius</span>
             <Link href="/pricing">
               <Button size="sm" variant="secondary" className="ml-4">
-                Claim Now →
+                Ambil Sekarang →
               </Button>
             </Link>
           </div>
@@ -72,19 +72,19 @@ export default function Home() {
             {/* Trust Badge */}
             <Badge className="mb-6 bg-purple-500/20 text-purple-300 border-purple-500/50 px-4 py-2">
               <Star className="w-4 h-4 mr-2 fill-yellow-400 text-yellow-400" />
-              Trusted by 1,000+ Creators & Educators
+              Dipercaya oleh 1.000+ Kreator & Educator
             </Badge>
 
             {/* Main Headline */}
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-              Transform Your Meetings<br />
-              Into <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Revenue-Generating</span><br />
-              Micro-Courses in 15 Minutes
+              Ubah Meeting Anda<br />
+              Jadi <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Kursus Micro-Learning</span><br />
+              yang Menghasilkan dalam 15 Menit
             </h1>
 
             {/* Sub-headline */}
             <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto">
-              Stop wasting hours editing recordings. Our AI automatically chunks your 2-hour meeting into 20 ready-to-sell modules with slides, quizzes, and podcasts. <span className="text-purple-400 font-semibold">Plus live commerce for 3-5x higher conversions.</span>
+              Berhenti buang waktu berjam-jam editing rekaman. AI kami otomatis memotong meeting 2 jam Anda jadi 20 modul siap jual lengkap dengan slides, quiz, dan podcast. <span className="text-purple-400 font-semibold">Plus live commerce untuk konversi 3-5x lebih tinggi.</span>
             </p>
 
             {/* Dual CTA */}
@@ -95,7 +95,7 @@ export default function Home() {
                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-6 text-lg rounded-xl shadow-2xl hover:shadow-purple-500/50 transition-all"
               >
                 <Rocket className="w-5 h-5 mr-2" />
-                Start Free Meeting Now
+                Mulai Meeting Gratis Sekarang
               </Button>
               <Link href="#demo">
                 <Button 
@@ -104,7 +104,7 @@ export default function Home() {
                   className="border-2 border-purple-500 text-purple-300 hover:bg-purple-500/20 px-8 py-6 text-lg rounded-xl"
                 >
                   <PlayCircle className="w-5 h-5 mr-2" />
-                  Watch 2-Min Demo
+                  Tonton Demo 2 Menit
                 </Button>
               </Link>
             </div>
@@ -113,15 +113,15 @@ export default function Home() {
             <div className="flex flex-wrap gap-8 justify-center text-center">
               <div>
                 <div className="text-3xl font-bold text-white">{stats.creators.toLocaleString()}+</div>
-                <div className="text-gray-400">Active Creators</div>
+                <div className="text-gray-400">Kreator Aktif</div>
               </div>
               <div>
                 <div className="text-3xl font-bold text-white">{stats.courses.toLocaleString()}+</div>
-                <div className="text-gray-400">Courses Generated</div>
+                <div className="text-gray-400">Kursus Dihasilkan</div>
               </div>
               <div>
                 <div className="text-3xl font-bold text-white">{stats.learners.toLocaleString()}+</div>
-                <div className="text-gray-400">Happy Learners</div>
+                <div className="text-gray-400">Pelajar Puas</div>
               </div>
             </div>
           </div>
@@ -130,12 +130,12 @@ export default function Home() {
           <Card className="max-w-2xl mx-auto p-8 bg-white/5 backdrop-blur-sm border-white/10">
             <form onSubmit={handleJoinMeeting} className="space-y-4">
               <h3 className="text-2xl font-semibold text-white text-center mb-6">
-                Join an Existing Meeting
+                Gabung Meeting yang Sudah Ada
               </h3>
               <div className="flex gap-4">
                 <input
                   type="text"
-                  placeholder="Enter meeting code (e.g., abc123xyz)"
+                  placeholder="Masukkan kode meeting (contoh: abc123xyz)"
                   value={meetingCode}
                   onChange={(e) => setMeetingCode(e.target.value)}
                   className="flex-1 px-6 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 text-lg"
@@ -145,7 +145,7 @@ export default function Home() {
                   size="lg"
                   className="bg-purple-600 hover:bg-purple-700 px-8 py-4 text-lg rounded-xl"
                 >
-                  Join Meeting
+                  Gabung Meeting
                 </Button>
               </div>
             </form>
@@ -157,10 +157,10 @@ export default function Home() {
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <Badge className="mb-4 bg-red-500/20 text-red-300 border-red-500/50">
-                The Problem with Current Platforms
+                Masalah dengan Platform Saat Ini
               </Badge>
               <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                Zoom & Google Meet Are <span className="text-red-400">Killing Your Productivity</span>
+                Zoom & Google Meet <span className="text-red-400">Bunuh Produktivitas</span> Anda
               </h2>
             </div>
 
@@ -168,20 +168,20 @@ export default function Home() {
               {[
                 {
                   icon: Clock,
-                  problem: "Wasting 10+ Hours",
-                  description: "Download → Transcribe → Edit → Create slides → Make quiz = 10-20 hours per course",
+                  problem: "Buang 10+ Jam",
+                  description: "Download → Transcribe → Edit → Bikin slides → Bikin quiz = 10-20 jam per kursus",
                   color: "red"
                 },
                 {
                   icon: DollarSign,
-                  problem: "Losing Money",
-                  description: "Zoom costs Rp 240K/month. Plus you can't sell courses directly from meetings.",
+                  problem: "Rugi Duit",
+                  description: "Zoom biaya Rp 240K/bulan. Plus gak bisa jual kursus langsung dari meeting.",
                   color: "orange"
                 },
                 {
                   icon: TrendingUp,
-                  problem: "Missing Conversions",
-                  description: "No way to push CTA during webinars. Viewers forget to buy after meeting ends.",
+                  problem: "Kehilangan Konversi",
+                  description: "Gak ada cara push CTA saat webinar. Viewer lupa beli setelah meeting selesai.",
                   color: "yellow"
                 }
               ].map((item, idx) => (
@@ -195,7 +195,7 @@ export default function Home() {
 
             <div className="text-center">
               <h3 className="text-3xl font-bold text-white mb-4">
-                Chaesa Live Solves All of This 👇
+                Chaesa Live Selesaikan Semua Ini 👇
               </h3>
             </div>
           </div>
@@ -205,10 +205,10 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center mb-16">
             <Badge className="mb-4 bg-purple-500/20 text-purple-300 border-purple-500/50">
-              Revolutionary Features
+              Fitur Revolusioner
             </Badge>
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              3 Features That <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">No Competitor</span> Has
+              3 Fitur yang <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Gak Ada</span> di Kompetitor
             </h2>
           </div>
 
@@ -221,18 +221,18 @@ export default function Home() {
                   AI Course Factory
                 </Badge>
                 <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                  One-Click Course Generation (Like NotebookLM for Video)
+                  Bikin Kursus 1 Klik (Kayak NotebookLM untuk Video)
                 </h3>
                 <p className="text-xl text-gray-300 mb-6">
-                  Record 1 meeting → AI chunks into 20 micro-modules (5-7 min each) → Auto-generate slides, quizzes, podcasts, ebook → Publish & sell in 15 minutes.
+                  Rekam 1 meeting → AI potong jadi 20 modul micro (5-7 menit tiap modul) → Otomatis bikin slides, quiz, podcast, ebook → Publish & jual dalam 15 menit.
                 </p>
                 <div className="space-y-3 mb-6">
                   {[
-                    "📊 Auto-generate PowerPoint slides",
-                    "📖 Create PDF ebooks & study guides",
-                    "✅ Generate quizzes with explanations",
-                    "🎙️ AI podcast (2-host conversation style)",
-                    "📱 Optimize for TikTok/Reels/YouTube Shorts"
+                    "📊 Bikin slides PowerPoint otomatis",
+                    "📖 Bikin ebook PDF & study guide",
+                    "✅ Bikin quiz lengkap dengan penjelasan",
+                    "🎙️ Podcast AI (gaya 2 host ngobrol)",
+                    "📱 Optimize untuk TikTok/Reels/YouTube Shorts"
                   ].map((feature, idx) => (
                     <div key={idx} className="flex items-center gap-3 text-gray-300">
                       <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
@@ -241,14 +241,14 @@ export default function Home() {
                   ))}
                 </div>
                 <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4 mb-6">
-                  <div className="text-sm text-purple-300 font-semibold mb-1">TIME SAVED</div>
+                  <div className="text-sm text-purple-300 font-semibold mb-1">HEMAT WAKTU</div>
                   <div className="text-2xl font-bold text-white">
-                    90% (20 hours → 2 hours)
+                    90% (20 jam → 2 jam)
                   </div>
                 </div>
                 <Link href="/ai-studio">
                   <Button className="bg-gradient-to-r from-blue-600 to-purple-600">
-                    Try AI Studio <ArrowRight className="w-4 h-4 ml-2" />
+                    Coba AI Studio <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </Link>
               </div>
@@ -257,7 +257,7 @@ export default function Home() {
                   <Brain className="w-32 h-32 text-purple-400" />
                 </div>
                 <div className="absolute -top-4 -right-4 bg-green-500 text-white px-4 py-2 rounded-full font-bold shadow-lg">
-                  Save 90% Time
+                  Hemat 90% Waktu
                 </div>
               </div>
             </div>
@@ -269,7 +269,7 @@ export default function Home() {
                   <Zap className="w-32 h-32 text-orange-400" />
                 </div>
                 <div className="absolute -top-4 -left-4 bg-orange-500 text-white px-4 py-2 rounded-full font-bold shadow-lg">
-                  3-5x Conversions
+                  Konversi 3-5x
                 </div>
               </div>
               <div className="order-1 md:order-2">
@@ -278,18 +278,18 @@ export default function Home() {
                   Live Sales CTA
                 </Badge>
                 <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                  TikTok Shop-Style Live Commerce (Push CTA to All Viewers)
+                  Live Commerce Gaya TikTok Shop (Push CTA ke Semua Viewer)
                 </h3>
                 <p className="text-xl text-gray-300 mb-6">
-                  During webinar/demo, push "Buy Now" button directly to viewers' screens with countdown timer. Impulse buying = 3-5x higher conversion than "link in chat".
+                  Saat webinar/demo, push tombol "Beli Sekarang" langsung ke layar semua viewer dengan countdown timer. Impulse buying = konversi 3-5x lebih tinggi dari "link di chat".
                 </p>
                 <div className="space-y-3 mb-6">
                   {[
-                    "💰 Push product offers during live demo",
-                    "⏱️ FOMO countdown timers",
-                    "📊 Real-time click tracking",
-                    "🎯 Customizable CTA colors & copy",
-                    "💳 Direct Midtrans checkout"
+                    "💰 Push penawaran produk saat demo live",
+                    "⏱️ Countdown timer FOMO",
+                    "📊 Tracking klik real-time",
+                    "🎯 CTA warna & copy bisa di-custom",
+                    "💳 Checkout langsung via Midtrans"
                   ].map((feature, idx) => (
                     <div key={idx} className="flex items-center gap-3 text-gray-300">
                       <CheckCircle className="w-5 h-5 text-orange-400 flex-shrink-0" />
@@ -298,13 +298,13 @@ export default function Home() {
                   ))}
                 </div>
                 <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4 mb-6">
-                  <div className="text-sm text-orange-300 font-semibold mb-1">CONVERSION BOOST</div>
+                  <div className="text-sm text-orange-300 font-semibold mb-1">BOOST KONVERSI</div>
                   <div className="text-2xl font-bold text-white">
-                    3-5x vs Traditional Webinars
+                    3-5x vs Webinar Tradisional
                   </div>
                 </div>
                 <Button className="bg-gradient-to-r from-orange-600 to-pink-600">
-                  See Live Demo <ArrowRight className="w-4 h-4 ml-2" />
+                  Lihat Demo Live <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </div>
             </div>
@@ -317,17 +317,17 @@ export default function Home() {
                   Studio Mode
                 </Badge>
                 <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                  OBS-Friendly for YouTubers & Streamers (Zero Audio Issues)
+                  OBS-Friendly untuk YouTuber & Streamer (Zero Masalah Audio)
                 </h3>
                 <p className="text-xl text-gray-300 mb-6">
-                  Zoom/Meet kills your OBS audio? We fixed it. Toggle "Studio Mode" → Clean feed (no UI) + "Original Sound" (no processing) = Perfect for live streaming.
+                  Zoom/Meet bunuh audio OBS Anda? Kami fix itu. Toggle "Studio Mode" → Feed bersih (tanpa UI) + "Original Sound" (tanpa processing) = Sempurna untuk live streaming.
                 </p>
                 <div className="space-y-3 mb-6">
                   {[
-                    "🎥 Clean feed (hide all UI for OBS capture)",
-                    "🎵 Original Sound mode (no audio processing)",
-                    "🎙️ Zero conflicts with OBS/Streamlabs",
-                    "🎬 Perfect for YouTube Live/Twitch",
+                    "🎥 Feed bersih (sembunyikan semua UI untuk capture OBS)",
+                    "🎵 Mode Original Sound (tanpa audio processing)",
+                    "🎙️ Zero konflik dengan OBS/Streamlabs",
+                    "🎬 Sempurna untuk YouTube Live/Twitch",
                     "⌨️ Keyboard shortcut (Ctrl+Shift+U)"
                   ].map((feature, idx) => (
                     <div key={idx} className="flex items-center gap-3 text-gray-300">
@@ -337,13 +337,13 @@ export default function Home() {
                   ))}
                 </div>
                 <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 mb-6">
-                  <div className="text-sm text-green-300 font-semibold mb-1">AUDIO QUALITY</div>
+                  <div className="text-sm text-green-300 font-semibold mb-1">KUALITAS AUDIO</div>
                   <div className="text-2xl font-bold text-white">
-                    Studio-Grade (No Zoom Robotic Sound)
+                    Kualitas Studio (Tanpa Suara Robot Zoom)
                   </div>
                 </div>
                 <Button className="bg-gradient-to-r from-green-600 to-teal-600">
-                  Try Studio Mode <ArrowRight className="w-4 h-4 ml-2" />
+                  Coba Studio Mode <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </div>
               <div className="relative">
@@ -351,7 +351,7 @@ export default function Home() {
                   <MonitorPlay className="w-32 h-32 text-green-400" />
                 </div>
                 <div className="absolute -top-4 -right-4 bg-teal-500 text-white px-4 py-2 rounded-full font-bold shadow-lg">
-                  Zero Audio Issues
+                  Zero Masalah Audio
                 </div>
               </div>
             </div>
@@ -363,10 +363,10 @@ export default function Home() {
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <Badge className="mb-4 bg-purple-500/20 text-purple-300 border-purple-500/50">
-                Transparent Pricing
+                Harga Transparan
               </Badge>
               <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                Save <span className="text-green-400">71% vs Zoom</span>, Get <span className="text-purple-400">10x More Features</span>
+                Hemat <span className="text-green-400">59% vs Zoom</span>, Dapat <span className="text-purple-400">10x Lebih Banyak Fitur</span>
               </h2>
             </div>
 
@@ -374,30 +374,30 @@ export default function Home() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-white/20">
-                    <th className="p-4 text-white font-semibold">Feature</th>
+                    <th className="p-4 text-white font-semibold">Fitur</th>
                     <th className="p-4 text-white font-semibold text-center">Zoom Pro</th>
                     <th className="p-4 text-white font-semibold text-center">Google Meet</th>
                     <th className="p-4 text-white font-semibold text-center bg-purple-900/30">
-                      <Badge className="mb-2">Recommended</Badge>
+                      <Badge className="mb-2">Rekomendasi</Badge>
                       <div>Chaesa Live Pro</div>
                     </th>
                   </tr>
                 </thead>
                 <tbody className="text-gray-300">
                   <tr className="border-b border-white/10">
-                    <td className="p-4 font-semibold">Price/Month</td>
+                    <td className="p-4 font-semibold">Harga/Bulan</td>
                     <td className="p-4 text-center">Rp 240.000</td>
                     <td className="p-4 text-center">Rp 130.000</td>
                     <td className="p-4 text-center bg-purple-900/20 font-bold text-green-400">Rp 99.000</td>
                   </tr>
                   <tr className="border-b border-white/10">
-                    <td className="p-4">Savings vs Competitor</td>
+                    <td className="p-4">Hemat vs Kompetitor</td>
                     <td className="p-4 text-center">-</td>
                     <td className="p-4 text-center">-</td>
-                    <td className="p-4 text-center bg-purple-900/20 font-bold text-green-400">Save 59% (vs Zoom)</td>
+                    <td className="p-4 text-center bg-purple-900/20 font-bold text-green-400">Hemat 59% (vs Zoom)</td>
                   </tr>
                   <tr className="border-b border-white/10">
-                    <td className="p-4">Meeting Duration</td>
+                    <td className="p-4">Durasi Meeting</td>
                     <td className="p-4 text-center">Unlimited</td>
                     <td className="p-4 text-center">Unlimited</td>
                     <td className="p-4 text-center bg-purple-900/20">Unlimited</td>
@@ -421,13 +421,13 @@ export default function Home() {
                     <td className="p-4 text-center bg-purple-900/20 text-green-400">✅</td>
                   </tr>
                   <tr className="border-b border-white/10">
-                    <td className="p-4">Original Sound (Audio Fix)</td>
-                    <td className="p-4 text-center text-yellow-400">⚠️ Complex</td>
+                    <td className="p-4">Original Sound (Fix Audio)</td>
+                    <td className="p-4 text-center text-yellow-400">⚠️ Rumit</td>
                     <td className="p-4 text-center text-red-400">❌</td>
-                    <td className="p-4 text-center bg-purple-900/20 text-green-400">✅ One Toggle</td>
+                    <td className="p-4 text-center bg-purple-900/20 text-green-400">✅ Toggle 1x</td>
                   </tr>
                   <tr className="border-b border-white/10">
-                    <td className="p-4">NotebookLM-Style Podcast</td>
+                    <td className="p-4">Podcast Gaya NotebookLM</td>
                     <td className="p-4 text-center text-red-400">❌</td>
                     <td className="p-4 text-center text-red-400">❌</td>
                     <td className="p-4 text-center bg-purple-900/20 text-green-400">✅</td>
@@ -445,7 +445,7 @@ export default function Home() {
             <div className="text-center mt-12">
               <Link href="/pricing">
                 <Button size="lg" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-12 py-6 text-lg">
-                  See Full Pricing <ArrowRight className="w-5 h-5 ml-2" />
+                  Lihat Harga Lengkap <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
             </div>
@@ -456,10 +456,10 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center mb-16">
             <Badge className="mb-4 bg-purple-500/20 text-purple-300 border-purple-500/50">
-              Perfect For
+              Sempurna Untuk
             </Badge>
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Who Benefits Most from Chaesa Live?
+              Siapa yang Paling Untung Pakai Chaesa Live?
             </h2>
           </div>
 
@@ -467,38 +467,38 @@ export default function Home() {
             {[
               {
                 icon: Brain,
-                persona: "E-Course Creators & Coaches",
-                pain: "Spend 10-20 hours creating courses from Zoom recordings",
-                solution: "Record 1 webinar → AI generates 20 modules → Sell in 15 minutes",
-                roi: "Save 90% time, Earn 5x more courses",
-                cta: "Create Your First Course",
+                persona: "Kreator E-Course & Coach",
+                pain: "Buang 10-20 jam bikin kursus dari rekaman Zoom",
+                solution: "Rekam 1 webinar → AI bikin 20 modul → Jual dalam 15 menit",
+                roi: "Hemat 90% waktu, Cuan 5x lebih banyak kursus",
+                cta: "Bikin Kursus Pertama",
                 color: "blue"
               },
               {
                 icon: DollarSign,
-                persona: "Live Sellers & E-Commerce",
-                pain: "Low webinar conversions, hard to close sales",
-                solution: "Push CTA during live demo → Impulse buying → 3-5x conversions",
-                roi: "3-5x higher conversion rate",
-                cta: "Boost Your Sales",
+                persona: "Live Seller & E-Commerce",
+                pain: "Konversi webinar rendah, susah closing",
+                solution: "Push CTA saat demo live → Impulse buying → Konversi 3-5x",
+                roi: "Tingkat konversi 3-5x lebih tinggi",
+                cta: "Boost Penjualan",
                 color: "orange"
               },
               {
                 icon: Video,
-                persona: "YouTubers & Content Creators",
-                pain: "OBS audio issues, can't use Zoom for streaming",
-                solution: "Studio Mode + Original Sound → Zero audio conflicts",
-                roi: "Professional quality streaming",
-                cta: "Fix Your Audio Issues",
+                persona: "YouTuber & Content Creator",
+                pain: "Masalah audio OBS, gak bisa pakai Zoom buat streaming",
+                solution: "Studio Mode + Original Sound → Zero konflik audio",
+                roi: "Kualitas streaming profesional",
+                cta: "Fix Masalah Audio",
                 color: "green"
               },
               {
                 icon: Users,
-                persona: "Corporate Trainers & HR",
-                pain: "Expensive training platforms, hard to track progress",
-                solution: "Record training once → Auto-chunk → Gamified learning",
-                roi: "Save 80% vs LinkedIn Learning",
-                cta: "Start Corporate Training",
+                persona: "Corporate Trainer & HR",
+                pain: "Platform training mahal, susah tracking progress",
+                solution: "Rekam training sekali → Auto-chunk → Gamified learning",
+                roi: "Hemat 80% vs LinkedIn Learning",
+                cta: "Mulai Corporate Training",
                 color: "purple"
               }
             ].map((useCase, idx) => (
@@ -507,11 +507,11 @@ export default function Home() {
                 <h3 className="text-2xl font-bold text-white mb-3">{useCase.persona}</h3>
                 <div className="space-y-4 mb-6">
                   <div>
-                    <div className="text-sm text-red-400 font-semibold mb-1">❌ Pain Point:</div>
+                    <div className="text-sm text-red-400 font-semibold mb-1">❌ Masalah:</div>
                     <div className="text-gray-300">{useCase.pain}</div>
                   </div>
                   <div>
-                    <div className="text-sm text-green-400 font-semibold mb-1">✅ Chaesa Solution:</div>
+                    <div className="text-sm text-green-400 font-semibold mb-1">✅ Solusi Chaesa:</div>
                     <div className="text-gray-300">{useCase.solution}</div>
                   </div>
                   <div className={`bg-${useCase.color}-500/10 border border-${useCase.color}-500/30 rounded-lg p-3`}>
@@ -532,10 +532,10 @@ export default function Home() {
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <Badge className="mb-4 bg-purple-500/20 text-purple-300 border-purple-500/50">
-                Success Stories
+                Kisah Sukses
               </Badge>
               <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                What Early Adopters Are Saying
+                Apa Kata Early Adopter
               </h2>
             </div>
 
@@ -543,24 +543,24 @@ export default function Home() {
               {[
                 {
                   name: "Sarah Chen",
-                  role: "E-Course Creator",
+                  role: "Kreator E-Course",
                   avatar: "SC",
-                  quote: "I used to spend 2 weeks creating a course. Now I do it in 1 day with Chaesa Live's AI. Already made Rp 50 juta from 5 courses!",
-                  metric: "Rp 50 juta revenue"
+                  quote: "Dulu bikin kursus 2 minggu. Sekarang 1 hari pakai AI Chaesa Live. Udah cuan Rp 50 juta dari 5 kursus!",
+                  metric: "Revenue Rp 50 juta"
                 },
                 {
                   name: "Budi Santoso",
                   role: "Live Seller",
                   avatar: "BS",
-                  quote: "The Live CTA feature is a game changer. My webinar conversion went from 2% to 8%. That's 4x more sales!",
-                  metric: "4x conversion boost"
+                  quote: "Fitur Live CTA game changer banget. Konversi webinar gue naik dari 2% jadi 8%. Itu 4x lipat!",
+                  metric: "Konversi naik 4x"
                 },
                 {
                   name: "Amanda Wijaya",
                   role: "YouTuber (150K subs)",
                   avatar: "AW",
-                  quote: "Finally, no more OBS audio issues! Studio Mode makes my live streams so much cleaner. Highly recommend for content creators.",
-                  metric: "Zero audio issues"
+                  quote: "Akhirnya gak ada masalah audio OBS lagi! Studio Mode bikin live stream gue jauh lebih bersih. Highly recommend buat content creator.",
+                  metric: "Zero masalah audio"
                 }
               ].map((testimonial, idx) => (
                 <Card key={idx} className="p-6 bg-white/5 border-white/10 backdrop-blur-sm">
@@ -593,19 +593,19 @@ export default function Home() {
           <Card className="p-12 bg-gradient-to-br from-purple-900/40 to-pink-900/40 border-purple-500/30 backdrop-blur-sm text-center">
             <Badge className="mb-6 bg-green-500/20 text-green-300 border-green-500/50">
               <Gift className="w-4 h-4 mr-2" />
-              For Serious Creators Only
+              Khusus Kreator Serius
             </Badge>
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Ready to 10x Your Content Revenue?
+              Siap 10x Revenue Konten Anda?
             </h2>
             <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-              Join 1,000+ creators who are already earning more with less effort. Paket 1 Tahun <span className="font-bold text-yellow-400">Rp 999.000</span> - All Pro features, zero regrets. This is an investment, not an expense.
+              Gabung 1.000+ kreator yang sudah cuan lebih dengan usaha lebih sedikit. Paket 1 Tahun <span className="font-bold text-yellow-400">Rp 999.000</span> - Semua fitur Pro, zero penyesalan. Ini investasi, bukan pengeluaran.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
               <Link href="/pricing">
                 <Button size="lg" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-12 py-6 text-lg">
                   <Rocket className="w-5 h-5 mr-2" />
-                  Get Pro Now - Rp 99K/month
+                  Ambil Pro Sekarang - Rp 99K/bulan
                 </Button>
               </Link>
               <Button 
@@ -614,11 +614,11 @@ export default function Home() {
                 onClick={handleStartMeeting}
                 className="border-2 border-purple-500 text-purple-300 hover:bg-purple-500/20 px-12 py-6 text-lg"
               >
-                Try Free Meeting First
+                Coba Meeting Gratis Dulu
               </Button>
             </div>
             <p className="text-gray-400 text-sm">
-              No credit card required • Cancel anytime • 7-day money-back guarantee
+              Tanpa kartu kredit • Batal kapan saja • Garansi uang kembali 7 hari
             </p>
           </Card>
         </div>
@@ -627,9 +627,9 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
           <div className="grid md:grid-cols-4 gap-8 text-center">
             {[
-              { icon: Shield, label: "Enterprise-Grade Security" },
-              { icon: Award, label: "99.9% Uptime SLA" },
-              { icon: Users, label: "24/7 Support" },
+              { icon: Shield, label: "Keamanan Enterprise-Grade" },
+              { icon: Award, label: "99,9% Uptime SLA" },
+              { icon: Users, label: "Support 24/7" },
               { icon: Lock, label: "GDPR Compliant" }
             ].map((trust, idx) => (
               <div key={idx} className="flex flex-col items-center gap-3">
@@ -645,10 +645,10 @@ export default function Home() {
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="text-gray-400 text-sm">
-                © 2026 Chaesa Live. All rights reserved.
+                © 2026 Chaesa Live. Hak cipta dilindungi.
               </div>
               <div className="flex gap-6 text-sm text-gray-400">
-                <Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link>
+                <Link href="/pricing" className="hover:text-white transition-colors">Harga</Link>
                 <Link href="/ai-studio" className="hover:text-white transition-colors">AI Studio</Link>
                 <Link href="/micro-learning" className="hover:text-white transition-colors">Micro-Learning</Link>
               </div>
