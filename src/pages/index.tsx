@@ -129,6 +129,22 @@ export default function Home() {
                 <Link href="/schedule" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors">
                   Jadwal Live
                 </Link>
+                <div className="relative group">
+                  <button className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors flex items-center gap-1">
+                    Creator Tools <Sparkles className="w-3 h-3" />
+                  </button>
+                  <div className="absolute top-full left-0 mt-2 w-56 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 py-2">
+                    <Link href="/creator-dashboard" className="block px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                      Dashboard Kreator
+                    </Link>
+                    <Link href="/broadcast" className="block px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                      Broadcast & Marketing
+                    </Link>
+                    <Link href="/content-calendar" className="block px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                      Kalender Konten
+                    </Link>
+                  </div>
+                </div>
               </nav>
 
               {/* Theme Toggle & Auth Buttons */}
