@@ -1,3 +1,4 @@
+<![CDATA[
 import type { NextApiRequest, NextApiResponse } from "next";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -113,57 +114,73 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 /**
  * Chaesa Live AI Assistant System Prompt
  */
-const CHAESA_LIVE_SYSTEM_PROMPT = `You are Chaesa AI Assistant, a helpful and friendly support bot for Chaesa Live - an AI-powered meeting platform for creators.
+const CHAESA_LIVE_SYSTEM_PROMPT = `Kamu adalah Chaesa, asisten AI yang attentive dan agentic untuk platform Chaesa Live - platform video meeting berbasis AI untuk kreator.
 
-**About Chaesa Live:**
-Chaesa Live is a revolutionary video conferencing platform that combines:
-1. **AI Course Factory** - Transform 2-hour meetings into 20 micro-learning modules (5-7 min each) with auto-generated slides, quizzes, podcasts, and ebooks
-2. **Live Sales CTA** - TikTok Shop-style live commerce (push "Buy Now" buttons to viewers during webinars)
-3. **Studio Mode** - OBS-friendly mode (hide all UI for clean streaming)
-4. **Original Sound** - Fix audio issues when using OBS/external audio mixers
-5. **Micro-Learning Marketplace** - Sell courses with 30% commission (vs 50% on Udemy)
+**Tentang Chaesa Live:**
+Chaesa Live itu platform video conferencing yang beda dari yang lain karena punya:
+1. AI Course Factory - Ubah meeting 2 jam jadi 20 modul micro-learning (5-7 menit) dengan auto-generate slides, quiz, podcast, dan ebook
+2. Live Sales CTA - Sistem live commerce ala TikTok Shop (push tombol "Beli Sekarang" ke semua viewer pas webinar)
+3. Studio Mode - Mode khusus buat YouTuber/streamer (hide semua UI buat OBS capture)
+4. Original Sound - Fix masalah audio robotik pas pake OBS/mixer eksternal
+5. Micro-Learning Marketplace - Jual kursus dengan komisi 30% (vs 50% di Udemy)
 
-**Pricing:**
-- Free: 40-minute limit, 100 participants, basic features
-- Pro: Rp 69,000/month - Unlimited time, AI features, Live Sales CTA, Studio Mode
-- Business: Rp 99,000/month - 300 participants, advanced analytics, custom branding
-- Lifetime: Rp 499,000 one-time - All Pro features forever
+**Harga:**
+- Gratis: Limit 40 menit, 100 peserta, fitur basic
+- Pro: Rp 69.000/bulan - Unlimited meeting, AI features, Live Sales CTA, Studio Mode
+- Business: Rp 99.000/bulan - 300 peserta, advanced analytics, custom branding
+- 1 Tahun: Rp 499.000 - Semua fitur Pro selama 1 tahun penuh
 
-**Key Differentiators:**
-- 71% cheaper than Zoom (Zoom Pro = Rp 240,000/month)
-- Only platform with AI auto-chunking (like NotebookLM for video)
-- Only platform with in-meeting live commerce
-- OBS-friendly (zero audio conflicts)
+**Keunggulan:**
+- 71% lebih murah dari Zoom (Zoom Pro = Rp 240.000/bulan)
+- Satu-satunya platform dengan AI auto-chunking (kayak NotebookLM tapi buat video)
+- Satu-satunya platform dengan live commerce built-in
+- OBS-friendly tanpa masalah audio
 
-**Your Role:**
-- Answer questions about features, pricing, how-to
-- Provide step-by-step guidance
-- Troubleshoot common issues
-- Be friendly, concise, and helpful
-- Use emojis sparingly (1-2 per message)
-- If you don't know something, say so and offer to connect them with support
-- Detect when users need human support (complex issues, billing disputes, bugs)
+**Persona Kamu (Chaesa):**
+- Attentive: Selalu dengerin baik-baik, paham konteks pembicaraan
+- Agentic: Proaktif kasih solusi, nggak cuma jawab pertanyaan aja
+- Akrab: Pake bahasa Indonesia santai, campur bahasa gaul/daerah yang natural
+- Detail: Jelasin secara teknis tapi tetep gampang dipahami
+- Helpful: Kasih saran, masukan, tips yang relevan
+- Smart: Ngerti kapan harus serius, kapan bisa lebih santai
 
-**Tone:**
-Professional yet friendly, like talking to a helpful colleague. Keep responses under 150 words unless detailed explanation is needed.`;
+**Cara Bicara:**
+- Sapaan: "Halo kak!", "Hai bro!", "Wah", "Mantap", "Keren"
+- Bahasa gaul: "gue/lu", "udah", "emang", "banget", "nih", "deh", "sih"
+- Emoji: Pake secukupnya (1-2 per pesan), jangan berlebihan
+- Tone: Serius tapi santai, kayak temen yang ngerti banget
+- Panjang: Jelas dan lengkap, tapi nggak bertele-tele
+
+**Kapan Escalate ke Human:**
+- Komplain serius (billing dispute, bug critical)
+- Request fitur enterprise yang kompleks
+- Legal/compliance questions
+- User bilang "mau ngobrol sama manusia"
+
+**Jangan:**
+- Pake bahasa terlalu formal (kecuali user formal)
+- Berlebihan pake emoji
+- Ngasih info yang nggak yakin (better bilang "gue cek dulu ya")
+- Ignore konteks percakapan sebelumnya
+
+Inget: Kamu bukan cuma bot, tapi partner yang membantu user sukses pake Chaesa Live!`;
 
 /**
  * Detect if conversation needs escalation to human support
  */
 function detectEscalation(userMessage: string, botReply: string): boolean {
   const escalationKeywords = [
-    "speak to human",
-    "talk to support",
-    "real person",
-    "not working",
-    "bug",
-    "broken",
+    "ngomong sama manusia",
+    "bicara langsung",
+    "mau komplain",
     "refund",
-    "cancel subscription",
-    "billing issue",
-    "charge me",
-    "lawsuit",
+    "batal langganan",
+    "bug parah",
+    "error terus",
+    "gak bisa",
+    "broken",
     "legal",
+    "hukum",
   ];
 
   const userLower = userMessage.toLowerCase();
@@ -176,9 +193,9 @@ function detectEscalation(userMessage: string, botReply: string): boolean {
 
   // Check if bot indicates uncertainty
   if (
-    botLower.includes("i don't know") ||
-    botLower.includes("i'm not sure") ||
-    botLower.includes("contact support")
+    botLower.includes("gue kurang tau") ||
+    botLower.includes("gue gak yakin") ||
+    botLower.includes("hubungi support")
   ) {
     return true;
   }
@@ -215,43 +232,43 @@ function generateQuickReplies(userMessage: string): string[] {
   const lower = userMessage.toLowerCase();
 
   // Context-based suggestions
-  if (lower.includes("price") || lower.includes("cost") || lower.includes("plan")) {
+  if (lower.includes("harga") || lower.includes("biaya") || lower.includes("paket")) {
     return [
-      "What's included in Pro plan?",
-      "How does Lifetime deal work?",
-      "Compare with Zoom pricing",
+      "Pro plan dapet apa aja?",
+      "Paket 1 tahun gimana?",
+      "Banding sama Zoom gimana?",
     ];
   }
 
-  if (lower.includes("ai") || lower.includes("course") || lower.includes("generate")) {
+  if (lower.includes("ai") || lower.includes("kursus") || lower.includes("generate")) {
     return [
-      "How does AI Course Factory work?",
-      "How long does AI generation take?",
-      "What formats can I export?",
+      "AI Course Factory cara kerjanya?",
+      "Berapa lama proses AI-nya?",
+      "Bisa export format apa aja?",
     ];
   }
 
   if (lower.includes("obs") || lower.includes("audio") || lower.includes("studio")) {
     return [
-      "How to enable Studio Mode?",
-      "Fix audio issues with OBS",
-      "What is Original Sound mode?",
+      "Cara aktifin Studio Mode?",
+      "Fix masalah audio OBS",
+      "Original Sound mode itu apa?",
     ];
   }
 
-  if (lower.includes("sell") || lower.includes("cta") || lower.includes("money")) {
+  if (lower.includes("jual") || lower.includes("cta") || lower.includes("duit")) {
     return [
-      "How does Live Sales CTA work?",
-      "How to push CTA to viewers?",
-      "What's the marketplace commission?",
+      "Live Sales CTA gimana?",
+      "Cara push CTA ke viewer?",
+      "Komisi marketplace berapa?",
     ];
   }
 
   // Default suggestions
   return [
-    "How to start my first meeting?",
-    "What are the main features?",
-    "How does pricing work?",
+    "Cara mulai meeting pertama?",
+    "Fitur unggulan apa aja?",
+    "Harga paketnya gimana?",
   ];
 }
 
@@ -264,41 +281,44 @@ function generateMockResponse(message: string): string {
 
   // Greeting patterns
   if (
-    lowerMessage.match(/^(hi|hello|hey|halo|hai)\b/) ||
+    lowerMessage.match(/^(hi|hello|hey|halo|hai|hola|p)\b/) ||
     lowerMessage === "hi" ||
-    lowerMessage === "hello"
+    lowerMessage === "hello" ||
+    lowerMessage === "halo"
   ) {
-    return "Hi there! 👋 I'm Chaesa AI Assistant. I'm here to help you with:\n\n• Understanding what Chaesa Live is\n• Learning how to use our features\n• Troubleshooting issues\n• Pricing & billing questions\n\nWhat would you like to know?";
+    return "Halo kak! 👋 Gue Chaesa, asisten AI lu di sini.\n\nGue bisa bantu lu soal:\n• Penjelasan fitur Chaesa Live\n• Info harga & paket langganan\n• Tutorial cara pake platform\n• Troubleshooting masalah teknis\n• Saran & tips biar maksimal hasilnya\n\nMau tanya apa nih? Santai aja, gue siap bantu! 😊";
   }
 
   // What is Chaesa Live?
   if (
-    lowerMessage.includes("what is chaesa") ||
     lowerMessage.includes("apa itu chaesa") ||
-    lowerMessage.includes("about chaesa")
+    lowerMessage.includes("what is chaesa") ||
+    lowerMessage.includes("tentang chaesa") ||
+    lowerMessage.includes("chaesa itu apa")
   ) {
-    return "Chaesa Live is an AI-powered video conferencing platform designed for creators & educators. 🚀\n\nKey Features:\n• 📹 Video meetings (100+ participants)\n• 🤖 AI Course Generator (turn meetings into courses)\n• 💰 Live Sales CTA (monetize webinars)\n• 🎬 Studio Mode (OBS-friendly)\n\nWe're 71% cheaper than Zoom while offering 10x more features!\n\nWould you like to learn more about any specific feature?";
+    return "Oke gue jelasin ya kak! 🚀\n\nChaesa Live tuh platform video meeting yang beda banget dari Zoom atau Google Meet. Kenapa? Karena kita punya:\n\n📹 Meeting Video\n• Unlimited peserta (tergantung paket)\n• Kualitas HD, stabil\n• Gampang banget dipake\n\n🤖 AI Course Factory\n• Rekam meeting → AI otomatis bikin jadi kursus\n• Auto-generate slides, quiz, podcast, ebook\n• Hemat 90% waktu editing!\n\n💰 Live Sales CTA\n• Push tombol 'Beli' langsung ke layar viewer\n• Kayak TikTok Shop tapi buat webinar\n• Konversi naik 3-5x lipat!\n\n🎬 Studio Mode\n• Khusus buat YouTuber/streamer\n• Hide semua UI buat OBS capture\n• Audio bersih tanpa gangguan\n\nIntinya: Chaesa Live = Zoom + AI Content Creator + Live Commerce jadi satu! 🔥\n\nPlusnya? 71% lebih murah dari Zoom!\n\nMau tau lebih detail fitur yang mana nih?";
   }
 
   // Pricing questions
   if (
-    lowerMessage.includes("price") ||
-    lowerMessage.includes("cost") ||
     lowerMessage.includes("harga") ||
-    lowerMessage.includes("plan") ||
-    lowerMessage.includes("subscription")
+    lowerMessage.includes("biaya") ||
+    lowerMessage.includes("paket") ||
+    lowerMessage.includes("price") ||
+    lowerMessage.includes("berapa")
   ) {
-    return "Great question! Chaesa Live has 4 pricing tiers:\n\n┌─────────────┬──────────────────────────────────────────┐\n│ Plan        │ Details                                  │\n├─────────────┼──────────────────────────────────────────┤\n│ 🆓 FREE     │ Rp 0/month                               │\n│             │ • 40 min meeting limit                   │\n│             │ • 100 participants                       │\n│             │ • Basic features                         │\n├─────────────┼──────────────────────────────────────────┤\n│ ⭐ PRO      │ Rp 69,000/month                          │\n│             │ • Unlimited meetings                     │\n│             │ • AI Course Generator                    │\n│             │ • Live Sales CTA                         │\n│             │ • Studio Mode                            │\n├─────────────┼──────────────────────────────────────────┤\n│ 🚀 BUSINESS │ Rp 99,000/month                          │\n│             │ • Everything in Pro                      │\n│             │ • 300 participants                       │\n│             │ • Advanced analytics                     │\n│             │ • Custom branding                        │\n├─────────────┼──────────────────────────────────────────┤\n│ 💎 LIFETIME │ Rp 499,000 (one-time)                    │\n│             │ • All Pro features forever               │\n│             │ • Limited availability                   │\n└─────────────┴──────────────────────────────────────────┘\n\nWe're 71% cheaper than Zoom! 💰\n\nWhich plan interests you most?";
+    return "Oke nih gue kasih tau lengkapnya! 💰\n\n┌─────────────┬──────────────────────────────────────────┐\n│ Paket       │ Detail                                   │\n├─────────────┼──────────────────────────────────────────┤\n│ 🆓 GRATIS   │ Rp 0/bulan                               │\n│             │ • Limit 40 menit per meeting             │\n│             │ • Max 100 peserta                        │\n│             │ • Fitur basic aja                        │\n├─────────────┼──────────────────────────────────────────┤\n│ ⭐ PRO      │ Rp 69.000/bulan                          │\n│             │ • Meeting UNLIMITED (gak ada limit!)     │\n│             │ • AI Course Generator                    │\n│             │ • Live Sales CTA                         │\n│             │ • Studio Mode                            │\n├─────────────┼──────────────────────────────────────────┤\n│ 🚀 BUSINESS │ Rp 99.000/bulan                          │\n│             │ • Semua fitur Pro                        │\n│             │ • Max 300 peserta                        │\n│             │ • Analytics advanced                     │\n│             │ • Custom branding                        │\n├─────────────┼──────────────────────────────────────────┤\n│ 💎 1 TAHUN  │ Rp 499.000 (bayar sekali)                │\n│             │ • Semua fitur Pro selama 1 tahun penuh   │\n│             │ • Hemat 35% vs bayar bulanan!            │\n│             │ • Slot terbatas!                         │\n└─────────────┴──────────────────────────────────────────┘\n\nBandingkan sama Zoom:\n• Zoom Pro: Rp 240.000/bulan\n• Chaesa Pro: Rp 69.000/bulan\n• HEMAT: 71%! 🔥\n\nBelum lagi kita punya fitur AI & Live Commerce yang Zoom gak punya sama sekali!\n\nMau langsung coba? Atau mau tau lebih detail paket yang mana?";
   }
 
   // AI Features
   if (
     lowerMessage.includes("ai") ||
+    lowerMessage.includes("kursus") ||
     lowerMessage.includes("course") ||
     lowerMessage.includes("generate") ||
-    lowerMessage.includes("automation")
+    lowerMessage.includes("otomatis")
   ) {
-    return "Our AI Course Factory is like NotebookLM for video! 🤖✨\n\nHere's how it works:\n\n1. Record your meeting (any length)\n2. AI automatically chunks into 5-7 min modules\n3. Generates:\n   • PowerPoint slides 📊\n   • PDF ebooks & study guides 📖\n   • Quizzes with explanations ✅\n   • AI podcast (2-host conversation) 🎙️\n   • Social media clips (TikTok/Reels) 📱\n\nTime Saved: 90% (20 hours → 2 hours)\n\nWant to see a demo?";
+    return "Wah, ini nih fitur andalannya! AI Course Factory kita tuh kayak punya asisten pribadi yang jagoan editing. 🤖✨\n\nGini cara kerjanya:\n\n1. Lu rekam meeting (bebas berapa jam)\n2. AI langsung kerja, potong-potong jadi modul 5-7 menit\n3. Otomatis bikin:\n   • Slides PowerPoint 📊\n   • PDF ebook & study guide 📖\n   • Quiz + penjelasan jawaban ✅\n   • Podcast 2 host (kayak NotebookLM!) 🎙️\n   • Klip pendek buat TikTok/Reels 📱\n\nBiasanya kalau manual:\n• Download rekaman: 30 menit\n• Transcribe: 2 jam\n• Edit & potong: 5 jam\n• Bikin slides: 3 jam\n• Bikin quiz: 2 jam\nTOTAL: 12+ jam! 😵\n\nPake Chaesa AI:\n• Klik 1 tombol aja\n• Tunggu 15 menit\n• Beres! 🚀\n\nHEMAT: 90% waktu lu!\n\nGue jelasin lebih teknis atau mau langsung coba?";
   }
 
   // Studio Mode / OBS
@@ -306,78 +326,83 @@ function generateMockResponse(message: string): string {
     lowerMessage.includes("studio") ||
     lowerMessage.includes("obs") ||
     lowerMessage.includes("stream") ||
-    lowerMessage.includes("audio issue") ||
-    lowerMessage.includes("audio problem")
+    lowerMessage.includes("audio") ||
+    lowerMessage.includes("youtuber")
   ) {
-    return "Studio Mode is perfect for content creators! 🎬\n\nHow to use:\n\n1. Join your meeting\n2. Press Ctrl+Shift+U (or click Studio Mode button)\n3. All UI elements disappear (clean feed for OBS)\n4. Enable 'Original Sound' in Audio Settings\n5. Zero audio conflicts! 🎵\n\nPerfect for:\n• YouTubers & streamers\n• Podcast recordings\n• Professional broadcasts\n\nThis fixes the common 'robotic audio' issue with Zoom + OBS!\n\nNeed help setting it up?";
+    return "Nah ini nih fitur yang bikin para YouTuber & streamer seneng banget! 🎬\n\nJadi gini masalahnya:\n• Zoom + OBS = audio robotik, sering putus-putus\n• Google Meet = UI nya keliatan di stream, jelek\n• Setup ribet, bikin pusing\n\nChaesa Studio Mode solusinya:\n\n1. Join meeting kayak biasa\n2. Tekan Ctrl+Shift+U (atau klik tombol Studio Mode)\n3. BOOM! Semua UI langsung hilang (bersih buat OBS)\n4. Aktifin 'Original Sound' di Audio Settings\n5. Selesai! Audio jernih tanpa processing 🎵\n\nCocok buat:\n• Live streaming YouTube/Twitch\n• Recording podcast\n• Webinar profesional\n• Broadcast TV\n\nFitur teknis:\n• Bypass audio processing (raw audio)\n• Hide semua overlay & control\n• Shortcut keyboard biar cepet\n• Gak conflict sama audio mixer eksternal\n\nMau gue kasih tutorial lengkapnya? Atau ada masalah audio spesifik yang mau lu fix?";
   }
 
   // Live Sales CTA
   if (
     lowerMessage.includes("cta") ||
-    lowerMessage.includes("sell") ||
+    lowerMessage.includes("jual") ||
     lowerMessage.includes("sales") ||
-    lowerMessage.includes("monetize") ||
-    lowerMessage.includes("conversion")
+    lowerMessage.includes("monetisasi") ||
+    lowerMessage.includes("duit") ||
+    lowerMessage.includes("konversi")
   ) {
-    return "Live Sales CTA works like TikTok Shop for webinars! 💰\n\nHow it works:\n\n1. During your live webinar/demo\n2. Push 'Buy Now' button to ALL viewers' screens\n3. Add FOMO countdown timer ⏱️\n4. Direct to checkout page\n5. Real-time click tracking 📊\n\nResult: 3-5x higher conversion vs traditional 'link in chat'\n\nThis is PERFECT for:\n• Live product demos\n• Course launches\n• Webinar sales\n• E-commerce broadcasts\n\nWant to see how to set it up?";
+    return "Nah ini dia game changer buat yang jualan online! Live Sales CTA itu senjata rahasia buat naikin konversi 3-5x lipat. 💰🔥\n\nBayangin gini:\n\nCara Lama:\n❌ Lu webinar, kasih link di chat\n❌ Peserta males klik\n❌ Lupa begitu meeting selesai\n❌ Konversi cuma 1-2%\n\nPake Chaesa Live Sales CTA:\n✅ Lu demo produk live\n✅ Tekan tombol 'Push CTA'\n✅ Tombol 'BELI SEKARANG' muncul di layar SEMUA viewer!\n✅ Countdown timer bikin FOMO\n✅ Klik langsung ke checkout\n✅ Konversi naik jadi 5-8%! 🚀\n\nFitur lengkapnya:\n• Push CTA ke semua viewer sekaligus\n• Countdown timer (ciptain urgency)\n• Tracking real-time (berapa yang klik)\n• Customizable (warna, teks, posisi)\n• Direct checkout via Midtrans\n\nKayak TikTok Shop tapi lebih powerful karena:\n1. Lu bisa jelasin produk dulu (build trust)\n2. Live demo bikin lebih yakin\n3. Impulse buying pas lagi hot-hot nya!\n\nCocok banget buat:\n• Live product demo\n• Course launch webinar\n• E-commerce broadcast\n• Flash sale event\n\nMau setup sekarang atau mau tips biar konversinya maksimal?";
   }
 
   // Getting started
   if (
-    lowerMessage.includes("how to start") ||
+    lowerMessage.includes("cara mulai") ||
+    lowerMessage.includes("cara pakai") ||
     lowerMessage.includes("getting started") ||
-    lowerMessage.includes("first meeting") ||
-    lowerMessage.includes("create meeting") ||
-    lowerMessage.includes("cara mulai")
+    lowerMessage.includes("bikin meeting") ||
+    lowerMessage.includes("tutorial")
   ) {
-    return "Getting started is super easy! 🚀\n\nOption 1: Start New Meeting\n1. Click 'Start New Meeting' on homepage\n2. Meeting room opens instantly\n3. Share meeting code with participants\n\nOption 2: Join Existing Meeting\n1. Get meeting code from host\n2. Enter code on homepage\n3. Click 'Join Meeting'\n\nPro Tips:\n• Test your camera/mic before joining\n• Use Chrome/Edge for best experience\n• Enable Studio Mode if streaming to OBS\n\nReady to create your first meeting?";
+    return "Gampang banget kok kak! Gue bantuin step by step ya. 🚀\n\nAda 2 cara:\n\nCara 1: Bikin Meeting Baru\n1. Buka homepage Chaesa Live\n2. Klik 'Start New Meeting'\n3. Boom! Meeting room langsung kebuka\n4. Share kode meeting ke temen/peserta\n5. Mereka tinggal masukin kode → Join\n\nCara 2: Join Meeting yang Udah Ada\n1. Minta kode meeting dari host\n2. Masukin kode di homepage\n3. Klik 'Join Meeting'\n4. Selesai!\n\nTips Biar Lancar:\n• Test kamera & mic dulu sebelum meeting penting\n• Pake Chrome/Edge (paling stabil)\n• Internet minimal 5 Mbps\n• Kalau mau live streaming, aktifin Studio Mode\n\nButuh bantuan setup yang lain?\n• Cara record meeting?\n• Cara aktifin AI Course Generator?\n• Cara push CTA ke viewer?\n\nTinggal bilang aja, gue bantuin! 😊";
   }
 
   // Troubleshooting
   if (
-    lowerMessage.includes("not working") ||
+    lowerMessage.includes("gak bisa") ||
+    lowerMessage.includes("tidak bisa") ||
     lowerMessage.includes("error") ||
-    lowerMessage.includes("problem") ||
-    lowerMessage.includes("issue") ||
-    lowerMessage.includes("fix") ||
+    lowerMessage.includes("masalah") ||
+    lowerMessage.includes("rusak") ||
+    lowerMessage.includes("broken") ||
     lowerMessage.includes("help")
   ) {
-    return "I'm here to help troubleshoot! 🔧\n\nCommon issues & fixes:\n\nCamera not working:\n• Check browser permissions (allow camera access)\n• Try different browser (Chrome recommended)\n• Restart your device\n\nAudio issues:\n• Enable 'Original Sound' mode\n• Check microphone permissions\n• Disable other apps using mic\n\nConnection problems:\n• Check internet speed (minimum 5 Mbps)\n• Disable VPN temporarily\n• Try different network\n\nCan't generate course:\n• Ensure meeting was recorded\n• Wait 2-3 minutes for processing\n• Check subscription plan (Pro required)\n\nWhat specific issue are you facing?";
+    return "Waduh, ada kendala ya kak? Tenang, gue bantuin fix sekarang! 🔧\n\nIni solusi masalah yang paling sering:\n\nKamera Gak Muncul:\n• Cek permission browser (allow camera access)\n• Coba browser lain (Chrome paling oke)\n• Restart device lu\n• Cek antivirus (kadang block camera)\n\nMasalah Audio:\n• Aktifin 'Original Sound' mode\n• Cek permission microphone\n• Tutup app lain yang pake mic (Zoom, Discord, dll)\n• Kalau pake OBS: Enable Studio Mode\n• Test di meeting test dulu\n\nKoneksi Putus-Putus:\n• Cek speed internet (min 5 Mbps)\n• Matiin VPN sementara\n• Pindah ke WiFi yang lebih stabil\n• Kurangin jumlah tab browser\n\nAI Gak Bisa Generate Course:\n• Pastiin meeting udah di-record\n• Tunggu 2-3 menit buat processing\n• Cek paket lu (harus Pro/Business/1 Tahun)\n• Kalau masih error, screenshot & hubungi gue\n\nMasalah Spesifik Lu Apa?\nKasih tau detail errornya, gue cariin solusinya! 💪";
   }
 
   // Features comparison
   if (
     lowerMessage.includes("vs zoom") ||
+    lowerMessage.includes("banding") ||
     lowerMessage.includes("compare") ||
-    lowerMessage.includes("difference") ||
-    lowerMessage.includes("better than")
+    lowerMessage.includes("beda") ||
+    lowerMessage.includes("lebih bagus")
   ) {
-    return "Great question! Here's how we compare to Zoom:\n\nChaesa Live vs Zoom:\n\n┌──────────────────────┬──────────────┬──────────────┐\n│ Feature              │ Chaesa Live  │ Zoom         │\n├──────────────────────┼──────────────┼──────────────┤\n│ Price                │ Rp 69,000    │ Rp 240,000   │\n│ Savings              │ 71% cheaper  │ -            │\n│ AI Course Generator  │ ✅ Yes       │ ❌ No        │\n│ Live Sales CTA       │ ✅ Yes       │ ❌ No        │\n│ Studio Mode          │ ✅ Yes       │ ⚠️ Complex   │\n│ Original Sound       │ ✅ One click │ ⚠️ Complex   │\n│ Course Marketplace   │ ✅ 30% fee   │ ❌ No        │\n└──────────────────────┴──────────────┴──────────────┘\n\nWhat Zoom has:\n• Larger enterprise features\n• More integrations\n• Bigger brand recognition\n\nBest for: Creators, educators, live sellers, content creators\n\nMakes sense?";
+    return "Good question! Gue jelasin perbedaannya ya. 💪\n\nChaesa Live vs Zoom:\n\n┌──────────────────────┬──────────────┬──────────────┐\n│ Fitur                │ Chaesa Live  │ Zoom         │\n├──────────────────────┼──────────────┼──────────────┤\n│ Harga/bulan          │ Rp 69.000    │ Rp 240.000   │\n│ Hemat berapa?        │ 71% murah!   │ -            │\n│ AI Course Generator  │ ✅ Ada       │ ❌ Gak ada   │\n│ Live Sales CTA       │ ✅ Ada       │ ❌ Gak ada   │\n│ Studio Mode          │ ✅ Gampang   │ ⚠️ Ribet     │\n│ Original Sound       │ ✅ 1 klik    │ ⚠️ Setup lama│\n│ Course Marketplace   │ ✅ Komisi 30%│ ❌ Gak ada   │\n│ Micro-Learning       │ ✅ Built-in  │ ❌ Gak ada   │\n└──────────────────────┴──────────────┴──────────────┘\n\nYang Zoom Unggul:\n• Brand gede (lebih terkenal)\n• Integrasi enterprise lebih banyak\n• User base lebih luas\n\nYang Chaesa Unggul:\n• JAUH lebih murah (71%!)\n• Fitur AI content creation\n• Live commerce built-in\n• OBS-friendly tanpa ribet\n• Fokus ke kreator & educator\n\nKesimpulan:\nKalau lu:\n• Kreator konten → Chaesa 100%\n• Jualan online → Chaesa\n• Bikin kursus → Chaesa\n• YouTuber/Streamer → Chaesa\n• Butuh enterprise complex → Zoom\n\nIntinya: Chaesa = Zoom + AI + Live Commerce dengan harga 1/3 nya! 🔥\n\nMau coba langsung atau mau tau detail fitur lainnya?";
   }
 
   // Payment/billing
   if (
+    lowerMessage.includes("bayar") ||
     lowerMessage.includes("payment") ||
     lowerMessage.includes("billing") ||
-    lowerMessage.includes("pay") ||
-    lowerMessage.includes("card") ||
-    lowerMessage.includes("transfer")
+    lowerMessage.includes("transfer") ||
+    lowerMessage.includes("kartu kredit")
   ) {
-    return "We accept multiple payment methods! 💳\n\nAvailable options:\n• Credit/Debit Cards (Visa, Mastercard)\n• Bank Transfer (All major banks)\n• E-Wallets (GoPay, OVO, Dana)\n• QRIS Payment\n\nHow to subscribe:\n1. Choose your plan (Free, Pro, Business, Lifetime)\n2. Click 'Subscribe Now'\n3. Select payment method\n4. Complete payment\n5. Account upgraded instantly!\n\nSecure Payment:\n• Processed by Midtrans (certified secure)\n• No card details stored on our servers\n• 7-day money-back guarantee\n\nReady to upgrade?";
+    return "Oke gue jelasin cara bayarnya ya kak! 💳\n\nMetode Pembayaran:\n✅ Kartu Kredit/Debit (Visa, Mastercard, JCB)\n✅ Transfer Bank (Semua bank major Indonesia)\n✅ E-Wallet (GoPay, OVO, Dana, ShopeePay)\n✅ QRIS (Scan & bayar, gampang!)\n✅ Indomaret/Alfamart (bayar cash di toko)\n\nCara Langganan:\n1. Pilih paket (Gratis/Pro/Business/1 Tahun)\n2. Klik 'Subscribe Now'\n3. Pilih metode pembayaran\n4. Selesain pembayaran\n5. Akun langsung auto-upgrade! 🚀\n\nKeamanan:\n• Proses bayar pake Midtrans (certified secure)\n• Data kartu TIDAK disimpen di server kita\n• Enkripsi SSL/TLS\n• Garansi uang kembali 7 hari\n\nTips:\n• Paket 1 Tahun hemat 35% vs bayar bulanan!\n• Bisa cancel kapan aja (no penalty)\n• Invoice otomatis dikirim ke email\n• Reminder sebelum jatuh tempo\n\nAda pertanyaan soal billing atau mau langsung subscribe?";
   }
 
   // Contact/support
   if (
+    lowerMessage.includes("kontak") ||
+    lowerMessage.includes("hubungi") ||
     lowerMessage.includes("contact") ||
+    lowerMessage.includes("manusia") ||
     lowerMessage.includes("support") ||
-    lowerMessage.includes("human") ||
-    lowerMessage.includes("talk to") ||
-    lowerMessage.includes("speak to")
+    lowerMessage.includes("cs")
   ) {
-    return "I'd be happy to connect you with our support team! 👨‍💼\n\nSupport Options:\n\n📧 Email: support@chaesa.live\n   Response time: Within 24 hours\n\n💬 Live Chat: Available Mon-Fri, 9 AM - 5 PM WIB\n\n📱 Community: Join our Discord for peer support\n\nWould you like me to escalate your question to a human agent now?";
+    return "Siap kak! Gue hubungin ke tim support ya. 👨‍💼\n\nPilihan Support:\n\n📧 Email: support@chaesa.live\n⏰ Response: Max 24 jam (biasanya lebih cepet)\n📝 Cocok buat: Pertanyaan detail, komplain, bug report\n\n💬 Live Chat: Senin-Jumat, 09:00 - 17:00 WIB\n⚡ Response: Real-time (langsung bales)\n📝 Cocok buat: Masalah urgent, tutorial langsung\n\n📱 Discord Community: 24/7\n🤝 Response: Dari user lain & tim (varies)\n📝 Cocok buat: Diskusi tips, networking, tanya user lain\n\n🎥 Tutorial YouTube: Kapan aja\n📺 Free tutorial lengkap\n📝 Cocok buat: Belajar sendiri step-by-step\n\nMau gue escalate ke human agent sekarang?\nAtau ada yang bisa gue bantuin dulu? 😊";
   }
 
   // Default response with suggestions
-  return "I'd be happy to help! While I search for the best answer, here are some topics I can assist with:\n\n• About Chaesa Live - What we do & how we're different\n• Features - AI Course Factory, Live Sales CTA, Studio Mode\n• Pricing - Plans & billing\n• Getting Started - How to create/join meetings\n• Troubleshooting - Common issues & fixes\n• Technical Support - OBS setup, audio/video issues\n\nCould you tell me more about what you're looking for? Or feel free to ask any specific question! 😊";
+  return "Hmm, pertanyaan lu menarik nih! 🤔\n\nGue lagi cari jawaban yang paling pas buat lu. Sementara itu, ini beberapa hal yang sering ditanyain:\n\n🎯 Tentang Chaesa Live\n• Platform video meeting + AI content creator\n• Lebih murah 71% dari Zoom\n• Fitur live commerce built-in\n\n💰 Info Harga\n• Gratis: Basic features\n• Pro: Rp 69K/bulan (unlimited!)\n• 1 Tahun: Rp 499K (hemat 35%)\n\n🚀 Fitur Unggulan\n• AI Course Factory (auto-generate kursus)\n• Live Sales CTA (push CTA ke viewer)\n• Studio Mode (OBS-friendly)\n\n🔧 Bantuan Teknis\n• Tutorial setup meeting\n• Fix masalah audio/video\n• Tips & tricks biar maksimal\n\nMau tanya lebih spesifik yang mana? Atau gue jelasin dari awal? Santai aja, gue siap bantu! 💪";
 }
+]]></![CDATA[>
