@@ -13,12 +13,11 @@ export const chatbotService = {
   /**
    * Create a new conversation
    */
-  async createConversation(userId?: string, sessionId?: string): Promise<{ data: ChatConversation | null; error: any }> {
+  async createConversation(userId?: string) {
     const { data, error } = await supabase
       .from("chat_conversations")
       .insert({
-        user_id: userId || null,
-        session_id: sessionId || `anon_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+        user_id: userId || null, // Allow null for anonymous users
         status: "active",
       })
       .select()

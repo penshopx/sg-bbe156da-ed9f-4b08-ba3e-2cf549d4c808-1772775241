@@ -67,6 +67,7 @@ export function ChatWidget() {
       let currentConvId = conversationId;
       if (!currentConvId) {
         const { data: { session } } = await supabase.auth.getSession();
+        // Pass user ID if authenticated, null if anonymous
         const { data } = await chatbotService.createConversation(session?.user?.id);
         if (data) {
           currentConvId = data.id;
