@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Mic, MicOff, Video, VideoOff, Monitor, MonitorOff, 
-  PhoneOff, Users, MessageSquare, Copy, Check, Send, Circle
+  PhoneOff, Users, MessageSquare, Copy, Check, Send, Circle,
+  UserPlus, Mail, Link as LinkIcon, Share2
 } from "lucide-react";
 import { meetingService } from "@/services/meetingService";
 import { authService } from "@/services/authService";
@@ -32,7 +33,10 @@ export default function MeetingRoom() {
   const [newMessage, setNewMessage] = useState("");
   const [showChat, setShowChat] = useState(false);
   const [showParticipants, setShowParticipants] = useState(false);
+  const [showInvitePanel, setShowInvitePanel] = useState(false);
   const [hasCopied, setHasCopied] = useState(false);
+  const [inviteEmailInput, setInviteEmailInput] = useState("");
+  const [inviteLinkCopied, setInviteLinkCopied] = useState(false);
   const [isJoined, setIsJoined] = useState(false);
   const [joinName, setJoinName] = useState("");
   
@@ -411,6 +415,59 @@ export default function MeetingRoom() {
       title: "Copied!",
       description: "Meeting code copied to clipboard",
     });
+  };
+
+  const getMeetingLink = () => {
+    if (!meetingCode) return "";
+    const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
+    return `${baseUrl}/meeting/${meetingCode}`;
+  };
+
+  const safeCopyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+      return true;
+    }
+  };
+
+  const copyMeetingLink = async () => {
+    if (!meetingCode) return;
+    await safeCopyToClipboard(getMeetingLink());
+    setInviteLinkCopied(true);
+    toast({ title: "Link disalin!" });
+    setTimeout(() => setInviteLinkCopied(false), 2000);
+  };
+
+  const inviteViaWhatsApp = () => {
+    if (!meetingCode) return;
+    const text = `🎬 *Gabung Live Meeting di Chaesa Live!*\n\n🔗 Klik link berikut:\n${getMeetingLink()}\n\n📋 Kode Meeting: ${meetingCode}\n\nSampai jumpa di meeting! 🙌`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+  };
+
+  const inviteViaEmail = () => {
+    if (!inviteEmailInput.trim() || !meetingCode) return;
+    const subject = `Undangan Live Meeting - Chaesa Live`;
+    const body = `Halo!\n\nKamu diundang untuk bergabung di Live Meeting.\n\n🔗 Link: ${getMeetingLink()}\n📋 Kode Meeting: ${meetingCode}\n\nKlik link di atas untuk langsung bergabung.\n\nSampai jumpa!`;
+    window.open(`mailto:${inviteEmailInput}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+    setInviteEmailInput("");
+    toast({ title: "Email undangan disiapkan!" });
+  };
+
+  const copyInviteText = async () => {
+    if (!meetingCode) return;
+    const text = `🎬 Gabung Live Meeting di Chaesa Live!\n🔗 ${getMeetingLink()}\nKode: ${meetingCode}`;
+    await safeCopyToClipboard(text);
+    toast({ title: "Teks undangan disalin!" });
   };
 
   const startRecording = async () => {
@@ -1142,8 +1199,17 @@ export default function MeetingRoom() {
               <Button
                 variant="ghost"
                 size="icon"
+                className={cn("text-gray-400 hover:text-white hover:bg-gray-800", showInvitePanel && "bg-green-600 text-white")}
+                onClick={() => { setShowInvitePanel(!showInvitePanel); if (!showInvitePanel) { setShowChat(false); setShowParticipants(false); } }}
+                title="Undang Peserta"
+              >
+                <UserPlus className="w-5 h-5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
                 className={cn("text-gray-400 hover:text-white hover:bg-gray-800", showParticipants && "bg-gray-800 text-white")}
-                onClick={() => setShowParticipants(!showParticipants)}
+                onClick={() => { setShowParticipants(!showParticipants); if (!showParticipants) setShowInvitePanel(false); }}
               >
                 <Users className="w-5 h-5" />
               </Button>
@@ -1151,7 +1217,7 @@ export default function MeetingRoom() {
                 variant="ghost"
                 size="icon"
                 className={cn("text-gray-400 hover:text-white hover:bg-gray-800", showChat && "bg-gray-800 text-white")}
-                onClick={() => setShowChat(!showChat)}
+                onClick={() => { setShowChat(!showChat); if (!showChat) setShowInvitePanel(false); }}
               >
                 <MessageSquare className="w-5 h-5" />
               </Button>
@@ -1215,6 +1281,76 @@ export default function MeetingRoom() {
               ))}
             </div>
           </div>
+
+          {/* Invite Panel */}
+          {showInvitePanel && (
+            <div className="w-80 bg-gray-800 border-l border-gray-700 flex flex-col shrink-0 transition-all duration-300">
+              <div className="p-4 border-b border-gray-700 flex items-center justify-between">
+                <h3 className="text-white font-medium flex items-center gap-2">
+                  <UserPlus className="w-4 h-4 text-green-400" />
+                  Undang Peserta
+                </h3>
+                <Button size="sm" variant="ghost" onClick={() => setShowInvitePanel(false)} className="text-gray-400 hover:text-white h-8 w-8 p-0">
+                  ✕
+                </Button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 space-y-5">
+                <div>
+                  <label className="text-xs font-medium text-gray-400 mb-2 block uppercase tracking-wide">Link Meeting</label>
+                  <div className="flex items-center gap-2 p-2.5 bg-gray-900 rounded-lg border border-gray-700">
+                    <LinkIcon className="w-4 h-4 text-gray-500 shrink-0" />
+                    <span className="text-xs text-gray-300 truncate flex-1">{getMeetingLink()}</span>
+                    <Button size="sm" variant="ghost" onClick={copyMeetingLink} className="h-7 px-2 text-gray-400 hover:text-white">
+                      {inviteLinkCopied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    </Button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-medium text-gray-400 mb-2 block uppercase tracking-wide">Kode Meeting</label>
+                  <div className="flex items-center gap-2 p-2.5 bg-gray-900 rounded-lg border border-gray-700">
+                    <code className="text-sm text-green-400 font-mono flex-1">{meetingCode}</code>
+                    <Button size="sm" variant="ghost" onClick={copyMeetingCode} className="h-7 px-2 text-gray-400 hover:text-white">
+                      {hasCopied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-700 pt-4">
+                  <label className="text-xs font-medium text-gray-400 mb-2 block uppercase tracking-wide">Undang via Email</label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="email"
+                      placeholder="email@contoh.com"
+                      value={inviteEmailInput}
+                      onChange={(e) => setInviteEmailInput(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter" && inviteEmailInput.trim()) inviteViaEmail(); }}
+                      className="flex-1 bg-gray-900 border-gray-700 text-white placeholder:text-gray-500 text-sm h-9"
+                    />
+                    <Button size="sm" onClick={inviteViaEmail} disabled={!inviteEmailInput.trim()} className="bg-blue-600 hover:bg-blue-700 h-9 px-3">
+                      <Mail className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-700 pt-4 space-y-2">
+                  <label className="text-xs font-medium text-gray-400 mb-2 block uppercase tracking-wide">Bagikan</label>
+                  <Button variant="outline" size="sm" onClick={inviteViaWhatsApp} className="w-full justify-start border-gray-700 text-green-400 hover:bg-green-900/20 hover:border-green-700">
+                    <MessageSquare className="w-4 h-4 mr-2" /> Bagikan via WhatsApp
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={copyInviteText} className="w-full justify-start border-gray-700 text-gray-300 hover:bg-gray-700">
+                    <Copy className="w-4 h-4 mr-2" /> Salin Teks Undangan
+                  </Button>
+                </div>
+
+                <div className="bg-gray-900/50 rounded-lg p-3 border border-gray-700/50">
+                  <p className="text-xs text-gray-400 leading-relaxed">
+                    Peserta bisa langsung gabung lewat link atau masukkan kode meeting di halaman Chaesa Live.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Right Sidebar (Chat/Participants) */}
           {(showChat || showParticipants) && (

@@ -62,6 +62,12 @@ supabase/         - Supabase configuration
 - Status tracking: upcoming, live, ended
 - Linked from navbar on index page as "Jadwal Live"
 
+## Meeting Room
+- Page: `src/pages/meeting/[id].tsx` — Live meeting room with video/audio
+- In-meeting invite panel (Zoom-like): share link, copy meeting code, WhatsApp, email, copy invite text
+- Invite button (UserPlus icon) in toolbar, opens side panel while meeting is live
+- WebRTC-based video/audio, recording, reactions, polls, whiteboard, breakout rooms
+
 ## Notes
 - Supabase client handles missing env vars gracefully (warns instead of crashing)
 - Payment gateway: Mayar.id (sandbox: api.mayar.club, production: api.mayar.id)
