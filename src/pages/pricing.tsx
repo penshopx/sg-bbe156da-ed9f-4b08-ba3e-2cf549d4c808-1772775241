@@ -80,8 +80,8 @@ export default function PricingPage() {
           {
             id: "pro",
             name: "Pro",
-            price_monthly: 69000,
-            price_yearly: 690000,
+            price_monthly: 99000,
+            price_yearly: 990000,
             max_participants: 100,
             max_duration_minutes: null,
             features: [
@@ -97,8 +97,8 @@ export default function PricingPage() {
           {
             id: "business",
             name: "Business",
-            price_monthly: 149000,
-            price_yearly: 1490000,
+            price_monthly: 399000,
+            price_yearly: 3990000,
             max_participants: 300,
             max_duration_minutes: null,
             features: [
