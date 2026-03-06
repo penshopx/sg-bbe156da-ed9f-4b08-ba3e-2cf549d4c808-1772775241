@@ -138,7 +138,8 @@ export default function MeetingRoom() {
         }
 
         // 2. Get or create meeting
-        let { data: meeting, error } = await meetingService.getMeetingByCode(meetingCode);
+        const { data: existingMeeting, error } = await meetingService.getMeetingByCode(meetingCode);
+        let meeting = existingMeeting;
         
         if (error || !meeting) {
           console.log("Meeting not found, creating new one...");
