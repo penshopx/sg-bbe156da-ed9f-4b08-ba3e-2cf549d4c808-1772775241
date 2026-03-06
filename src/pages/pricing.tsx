@@ -48,7 +48,7 @@ export default function PricingPage() {
 
       const priceOverrides: Record<string, { monthly: number; yearly: number }> = {
         "Pro": { monthly: 99000, yearly: 990000 },
-        "Business": { monthly: 399000, yearly: 3990000 },
+        "Business": { monthly: 199000, yearly: 1990000 },
       };
       
       if (data && data.length > 0) {
@@ -106,8 +106,8 @@ export default function PricingPage() {
           {
             id: "business",
             name: "Business",
-            price_monthly: 399000,
-            price_yearly: 3990000,
+            price_monthly: 199000,
+            price_yearly: 1990000,
             max_participants: 300,
             max_duration_minutes: null,
             features: [
