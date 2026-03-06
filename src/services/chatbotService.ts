@@ -13,11 +13,15 @@ export const chatbotService = {
   /**
    * Create a new conversation
    */
-  async createConversation(userId?: string) {
+  async createConversation(userId?: string, sessionId?: string) {
+    // Generate a session ID if not provided
+    const sid = sessionId || crypto.randomUUID();
+    
     const { data, error } = await supabase
       .from("chat_conversations")
       .insert({
         user_id: userId || null, // Allow null for anonymous users
+        session_id: sid,
         status: "active",
       })
       .select()

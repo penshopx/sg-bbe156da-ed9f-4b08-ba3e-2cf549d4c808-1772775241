@@ -30,6 +30,16 @@ export function ChatWidget() {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Get or create a persistent session ID for guest users
+  const getSessionId = () => {
+    let sid = localStorage.getItem("chat_session_id");
+    if (!sid) {
+      sid = crypto.randomUUID();
+      localStorage.setItem("chat_session_id", sid);
+    }
+    return sid;
+  };
+
   useEffect(() => {
     // Auto-scroll to bottom
     if (scrollRef.current) {
@@ -67,8 +77,11 @@ export function ChatWidget() {
       let currentConvId = conversationId;
       if (!currentConvId) {
         const { data: { session } } = await supabase.auth.getSession();
+        const sessionId = getSessionId();
+        
         // Pass user ID if authenticated, null if anonymous
-        const { data } = await chatbotService.createConversation(session?.user?.id);
+        // Also pass the persistent session ID
+        const { data } = await chatbotService.createConversation(session?.user?.id, sessionId);
         if (data) {
           currentConvId = data.id;
           setConversationId(data.id);
