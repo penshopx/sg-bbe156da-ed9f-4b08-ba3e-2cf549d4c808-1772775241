@@ -244,5 +244,24 @@ export const meetingService = {
         (payload) => callback(payload.new)
       )
       .subscribe();
+  },
+
+  /**
+   * Get all meetings for the current user
+   */
+  async getUserMeetings() {
+    const { data: session } = await supabase.auth.getSession();
+    if (!session.session) return { data: [], error: null };
+
+    const { data, error } = await supabase
+      .from("meetings")
+      .select(`
+        *,
+        meeting_recordings (*)
+      `)
+      .eq("host_id", session.session.user.id)
+      .order("created_at", { ascending: false });
+
+    return { data, error };
   }
 };

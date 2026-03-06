@@ -2,12 +2,13 @@ import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Video, Users, Shield, Sparkles, ArrowRight } from "lucide-react";
+import { Video, Users, Shield, Sparkles, ArrowRight, Lock } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/router";
 import { meetingService } from "@/services/meetingService";
 import { authService } from "@/services/authService";
 import { useToast } from "@/hooks/use-toast";
+import Link from "next/link";
 
 export default function Home() {
   const router = useRouter();
@@ -252,6 +253,47 @@ export default function Home() {
           </div>
         </section>
 
+        {/* AI Course Factory Announcement Banner */}
+        <div className="max-w-6xl mx-auto mb-16">
+          <div className="bg-gradient-to-r from-purple-900/50 via-pink-900/50 to-orange-900/50 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <div className="flex-shrink-0">
+                <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center">
+                  <Sparkles className="w-10 h-10 text-white" />
+                </div>
+              </div>
+              <div className="flex-1 text-center md:text-left">
+                <h3 className="text-2xl font-bold text-white mb-2">
+                  🤖 AI Course Factory - NEW!
+                </h3>
+                <p className="text-gray-300 mb-4">
+                  Transform your meetings into complete course packages automatically! 
+                  Generate slides, eBooks, quizzes, and even NotebookLM-style podcasts with one click.
+                </p>
+                <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+                  <span className="px-3 py-1 bg-white/10 rounded-full text-sm text-white">
+                    📊 Auto-Slides
+                  </span>
+                  <span className="px-3 py-1 bg-white/10 rounded-full text-sm text-white">
+                    📚 eBook Generator
+                  </span>
+                  <span className="px-3 py-1 bg-white/10 rounded-full text-sm text-white">
+                    🎙️ AI Podcast
+                  </span>
+                  <span className="px-3 py-1 bg-white/10 rounded-full text-sm text-white">
+                    ✅ Quiz Maker
+                  </span>
+                </div>
+              </div>
+              <Link href="/ai-studio">
+                <Button size="lg" className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-black font-bold">
+                  Try AI Studio →
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+
         {/* Features Section */}
         <section className="container mx-auto px-4 py-20 border-t">
           <div className="max-w-6xl mx-auto">
@@ -294,6 +336,30 @@ export default function Home() {
                   Your meetings are encrypted and secure. We respect your privacy.
                 </p>
               </Card>
+
+              <div className="p-6 bg-white/5 rounded-xl backdrop-blur-sm border border-white/10 hover:bg-white/10 transition group">
+                <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-600 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                  <Lock className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-2">End-to-End Encryption</h3>
+                <p className="text-gray-300">Your meetings are secured with bank-grade encryption. Privacy guaranteed.</p>
+              </div>
+
+              <div className="p-6 bg-gradient-to-br from-purple-900/50 to-pink-900/50 rounded-xl backdrop-blur-sm border border-purple-400/30 hover:border-purple-400/60 transition group relative overflow-hidden">
+                <div className="absolute top-2 right-2">
+                  <span className="px-2 py-1 bg-yellow-400 text-black text-xs font-bold rounded-full">NEW</span>
+                </div>
+                <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                  <Sparkles className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-2">AI Course Factory</h3>
+                <p className="text-gray-300">Transform meetings into courses automatically! Generate slides, eBooks, quizzes, and AI podcasts.</p>
+                <Link href="/ai-studio" className="inline-block mt-3">
+                  <Button size="sm" variant="outline" className="border-purple-400 text-purple-300 hover:bg-purple-400/20">
+                    Learn More →
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </section>

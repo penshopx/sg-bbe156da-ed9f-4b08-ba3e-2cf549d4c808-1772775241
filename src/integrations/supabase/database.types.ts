@@ -15,6 +15,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_processing_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          error_message: string | null
+          id: string
+          input_data: Json | null
+          job_type: string
+          meeting_id: string | null
+          output_data: Json | null
+          recording_id: string | null
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          input_data?: Json | null
+          job_type: string
+          meeting_id?: string | null
+          output_data?: Json | null
+          recording_id?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          input_data?: Json | null
+          job_type?: string
+          meeting_id?: string | null
+          output_data?: Json | null
+          recording_id?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_processing_jobs_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_processing_jobs_recording_id_fkey"
+            columns: ["recording_id"]
+            isOneToOne: false
+            referencedRelation: "meeting_recordings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       breakout_assignments: {
         Row: {
           created_at: string | null
@@ -69,6 +129,114 @@ export type Database = {
             columns: ["meeting_id"]
             isOneToOne: false
             referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_templates: {
+        Row: {
+          config: Json
+          created_at: string | null
+          description: string | null
+          id: string
+          is_public: boolean | null
+          name: string
+          template_type: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          config: Json
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          name: string
+          template_type: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          config?: Json
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          name?: string
+          template_type?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      generated_content: {
+        Row: {
+          content_type: string
+          created_at: string | null
+          description: string | null
+          downloads_count: number | null
+          file_type: string | null
+          file_url: string | null
+          id: string
+          is_published: boolean | null
+          meeting_id: string | null
+          metadata: Json | null
+          processing_job_id: string | null
+          published_at: string | null
+          title: string
+          updated_at: string | null
+          user_id: string
+          views_count: number | null
+        }
+        Insert: {
+          content_type: string
+          created_at?: string | null
+          description?: string | null
+          downloads_count?: number | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          is_published?: boolean | null
+          meeting_id?: string | null
+          metadata?: Json | null
+          processing_job_id?: string | null
+          published_at?: string | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+          views_count?: number | null
+        }
+        Update: {
+          content_type?: string
+          created_at?: string | null
+          description?: string | null
+          downloads_count?: number | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          is_published?: boolean | null
+          meeting_id?: string | null
+          metadata?: Json | null
+          processing_job_id?: string | null
+          published_at?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+          views_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_content_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "generated_content_processing_job_id_fkey"
+            columns: ["processing_job_id"]
+            isOneToOne: false
+            referencedRelation: "ai_processing_jobs"
             referencedColumns: ["id"]
           },
         ]
@@ -301,6 +469,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "meeting_questions_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meeting_recordings: {
+        Row: {
+          created_at: string | null
+          duration: number | null
+          file_size: number | null
+          id: string
+          meeting_id: string
+          recording_url: string
+          status: string | null
+          title: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          duration?: number | null
+          file_size?: number | null
+          id?: string
+          meeting_id: string
+          recording_url: string
+          status?: string | null
+          title?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          duration?: number | null
+          file_size?: number | null
+          id?: string
+          meeting_id?: string
+          recording_url?: string
+          status?: string | null
+          title?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_recordings_meeting_id_fkey"
             columns: ["meeting_id"]
             isOneToOne: false
             referencedRelation: "meetings"
@@ -709,7 +921,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment_downloads: { Args: { content_id: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
