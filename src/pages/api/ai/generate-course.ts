@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import { requireSubscription } from "@/middleware/subscriptionMiddleware";
 import { supabase } from "@/integrations/supabase/client";
 
 /**
@@ -22,23 +23,33 @@ export default async function handler(
   }
 
   try {
-    const { meetingId, recordingId, contentTypes } = req.body;
-
-    if (!meetingId) {
-      return res.status(400).json({ error: "Meeting ID required" });
-    }
-
-    // Validate user session
+    // Get user session
     const authHeader = req.headers.authorization;
     if (!authHeader) {
-      return res.status(401).json({ error: "Unauthorized" });
+      return res.status(401).json({ error: "Unauthorized - No token provided" });
     }
 
     const token = authHeader.replace("Bearer ", "");
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
 
     if (authError || !user) {
-      return res.status(401).json({ error: "Invalid token" });
+      return res.status(401).json({ error: "Unauthorized - Invalid token" });
+    }
+
+    // Check subscription
+    const subscriptionCheck = await requireSubscription(user.id, "pro");
+    if (!subscriptionCheck.allowed) {
+      return res.status(403).json({
+        error: "Subscription Required",
+        message: subscriptionCheck.message,
+        upgradeUrl: "/pricing",
+      });
+    }
+
+    const { meetingId, recordingId, contentTypes } = req.body;
+
+    if (!meetingId) {
+      return res.status(400).json({ error: "Meeting ID required" });
     }
 
     // Get meeting recording data
