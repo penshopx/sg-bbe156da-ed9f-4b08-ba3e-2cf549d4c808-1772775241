@@ -104,9 +104,8 @@ export default async function handler(
     const metadata = transactionData.metadata as TransactionMetadata;
 
     // Update transaction status
-    // @ts-expect-error - Supabase JSONB type inference causes deep instantiation error
-    const { error: updateError } = await supabase
-      .from("payment_transactions")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: updateError } = await (supabase.from("payment_transactions") as any)
       .update({
         status: finalStatus,
         payment_method: payment_type,

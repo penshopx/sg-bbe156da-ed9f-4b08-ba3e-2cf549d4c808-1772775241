@@ -86,44 +86,44 @@ export default function PricingPage() {
             price_monthly: 0,
             price_yearly: 0,
             max_participants: 100,
-            max_duration_minutes: 40,
+            max_duration_minutes: 45,
             features: [
               "Up to 100 participants",
-              "40 mins group meetings",
-              "Unlimited 1-on-1 meetings",
-              "Screen sharing",
-              "Chat & Reactions"
+              "45 mins group meetings",
+              "Unlimited 1-on-1",
+              "Basic Sales Tools",
+              "Screen sharing"
             ]
           },
           {
             id: "pro",
             name: "Pro",
-            price_monthly: 149000,
-            price_yearly: 1490000,
+            price_monthly: 69000,
+            price_yearly: 690000,
             max_participants: 100,
             max_duration_minutes: null,
             features: [
               "Everything in Free",
-              "Unlimited meeting duration",
-              "5GB Cloud Storage",
-              "Cloud Recording",
-              "Breakout Rooms",
-              "Polls & Whiteboard",
+              "Unlimited duration",
+              "Push Sales CTA (Live Shopping)",
+              "Live Streaming to Social Media",
+              "5GB Cloud Recording",
+              "AI Meeting Summary",
               "Priority Support"
             ]
           },
           {
             id: "business",
             name: "Business",
-            price_monthly: 199000,
-            price_yearly: 1990000,
+            price_monthly: 149000,
+            price_yearly: 1490000,
             max_participants: 300,
             max_duration_minutes: null,
             features: [
               "Everything in Pro",
               "Up to 300 participants",
-              "10GB Cloud Storage",
-              "Custom Branding",
+              "20GB Cloud Storage",
+              "White-label Branding",
               "Advanced Analytics",
               "API Access",
               "SSO Integration"
