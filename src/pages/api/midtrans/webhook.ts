@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { supabase } from "@/integrations/supabase/client";
 import crypto from "crypto";
 
+/* eslint-disable @typescript-eslint/no-require-imports */
 const midtransClient = require("midtrans-client");
 
 // Initialize API client for verification

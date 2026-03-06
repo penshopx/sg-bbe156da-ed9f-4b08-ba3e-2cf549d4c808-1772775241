@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { supabase } from "@/integrations/supabase/client";
 
+/* eslint-disable @typescript-eslint/no-require-imports */
 const midtransClient = require("midtrans-client");
 
 // Initialize Snap API client
