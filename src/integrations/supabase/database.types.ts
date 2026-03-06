@@ -128,9 +128,13 @@ export type Database = {
       }
       meeting_ctas: {
         Row: {
+          button_color: string | null
           button_text: string
+          clicks_count: number | null
           created_at: string | null
           creator_id: string
+          description: string | null
+          duration_seconds: number | null
           id: string
           is_active: boolean | null
           link_url: string
@@ -139,9 +143,13 @@ export type Database = {
           title: string
         }
         Insert: {
+          button_color?: string | null
           button_text: string
+          clicks_count?: number | null
           created_at?: string | null
           creator_id: string
+          description?: string | null
+          duration_seconds?: number | null
           id?: string
           is_active?: boolean | null
           link_url: string
@@ -150,9 +158,13 @@ export type Database = {
           title: string
         }
         Update: {
+          button_color?: string | null
           button_text?: string
+          clicks_count?: number | null
           created_at?: string | null
           creator_id?: string
+          description?: string | null
+          duration_seconds?: number | null
           id?: string
           is_active?: boolean | null
           link_url?: string
@@ -296,8 +308,53 @@ export type Database = {
           },
         ]
       }
+      meeting_recordings_processing: {
+        Row: {
+          chapters: Json | null
+          created_at: string | null
+          generated_summary: string | null
+          generated_title: string | null
+          id: string
+          meeting_id: string
+          quiz_questions: Json | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          chapters?: Json | null
+          created_at?: string | null
+          generated_summary?: string | null
+          generated_title?: string | null
+          id?: string
+          meeting_id: string
+          quiz_questions?: Json | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          chapters?: Json | null
+          created_at?: string | null
+          generated_summary?: string | null
+          generated_title?: string | null
+          id?: string
+          meeting_id?: string
+          quiz_questions?: Json | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_recordings_processing_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       meetings: {
         Row: {
+          allow_high_quality_audio: boolean | null
           created_at: string | null
           ended_at: string | null
           host_id: string | null
@@ -308,6 +365,7 @@ export type Database = {
           title: string | null
         }
         Insert: {
+          allow_high_quality_audio?: boolean | null
           created_at?: string | null
           ended_at?: string | null
           host_id?: string | null
@@ -318,6 +376,7 @@ export type Database = {
           title?: string | null
         }
         Update: {
+          allow_high_quality_audio?: boolean | null
           created_at?: string | null
           ended_at?: string | null
           host_id?: string | null

@@ -11,6 +11,7 @@ import {
 import { meetingService } from "@/services/meetingService";
 import { authService } from "@/services/authService";
 import { subscriptionService } from "@/services/subscriptionService";
+import { ctaService } from "@/services/ctaService";
 import { useWebRTC } from "@/hooks/useWebRTC";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -62,6 +63,16 @@ export default function MeetingRoom() {
   const [currentCaption, setCurrentCaption] = useState("");
   const [showBreakoutRooms, setShowBreakoutRooms] = useState(false);
   const [showQA, setShowQA] = useState(false);
+
+  // Live Sales CTA states
+  const [showCTAPanel, setShowCTAPanel] = useState(false);
+  const [showCTAForm, setShowCTAForm] = useState(false);
+  const [activeCTA, setActiveCTA] = useState<any>(null);
+  const [ctaList, setCtaList] = useState<any[]>([]);
+  
+  // Studio Mode states
+  const [isStudioMode, setIsStudioMode] = useState(false);
+  const [isOriginalSound, setIsOriginalSound] = useState(false);
 
   // Meeting limits and monetization
   const [meetingLimits, setMeetingLimits] = useState<{
@@ -198,6 +209,29 @@ export default function MeetingRoom() {
       setMessages(prev => [...prev, message]);
     });
 
+    // Subscribe to Live Sales CTA
+    const ctaSub = ctaService.subscribeToMeetingCTAs(
+      meetingId,
+      (cta) => {
+        setActiveCTA(cta);
+        toast({
+          title: "🛍️ Special Offer!",
+          description: cta.title,
+          duration: cta.duration_seconds ? cta.duration_seconds * 1000 : 30000,
+        });
+        
+        // Auto-hide after duration
+        if (cta.duration_seconds) {
+          setTimeout(() => {
+            setActiveCTA(null);
+          }, cta.duration_seconds * 1000);
+        }
+      },
+      () => {
+        setActiveCTA(null);
+      }
+    );
+
     // Initial load
     loadParticipants();
     loadMessages();
@@ -206,6 +240,7 @@ export default function MeetingRoom() {
       participantsSub.unsubscribe();
       signalsSub.unsubscribe();
       chatSub.unsubscribe();
+      ctaSub.unsubscribe();
       cleanup();
       meetingService.leaveMeeting(meetingId, currentUser.id);
     };
@@ -221,6 +256,50 @@ export default function MeetingRoom() {
     if (!meetingId) return;
     const { data } = await meetingService.getChatMessages(meetingId);
     if (data) setMessages(data);
+  };
+
+  // Toggle Studio Mode (Hide all UI for clean OBS capture)
+  const toggleStudioMode = () => {
+    setIsStudioMode(!isStudioMode);
+    toast({
+      title: isStudioMode ? "Studio Mode Off" : "Studio Mode On",
+      description: isStudioMode 
+        ? "UI controls restored" 
+        : "Clean layout for streaming. Press Ctrl+Shift+S to toggle",
+    });
+  };
+
+  // Toggle Original Sound (Disable audio processing for OBS/Music)
+  const toggleOriginalSound = () => {
+    setIsOriginalSound(!isOriginalSound);
+    
+    // Apply audio constraints
+    if (localStream) {
+      const audioTrack = localStream.getAudioTracks()[0];
+      if (audioTrack) {
+        audioTrack.applyConstraints({
+          echoCancellation: !isOriginalSound,
+          noiseSuppression: !isOriginalSound,
+          autoGainControl: !isOriginalSound,
+        });
+      }
+    }
+    
+    toast({
+      title: isOriginalSound ? "Original Sound Off" : "Original Sound On",
+      description: isOriginalSound 
+        ? "Audio processing enabled (better for voice)" 
+        : "Audio processing disabled (better for music/OBS)",
+    });
+  };
+
+  // Handle CTA click
+  const handleCTAClick = async (ctaId: string) => {
+    await ctaService.recordClick(ctaId);
+    
+    if (activeCTA?.link_url) {
+      window.open(activeCTA.link_url, "_blank");
+    }
   };
 
   const handleJoin = async () => {
@@ -527,6 +606,11 @@ export default function MeetingRoom() {
         e.preventDefault();
         setShowParticipants(prev => !prev);
       }
+      // Ctrl/Cmd + Shift + S: Toggle Studio Mode
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "S") {
+        e.preventDefault();
+        toggleStudioMode();
+      }
       // ?: Show keyboard shortcuts
       if (e.key === "?" && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
@@ -760,192 +844,233 @@ export default function MeetingRoom() {
       <SEO title="Meeting Room - Chaesa Live" />
       <div className="h-screen bg-gray-900 flex flex-col overflow-hidden">
         {/* Top Bar */}
-        <div className="h-16 bg-gray-800/50 backdrop-blur border-b border-gray-700 flex items-center justify-between px-6 shrink-0">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-800 rounded-lg border border-gray-700">
-              <span className="text-white font-medium">{meetingCode}</span>
-              <button onClick={copyMeetingCode} className="text-gray-400 hover:text-white transition-colors">
-                {hasCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-              </button>
-            </div>
-            {isRecording && (
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-red-600/20 rounded-lg border border-red-600/50 animate-pulse">
-                <Circle className="w-3 h-3 fill-red-500 text-red-500" />
-                <span className="text-red-400 font-medium text-sm">
-                  REC {formatRecordingDuration(recordingDuration)}
-                </span>
+        {!isStudioMode && (
+          <div className="h-16 bg-gray-800/50 backdrop-blur border-b border-gray-700 flex items-center justify-between px-6 shrink-0">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-800 rounded-lg border border-gray-700">
+                <span className="text-white font-medium">{meetingCode}</span>
+                <button onClick={copyMeetingCode} className="text-gray-400 hover:text-white transition-colors">
+                  {hasCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                </button>
               </div>
-            )}
-            {meetingLimits && !meetingLimits.isPro && meetingLimits.timeRemaining !== undefined && (
-              <div className={cn(
-                "flex items-center gap-2 px-3 py-1.5 rounded-lg border",
-                meetingLimits.timeRemaining <= 10 
+              {isRecording && (
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-red-600/20 rounded-lg border border-red-600/50 animate-pulse">
+                  <Circle className="w-3 h-3 fill-red-500 text-red-500" />
+                  <span className="text-red-400 font-medium text-sm">
+                    REC {formatRecordingDuration(recordingDuration)}
+                  </span>
+                </div>
+              )}
+              {meetingLimits && !meetingLimits.isPro && meetingLimits.timeRemaining !== undefined && (
+                <div className={cn(
+                  "flex items-center gap-2 px-3 py-1.5 rounded-lg border",
+                  meetingLimits.timeRemaining <= 10 
                   ? "bg-red-600/20 border-red-600/50 animate-pulse" 
                   : meetingLimits.timeRemaining <= 20
                   ? "bg-yellow-600/20 border-yellow-600/50"
                   : "bg-blue-600/20 border-blue-600/50"
-              )}>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M12 6v6l4 2" />
-                </svg>
-                <span className={cn(
-                  "font-medium text-sm",
-                  meetingLimits.timeRemaining <= 10 
+                )}>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 6v6l4 2" />
+                  </svg>
+                  <span className={cn(
+                    "font-medium text-sm",
+                    meetingLimits.timeRemaining <= 10 
                     ? "text-red-400" 
                     : meetingLimits.timeRemaining <= 20
                     ? "text-yellow-400"
                     : "text-blue-400"
-                )}>
-                  {Math.ceil(meetingLimits.timeRemaining)} min left (Free)
-                </span>
-              </div>
-            )}
-            <span className="text-gray-400 text-sm hidden sm:inline">
-              {participants.length} participant{participants.length !== 1 && "s"}
-            </span>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            {/* View Mode Toggle */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-gray-400 hover:text-white hover:bg-gray-800"
-              onClick={toggleViewMode}
-              title={`Switch to ${viewMode === "grid" ? "speaker" : "grid"} view`}
-            >
-              {viewMode === "grid" ? (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <rect x="3" y="3" width="7" height="7" rx="1" />
-                  <rect x="14" y="3" width="7" height="7" rx="1" />
-                  <rect x="3" y="14" width="7" height="7" rx="1" />
-                  <rect x="14" y="14" width="7" height="7" rx="1" />
-                </svg>
-              ) : (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <rect x="3" y="3" width="18" height="13" rx="1" />
-                  <rect x="3" y="18" width="5" height="3" rx="1" />
-                  <rect x="10" y="18" width="5" height="3" rx="1" />
-                  <rect x="17" y="18" width="4" height="3" rx="1" />
-                </svg>
+                  )}>
+                    {Math.ceil(meetingLimits.timeRemaining)} min left (Free)
+                  </span>
+                </div>
               )}
-            </Button>
-
-            {/* Meeting Lock Toggle (Host) */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className={cn("text-gray-400 hover:text-white hover:bg-gray-800", meetingLocked && "text-red-400")}
-              onClick={toggleMeetingLock}
-              title={meetingLocked ? "Unlock meeting" : "Lock meeting"}
-            >
-              {meetingLocked ? (
+              <span className="text-gray-400 text-sm hidden sm:inline">
+                {participants.length} participant{participants.length !== 1 && "s"}
+              </span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              {/* Studio Mode Toggle (for Content Creators) */}
+              <Button
+                variant={isStudioMode ? "default" : "ghost"}
+                size="icon"
+                className={cn("text-gray-400 hover:text-white hover:bg-gray-800", isStudioMode && "bg-purple-600 text-white")}
+                onClick={toggleStudioMode}
+                title="Studio Mode (Hide UI for OBS)"
+              >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <rect x="5" y="11" width="14" height="10" rx="2" />
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  <rect x="2" y="3" width="20" height="14" rx="2" />
+                  <path d="M8 21h8M12 17v4" />
                 </svg>
-              ) : (
+              </Button>
+
+              {/* Original Sound Toggle (for Musicians/Podcasters) */}
+              <Button
+                variant={isOriginalSound ? "default" : "ghost"}
+                size="icon"
+                className={cn("text-gray-400 hover:text-white hover:bg-gray-800", isOriginalSound && "bg-blue-600 text-white")}
+                onClick={toggleOriginalSound}
+                title="Original Sound (Disable audio processing)"
+              >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <rect x="5" y="11" width="14" height="10" rx="2" />
-                  <path d="M7 11V7a5 5 0 0 1 9 0" />
-                  <path d="M16 7h.01" />
+                  <path d="M9 18V5l12-2v13M9 9l12-2M9 18c0 1.657-1.343 3-3 3s-3-1.343-3-3 1.343-3 3-3 3 1.343 3 3z" />
                 </svg>
-              )}
-            </Button>
+              </Button>
 
-            {/* Keyboard Shortcuts Help */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-gray-400 hover:text-white hover:bg-gray-800"
-              onClick={() => setShowKeyboardShortcuts(true)}
-              title="Keyboard shortcuts (?)"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="2" y="6" width="20" height="12" rx="2" />
-                <path d="M6 10h4M14 10h4M6 14h12" />
-              </svg>
-            </Button>
+              {/* Live Sales CTA Panel (for E-commerce/Digital Marketing) */}
+              <Button
+                variant={showCTAPanel ? "default" : "ghost"}
+                size="icon"
+                className={cn("text-gray-400 hover:text-white hover:bg-gray-800", showCTAPanel && "bg-green-600 text-white")}
+                onClick={() => setShowCTAPanel(!showCTAPanel)}
+                title="Live Sales CTA"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </Button>
 
-            <div className="w-px h-8 bg-gray-700 mx-2" />
+              <div className="w-px h-8 bg-gray-700 mx-2" />
 
-            {/* Polls */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className={cn("text-gray-400 hover:text-white hover:bg-gray-800", showPolls && "bg-gray-800 text-white")}
-              onClick={() => setShowPolls(!showPolls)}
-              title="Polls"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M3 13h4v8H3zM10 3h4v18h-4zM17 8h4v13h-4z" />
-              </svg>
-            </Button>
+              {/* View Mode Toggle */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-gray-400 hover:text-white hover:bg-gray-800"
+                onClick={toggleViewMode}
+                title={`Switch to ${viewMode === "grid" ? "speaker" : "grid"} view`}
+              >
+                {viewMode === "grid" ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="7" height="7" rx="1" />
+                    <rect x="14" y="3" width="7" height="7" rx="1" />
+                    <rect x="3" y="14" width="7" height="7" rx="1" />
+                    <rect x="14" y="14" width="7" height="7" rx="1" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <path d="M9 9l3 3-3 3M14 12h-3" />
+                  </svg>
+                )}
+              </Button>
 
-            {/* Whiteboard */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className={cn("text-gray-400 hover:text-white hover:bg-gray-800", showWhiteboard && "bg-gray-800 text-white")}
-              onClick={() => setShowWhiteboard(!showWhiteboard)}
-              title="Whiteboard"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-                <path d="M9 9l3 3-3 3M14 12h-3" />
-              </svg>
-            </Button>
+              {/* Meeting Lock Toggle (Host) */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className={cn("text-gray-400 hover:text-white hover:bg-gray-800", meetingLocked && "text-red-400")}
+                onClick={toggleMeetingLock}
+                title={meetingLocked ? "Unlock meeting" : "Lock meeting"}
+              >
+                {meetingLocked ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <rect x="5" y="11" width="14" height="10" rx="2" />
+                    <path d="M7 11V7a5 5 0 0 1 9 0" />
+                    <path d="M16 7h.01" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <rect x="5" y="11" width="14" height="10" rx="2" />
+                    <path d="M7 11V7a5 5 0 0 1 9 0" />
+                    <path d="M16 7h.01" />
+                  </svg>
+                )}
+              </Button>
 
-            {/* Breakout Rooms */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className={cn("text-gray-400 hover:text-white hover:bg-gray-800", showBreakoutRooms && "bg-gray-800 text-white")}
-              onClick={() => setShowBreakoutRooms(!showBreakoutRooms)}
-              title="Breakout Rooms"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M23 21v-2a4 4 0 0 1 0-7.75" />
-              </svg>
-            </Button>
+              {/* Keyboard Shortcuts Help */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-gray-400 hover:text-white hover:bg-gray-800"
+                onClick={() => setShowKeyboardShortcuts(true)}
+                title="Keyboard shortcuts (?)"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <rect x="2" y="6" width="20" height="12" rx="2" />
+                  <path d="M6 10h4M14 10h4M6 14h12" />
+                </svg>
+              </Button>
 
-            {/* Q&A */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className={cn("text-gray-400 hover:text-white hover:bg-gray-800", showQA && "bg-gray-800 text-white")}
-              onClick={() => setShowQA(!showQA)}
-              title="Q&A"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" />
-              </svg>
-            </Button>
+              <div className="w-px h-8 bg-gray-700 mx-2" />
 
-            <div className="w-px h-8 bg-gray-700 mx-2" />
+              {/* Polls */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className={cn("text-gray-400 hover:text-white hover:bg-gray-800", showPolls && "bg-gray-800 text-white")}
+                onClick={() => setShowPolls(!showPolls)}
+                title="Polls"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M3 13h4v8H3zM10 3h4v18h-4zM17 8h4v13h-4z" />
+                </svg>
+              </Button>
 
-            <Button
-              variant="ghost"
-              size="icon"
-              className={cn("text-gray-400 hover:text-white hover:bg-gray-800", showParticipants && "bg-gray-800 text-white")}
-              onClick={() => setShowParticipants(!showParticipants)}
-            >
-              <Users className="w-5 h-5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className={cn("text-gray-400 hover:text-white hover:bg-gray-800", showChat && "bg-gray-800 text-white")}
-              onClick={() => setShowChat(!showChat)}
-            >
-              <MessageSquare className="w-5 h-5" />
-            </Button>
+              {/* Whiteboard */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className={cn("text-gray-400 hover:text-white hover:bg-gray-800", showWhiteboard && "bg-gray-800 text-white")}
+                onClick={() => setShowWhiteboard(!showWhiteboard)}
+                title="Whiteboard"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <path d="M9 9l3 3-3 3M14 12h-3" />
+                </svg>
+              </Button>
+
+              {/* Breakout Rooms */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className={cn("text-gray-400 hover:text-white hover:bg-gray-800", showBreakoutRooms && "bg-gray-800 text-white")}
+                onClick={() => setShowBreakoutRooms(!showBreakoutRooms)}
+                title="Breakout Rooms"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                </svg>
+              </Button>
+
+              {/* Q&A */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className={cn("text-gray-400 hover:text-white hover:bg-gray-800", showQA && "bg-gray-800 text-white")}
+                onClick={() => setShowQA(!showQA)}
+                title="Q&A"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" />
+                </svg>
+              </Button>
+
+              <div className="w-px h-8 bg-gray-700 mx-2" />
+
+              <Button
+                variant="ghost"
+                size="icon"
+                className={cn("text-gray-400 hover:text-white hover:bg-gray-800", showParticipants && "bg-gray-800 text-white")}
+                onClick={() => setShowParticipants(!showParticipants)}
+              >
+                <Users className="w-5 h-5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className={cn("text-gray-400 hover:text-white hover:bg-gray-800", showChat && "bg-gray-800 text-white")}
+                onClick={() => setShowChat(!showChat)}
+              >
+                <MessageSquare className="w-5 h-5" />
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Main Content */}
         <div className="flex-1 flex overflow-hidden">
@@ -1308,115 +1433,117 @@ export default function MeetingRoom() {
         )}
 
         {/* Bottom Controls */}
-        <div className="h-20 bg-gray-800 border-t border-gray-700 flex items-center justify-center gap-4 shrink-0 px-4">
-          <Button
-            variant={isMicOn ? "secondary" : "destructive"}
-            size="lg"
-            className="rounded-full w-12 h-12 p-0"
-            onClick={toggleMic}
-          >
-            {isMicOn ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
-          </Button>
-          
-          <Button
-            variant={isCameraOn ? "secondary" : "destructive"}
-            size="lg"
-            className="rounded-full w-12 h-12 p-0"
-            onClick={toggleCamera}
-          >
-            {isCameraOn ? <Video className="w-5 h-5" /> : <VideoOff className="w-5 h-5" />}
-          </Button>
+        {!isStudioMode && (
+          <div className="h-20 bg-gray-800 border-t border-gray-700 flex items-center justify-center gap-4 shrink-0 px-4">
+            <Button
+              variant={isMicOn ? "secondary" : "destructive"}
+              size="lg"
+              className="rounded-full w-12 h-12 p-0"
+              onClick={toggleMic}
+            >
+              {isMicOn ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
+            </Button>
+            
+            <Button
+              variant={isCameraOn ? "secondary" : "destructive"}
+              size="lg"
+              className="rounded-full w-12 h-12 p-0"
+              onClick={toggleCamera}
+            >
+              {isCameraOn ? <Video className="w-5 h-5" /> : <VideoOff className="w-5 h-5" />}
+            </Button>
 
-          <Button
-            variant={isScreenSharing ? "destructive" : "secondary"}
-            size="lg"
-            className="rounded-full w-12 h-12 p-0"
-            onClick={isScreenSharing ? stopScreenShare : startScreenShare}
-          >
-            {isScreenSharing ? <MonitorOff className="w-5 h-5" /> : <Monitor className="w-5 h-5" />}
-          </Button>
+            <Button
+              variant={isScreenSharing ? "destructive" : "secondary"}
+              size="lg"
+              className="rounded-full w-12 h-12 p-0"
+              onClick={isScreenSharing ? stopScreenShare : startScreenShare}
+            >
+              {isScreenSharing ? <MonitorOff className="w-5 h-5" /> : <Monitor className="w-5 h-5" />}
+            </Button>
 
-          <div className="w-px h-8 bg-gray-700 mx-2" />
+            <div className="w-px h-8 bg-gray-700 mx-2" />
 
-          {/* Hand Raise */}
-          <Button
-            variant={isHandRaised ? "default" : "secondary"}
-            size="lg"
-            className={cn("rounded-full w-12 h-12 p-0", isHandRaised && "bg-yellow-500 hover:bg-yellow-600")}
-            onClick={toggleHandRaise}
-            title="Raise hand (Ctrl+Shift+H)"
-          >
-            <span className="text-xl">✋</span>
-          </Button>
+            {/* Hand Raise */}
+            <Button
+              variant={isHandRaised ? "default" : "secondary"}
+              size="lg"
+              className={cn("rounded-full w-12 h-12 p-0", isHandRaised && "bg-yellow-500 hover:bg-yellow-600")}
+              onClick={toggleHandRaise}
+              title="Raise hand (Ctrl+Shift+H)"
+            >
+              <span className="text-xl">✋</span>
+            </Button>
 
-          {/* Reactions Menu */}
-          <div className="relative">
+            {/* Reactions Menu */}
+            <div className="relative">
+              <Button
+                variant="secondary"
+                size="lg"
+                className="rounded-full w-12 h-12 p-0"
+                onClick={() => setShowReactionsMenu(!showReactionsMenu)}
+                title="Send reaction"
+              >
+                <span className="text-xl">😊</span>
+              </Button>
+              
+              {showReactionsMenu && (
+                <div className="absolute bottom-16 left-0 bg-gray-800 border border-gray-700 rounded-xl p-2 flex gap-2 shadow-xl">
+                  {["👍", "❤️", "😂", "👏", "🎉", "🤔", "👋", "🔥"].map((emoji) => (
+                    <button
+                      key={emoji}
+                      onClick={() => sendReaction(emoji)}
+                      className="text-2xl hover:scale-125 transition-transform p-2 hover:bg-gray-700 rounded-lg"
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Picture-in-Picture */}
             <Button
               variant="secondary"
               size="lg"
               className="rounded-full w-12 h-12 p-0"
-              onClick={() => setShowReactionsMenu(!showReactionsMenu)}
-              title="Send reaction"
+              onClick={enterPipMode}
+              title="Picture-in-Picture"
             >
-              <span className="text-xl">😊</span>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <rect x="2" y="3" width="20" height="14" rx="2" />
+                <path d="M8 21h8M12 17v4" />
+              </svg>
             </Button>
-            
-            {showReactionsMenu && (
-              <div className="absolute bottom-16 left-0 bg-gray-800 border border-gray-700 rounded-xl p-2 flex gap-2 shadow-xl">
-                {["👍", "❤️", "😂", "👏", "🎉", "🤔", "👋", "🔥"].map((emoji) => (
-                  <button
-                    key={emoji}
-                    onClick={() => sendReaction(emoji)}
-                    className="text-2xl hover:scale-125 transition-transform p-2 hover:bg-gray-700 rounded-lg"
-                  >
-                    {emoji}
-                  </button>
-                ))}
-              </div>
-            )}
+
+            <div className="w-px h-8 bg-gray-700 mx-2" />
+
+            <Button
+              variant={isRecording ? "destructive" : "secondary"}
+              size="lg"
+              className={cn(
+                "rounded-full w-12 h-12 p-0",
+                isRecording && "animate-pulse"
+              )}
+              onClick={isRecording ? stopRecording : startRecording}
+              title={isRecording ? "Stop Recording" : "Start Recording"}
+            >
+              <Circle className={cn("w-5 h-5", isRecording && "fill-current")} />
+            </Button>
+
+            <div className="w-px h-8 bg-gray-700 mx-2" />
+
+            <Button
+              variant="destructive"
+              size="lg"
+              className="rounded-full px-8 bg-red-600 hover:bg-red-700"
+              onClick={() => router.push("/")}
+            >
+              <PhoneOff className="w-5 h-5 mr-2" />
+              End Call
+            </Button>
           </div>
-
-          {/* Picture-in-Picture */}
-          <Button
-            variant="secondary"
-            size="lg"
-            className="rounded-full w-12 h-12 p-0"
-            onClick={enterPipMode}
-            title="Picture-in-Picture"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <rect x="2" y="3" width="20" height="14" rx="2" />
-              <rect x="13" y="12" width="7" height="6" rx="1" />
-            </svg>
-          </Button>
-
-          <div className="w-px h-8 bg-gray-700 mx-2" />
-
-          <Button
-            variant={isRecording ? "destructive" : "secondary"}
-            size="lg"
-            className={cn(
-              "rounded-full w-12 h-12 p-0",
-              isRecording && "animate-pulse"
-            )}
-            onClick={isRecording ? stopRecording : startRecording}
-            title={isRecording ? "Stop Recording" : "Start Recording"}
-          >
-            <Circle className={cn("w-5 h-5", isRecording && "fill-current")} />
-          </Button>
-
-          <div className="w-px h-8 bg-gray-700 mx-2" />
-
-          <Button
-            variant="destructive"
-            size="lg"
-            className="rounded-full px-8 bg-red-600 hover:bg-red-700"
-            onClick={() => router.push("/")}
-          >
-            <PhoneOff className="w-5 h-5 mr-2" />
-            End Call
-          </Button>
-        </div>
+        )}
 
         {/* Reactions Overlay */}
         <div className="fixed bottom-32 left-1/2 -translate-x-1/2 flex gap-4 pointer-events-none z-50">
@@ -1432,6 +1559,270 @@ export default function MeetingRoom() {
             </div>
           ))}
         </div>
+
+        {/* Live Sales CTA Overlay (Participant View) */}
+        {activeCTA && !isStudioMode && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 pointer-events-none">
+            <div className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl max-w-md w-full p-8 space-y-6 shadow-2xl animate-in zoom-in-95 pointer-events-auto">
+              <div className="text-center space-y-4">
+                {activeCTA.image_url && (
+                  <div className="relative w-full h-48 rounded-xl overflow-hidden">
+                    <img 
+                      src={activeCTA.image_url} 
+                      alt={activeCTA.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+                
+                <div>
+                  <h2 className="text-3xl font-bold text-white mb-2">
+                    {activeCTA.title}
+                  </h2>
+                  {activeCTA.description && (
+                    <p className="text-purple-100 text-lg">
+                      {activeCTA.description}
+                    </p>
+                  )}
+                </div>
+
+                {activeCTA.price && activeCTA.price > 0 && (
+                  <div className="bg-white/20 backdrop-blur rounded-xl p-4">
+                    <div className="text-sm text-purple-200 mb-1">Special Price</div>
+                    <div className="text-4xl font-bold text-white">
+                      Rp {activeCTA.price.toLocaleString('id-ID')}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <Button 
+                className="w-full h-14 text-xl font-bold"
+                style={{ backgroundColor: activeCTA.button_color || "#3B82F6" }}
+                onClick={() => handleCTAClick(activeCTA.id)}
+              >
+                {activeCTA.button_text || "Beli Sekarang"} 🛍️
+              </Button>
+
+              <button
+                onClick={() => setActiveCTA(null)}
+                className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Live Sales CTA Panel (Host Control) */}
+        {showCTAPanel && (
+          <div className="w-96 bg-gray-800 border-l border-gray-700 flex flex-col shrink-0 absolute right-0 top-16 bottom-20 z-40">
+            <div className="p-4 border-b border-gray-700 flex items-center justify-between">
+              <h3 className="text-white font-medium">Live Sales CTA</h3>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setShowCTAPanel(false)}
+                className="text-gray-400 hover:text-white"
+              >
+                ✕
+              </Button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {ctaList.length === 0 ? (
+                <div className="text-center text-gray-400 mt-8">
+                  <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  <p className="text-sm">No CTAs created yet</p>
+                  <p className="text-xs mt-1">Create one to start selling!</p>
+                </div>
+              ) : (
+                ctaList.map((cta) => (
+                  <div key={cta.id} className="bg-gray-900 rounded-lg p-4 space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h4 className="text-white font-medium">{cta.title}</h4>
+                        {cta.price && (
+                          <p className="text-green-400 text-sm mt-1">
+                            Rp {cta.price.toLocaleString('id-ID')}
+                          </p>
+                        )}
+                      </div>
+                      {cta.is_active && (
+                        <span className="text-xs bg-green-600 text-white px-2 py-0.5 rounded">Live</span>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center gap-2 text-xs text-gray-400">
+                      <span>👆 {cta.clicks_count || 0} clicks</span>
+                    </div>
+
+                    <div className="flex gap-2">
+                      {!cta.is_active ? (
+                        <Button
+                          size="sm"
+                          className="flex-1 bg-green-600 hover:bg-green-700"
+                          onClick={async () => {
+                            await ctaService.activateCTA(cta.id);
+                            toast({
+                              title: "CTA Activated!",
+                              description: "All participants can now see this offer",
+                            });
+                          }}
+                        >
+                          Activate
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="flex-1"
+                          onClick={async () => {
+                            await ctaService.deactivateCTA(cta.id);
+                            toast({
+                              title: "CTA Deactivated",
+                              description: "Offer hidden from participants",
+                            });
+                          }}
+                        >
+                          Deactivate
+                        </Button>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-red-400"
+                        onClick={async () => {
+                          await ctaService.deleteCTA(cta.id);
+                          setCtaList(prev => prev.filter(c => c.id !== cta.id));
+                          toast({
+                            title: "CTA Deleted",
+                          });
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="p-4 border-t border-gray-700">
+              {!showCTAForm ? (
+                <Button 
+                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                  onClick={() => setShowCTAForm(true)}
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Create New CTA
+                </Button>
+              ) : (
+                <form
+                  className="space-y-3"
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.currentTarget);
+                    
+                    if (!meetingId) return;
+                    
+                    const { data, error } = await ctaService.createCTA(meetingId, {
+                      title: formData.get('title') as string,
+                      description: formData.get('description') as string,
+                      button_text: formData.get('button_text') as string,
+                      button_url: formData.get('button_url') as string,
+                      button_color: formData.get('button_color') as string,
+                      duration_seconds: parseInt(formData.get('duration') as string) || 30,
+                      price: parseInt(formData.get('price') as string) || 0,
+                    });
+
+                    if (error) {
+                      toast({
+                        title: "Failed to create CTA",
+                        description: error.message,
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+
+                    if (data) {
+                      setCtaList(prev => [data, ...prev]);
+                      setShowCTAForm(false);
+                      toast({
+                        title: "CTA Created!",
+                        description: "Click Activate to show it to participants",
+                      });
+                    }
+                  }}
+                >
+                  <Input
+                    name="title"
+                    placeholder="Title (e.g., Flash Sale 50%)"
+                    required
+                    className="bg-gray-900 border-gray-700 text-white"
+                  />
+                  <Input
+                    name="description"
+                    placeholder="Description (optional)"
+                    className="bg-gray-900 border-gray-700 text-white"
+                  />
+                  <Input
+                    name="price"
+                    type="number"
+                    placeholder="Price (Rp)"
+                    className="bg-gray-900 border-gray-700 text-white"
+                  />
+                  <Input
+                    name="button_text"
+                    placeholder="Button Text (e.g., Beli Sekarang)"
+                    required
+                    className="bg-gray-900 border-gray-700 text-white"
+                  />
+                  <Input
+                    name="button_url"
+                    type="url"
+                    placeholder="Link URL"
+                    required
+                    className="bg-gray-900 border-gray-700 text-white"
+                  />
+                  <div className="flex gap-2">
+                    <Input
+                      name="button_color"
+                      type="color"
+                      defaultValue="#3B82F6"
+                      className="w-16 h-10 bg-gray-900 border-gray-700"
+                    />
+                    <Input
+                      name="duration"
+                      type="number"
+                      placeholder="Duration (seconds)"
+                      defaultValue="30"
+                      className="flex-1 bg-gray-900 border-gray-700 text-white"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button type="submit" className="flex-1">
+                      Create
+                    </Button>
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      onClick={() => setShowCTAForm(false)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Upgrade Modal */}
         {showUpgradeModal && (
