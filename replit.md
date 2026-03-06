@@ -158,10 +158,24 @@ supabase/         - Supabase configuration
 - Output: questions with options, answers, explanations, competency tags, passing score, estimated time
 - Fallback to template-based questions if AI unavailable
 
+## Storybook Visual Learning (`/storybook`)
+- Page: `src/pages/storybook.tsx`
+- AI-powered visual storytelling for learning: transforms topics into illustrated stories
+- API: `src/pages/api/ai/generate-story.ts` — generates story with characters, scenes, quiz, learning points
+- Interactive scene-by-scene viewer with AI-generated illustrations
+- 3 sample stories with 15 AI-generated illustrations in `public/storybook/`:
+  - "Pak Budi Membangun Rumah Impian" (Construction → Project Management)
+  - "Startup Digital Rina" (Technology → Entrepreneurship)
+  - "Dokter Muda di Desa Terpencil" (Health → Leadership & Empathy)
+- Story creator: pick topic, industry, audience, scene count → AI generates full story
+- Quiz at end of each story, learning points summary
+- Industries: Construction, Business, Technology, Health, Education, Marketing
+- localStorage persistence
+
 ## Navigation
 - Homepage navbar (segment-based):
   - Harga, Jadwal Live
-  - "Belajar" dropdown: Micro-Learning, Learning Path, Ujian & Sertifikasi, Sertifikat Saya
+  - "Belajar" dropdown: Micro-Learning, Learning Path, Ujian & Sertifikasi, Sertifikat Saya, Storybook Visual
   - "HRD & Training" dropdown: Skills Matrix & Gap Analysis, Exam Center, Training Path, Digital Certificate
   - "Creator Tools" dropdown: AI Studio, Dashboard Kreator, Broadcast & Marketing, Kalender Konten
 - All new pages have consistent header with back-to-home link and theme toggle

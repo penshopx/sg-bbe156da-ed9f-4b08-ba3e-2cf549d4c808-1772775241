@@ -140,6 +140,9 @@ export default function Home() {
                     <Link href="/sertifikat" className="block px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
                       Sertifikat Saya
                     </Link>
+                    <Link href="/storybook" className="block px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                      Storybook Visual
+                    </Link>
                   </div>
                 </div>
                 <div className="relative group">
