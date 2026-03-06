@@ -140,7 +140,7 @@ export function ChatWidget() {
         isOpen ? "scale-100 opacity-100" : "scale-0 opacity-0 hidden"
       )}>
         {/* Header */}
-        <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-4 flex items-center justify-between text-white">
+        <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-4 flex items-center justify-between text-white">
           <div className="flex items-center gap-3">
             <div className="bg-white/20 p-2 rounded-full">
               <Bot className="w-5 h-5" />
@@ -176,16 +176,16 @@ export function ChatWidget() {
               >
                 <div className={cn(
                   "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1",
-                  msg.role === "user" ? "bg-gray-200 dark:bg-gray-700" : "bg-purple-100 dark:bg-purple-900/50"
+                  msg.role === "user" ? "bg-gray-200 dark:bg-gray-700" : "bg-green-100 dark:bg-green-900/50"
                 )}>
-                  {msg.role === "user" ? <User className="w-4 h-4 text-gray-600" /> : <Bot className="w-4 h-4 text-purple-600 dark:text-purple-400" />}
+                  {msg.role === "user" ? <User className="w-4 h-4 text-gray-600" /> : <Bot className="w-4 h-4 text-green-600 dark:text-green-400" />}
                 </div>
                 
                 <div className="flex flex-col gap-2">
                   <div className={cn(
                     "p-3 rounded-2xl text-sm shadow-sm",
                     msg.role === "user" 
-                      ? "bg-purple-600 text-white rounded-tr-none" 
+                      ? "bg-green-600 text-white rounded-tr-none" 
                       : "bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-tl-none"
                   )}>
                     {msg.text}
@@ -193,13 +193,13 @@ export function ChatWidget() {
 
                   {/* Related Articles */}
                   {msg.metadata?.relatedArticles?.length > 0 && (
-                    <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl border border-blue-100 dark:border-blue-800/30">
-                      <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-2 flex items-center gap-1">
+                    <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-xl border border-green-100 dark:border-green-800/30">
+                      <p className="text-xs font-semibold text-green-600 dark:text-green-400 mb-2 flex items-center gap-1">
                         <HelpCircle className="w-3 h-3" /> Related Help Articles:
                       </p>
                       <div className="space-y-1">
                         {msg.metadata.relatedArticles.map((article: any) => (
-                          <div key={article.id} className="text-xs bg-white dark:bg-gray-800 p-2 rounded border border-blue-100 dark:border-gray-700 cursor-pointer hover:border-blue-400 transition-colors">
+                          <div key={article.id} className="text-xs bg-white dark:bg-gray-800 p-2 rounded border border-green-100 dark:border-gray-700 cursor-pointer hover:border-green-400 transition-colors">
                             {article.title}
                           </div>
                         ))}
@@ -214,7 +214,7 @@ export function ChatWidget() {
                         <button
                           key={reply}
                           onClick={() => handleQuickReply(reply)}
-                          className="text-xs bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-300 px-3 py-1.5 rounded-full border border-purple-100 dark:border-purple-800 hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-colors"
+                          className="text-xs bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-300 px-3 py-1.5 rounded-full border border-green-100 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors"
                         >
                           {reply}
                         </button>
@@ -226,11 +226,11 @@ export function ChatWidget() {
             ))}
             {isLoading && (
               <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center">
-                  <Bot className="w-4 h-4 text-purple-600" />
+                <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center">
+                  <Bot className="w-4 h-4 text-green-600" />
                 </div>
                 <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl rounded-tl-none border shadow-sm flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin text-purple-500" />
+                  <Loader2 className="w-4 h-4 animate-spin text-green-500" />
                   <span className="text-xs text-gray-400">Thinking...</span>
                 </div>
               </div>
@@ -246,13 +246,13 @@ export function ChatWidget() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
               placeholder="Ask a question..."
-              className="flex-1 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus-visible:ring-purple-500"
+              className="flex-1 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus-visible:ring-green-500"
             />
             <Button 
               onClick={handleSend} 
               disabled={!input.trim() || isLoading}
               size="icon"
-              className="bg-purple-600 hover:bg-purple-700"
+              className="bg-green-600 hover:bg-green-700"
             >
               <Send className="w-4 h-4" />
             </Button>
@@ -269,7 +269,7 @@ export function ChatWidget() {
         size="lg"
         className={cn(
           "rounded-full h-14 w-14 shadow-xl pointer-events-auto transition-all duration-300 hover:scale-110",
-          isOpen ? "bg-gray-800 hover:bg-gray-700 rotate-90" : "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+          isOpen ? "bg-gray-800 hover:bg-gray-700 rotate-90" : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
         )}
       >
         {isOpen ? <X className="w-6 h-6" /> : <MessageSquare className="w-6 h-6" />}
