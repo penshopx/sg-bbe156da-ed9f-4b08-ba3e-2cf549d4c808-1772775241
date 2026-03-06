@@ -110,6 +110,7 @@ export default async function handler(
 
     const paymentLink = mayarData?.data?.link || mayarData?.link;
 
+    // @ts-expect-error Supabase type instantiation too deep for metadata JSON field
     await supabase
       .from("payment_transactions")
       .update({
