@@ -411,11 +411,11 @@ export default function MicroLearning() {
                             </div>
                             <div className="flex items-center gap-1">
                               <Clock className="w-4 h-4" />
-                              {Math.floor((course.total_duration || 0) / 60)} min
+                              {Math.floor((course.total_duration_seconds || 0) / 60)} min
                             </div>
                             <div className="flex items-center gap-1">
                               <Users className="w-4 h-4" />
-                              {course.enrolled_count || 0} learners
+                              {course.enrollments_count || 0} learners
                             </div>
                           </div>
                         </div>
