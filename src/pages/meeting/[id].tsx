@@ -12,7 +12,7 @@ import { meetingService } from "@/services/meetingService";
 import { authService } from "@/services/authService";
 import { subscriptionService } from "@/services/subscriptionService";
 import { useWebRTC } from "@/hooks/useWebRTC";
-import { useToast } from "@/hooks/useToast";
+import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { KeyboardShortcutsDialog } from "@/components/KeyboardShortcutsDialog";
 import Link from "next/link";
