@@ -2,7 +2,7 @@ import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Video, Users, Shield, Sparkles, ArrowRight, Lock } from "lucide-react";
+import { Video, Users, Shield, Sparkles, ArrowRight, Lock, Zap } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/router";
 import { meetingService } from "@/services/meetingService";
@@ -264,11 +264,12 @@ export default function Home() {
               </div>
               <div className="flex-1 text-center md:text-left">
                 <h3 className="text-2xl font-bold text-white mb-2">
-                  🤖 AI Course Factory - NEW!
+                  🤖 AI Course Factory + Micro-Learning - NEW!
                 </h3>
                 <p className="text-gray-300 mb-4">
                   Transform your meetings into complete course packages automatically! 
                   Generate slides, eBooks, quizzes, and even NotebookLM-style podcasts with one click.
+                  <strong className="text-yellow-300"> Plus: Auto-chunk into 5-7 minute bite-sized modules!</strong>
                 </p>
                 <div className="flex flex-wrap gap-2 justify-center md:justify-start">
                   <span className="px-3 py-1 bg-white/10 rounded-full text-sm text-white">
@@ -283,13 +284,23 @@ export default function Home() {
                   <span className="px-3 py-1 bg-white/10 rounded-full text-sm text-white">
                     ✅ Quiz Maker
                   </span>
+                  <span className="px-3 py-1 bg-yellow-400/20 rounded-full text-sm text-yellow-300 font-semibold">
+                    ⚡ 5-Min Modules
+                  </span>
                 </div>
               </div>
-              <Link href="/ai-studio">
-                <Button size="lg" className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-black font-bold">
-                  Try AI Studio →
-                </Button>
-              </Link>
+              <div className="flex flex-col gap-2">
+                <Link href="/ai-studio">
+                  <Button size="lg" className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-black font-bold">
+                    AI Studio →
+                  </Button>
+                </Link>
+                <Link href="/micro-learning">
+                  <Button size="lg" variant="outline" className="border-yellow-400 text-yellow-300 hover:bg-yellow-400/20">
+                    Micro-Learning →
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -357,6 +368,22 @@ export default function Home() {
                 <Link href="/ai-studio" className="inline-block mt-3">
                   <Button size="sm" variant="outline" className="border-purple-400 text-purple-300 hover:bg-purple-400/20">
                     Learn More →
+                  </Button>
+                </Link>
+              </div>
+
+              <div className="p-6 bg-gradient-to-br from-blue-900/50 to-cyan-900/50 rounded-xl backdrop-blur-sm border border-blue-400/30 hover:border-blue-400/60 transition group relative overflow-hidden">
+                <div className="absolute top-2 right-2">
+                  <span className="px-2 py-1 bg-yellow-400 text-black text-xs font-bold rounded-full">NEW</span>
+                </div>
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                  <Zap className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-2">Micro-Learning Generator</h3>
+                <p className="text-gray-300">Auto-chunk meetings into 5-7 minute bite-sized modules. Perfect for modern attention spans!</p>
+                <Link href="/micro-learning" className="inline-block mt-3">
+                  <Button size="sm" variant="outline" className="border-blue-400 text-blue-300 hover:bg-blue-400/20">
+                    Try Now →
                   </Button>
                 </Link>
               </div>
