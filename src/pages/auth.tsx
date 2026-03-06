@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 import { Video, Mail, Lock, User, ArrowLeft, CheckCircle } from "lucide-react";
 
 export default function AuthPage() {
@@ -22,6 +23,26 @@ export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [emailError, setEmailError] = useState("");
+
+  // Email validation helper
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    return emailRegex.test(email);
+  };
+
+  // Handle email input change with validation
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setEmail(value);
+    
+    if (value && !validateEmail(value)) {
+      setEmailError("Format email tidak valid");
+    } else {
+      setEmailError("");
+    }
+  };
 
   useEffect(() => {
     if (mode === "register") {
@@ -44,6 +65,18 @@ export default function AuthPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate email format before submitting
+    if (!validateEmail(email)) {
+      toast({
+        title: "Email Tidak Valid",
+        description: "Mohon periksa kembali format email Anda. Contoh: nama@email.com",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
     setError("");
     setSuccess("");
     setLoading(true);
@@ -93,6 +126,7 @@ export default function AuthPage() {
       console.error("Auth error:", err);
       setError(err.message || "Terjadi kesalahan. Silakan coba lagi.");
     } finally {
+      setIsLoading(false);
       setLoading(false);
     }
   };
@@ -169,22 +203,20 @@ export default function AuthPage() {
             )}
 
             {/* Email */}
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-gray-300">
-                Email
-              </Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="nama@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 bg-white/10 border-white/20 text-white placeholder-gray-400 focus:border-purple-500"
-                  required
-                />
-              </div>
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="nama@email.com"
+                value={email}
+                onChange={handleEmailChange}
+                required
+                className={emailError ? "border-red-500 focus-visible:ring-red-500" : ""}
+              />
+              {emailError && (
+                <p className="text-sm text-red-500 mt-1">{emailError}</p>
+              )}
             </div>
 
             {/* Password */}
@@ -208,12 +240,12 @@ export default function AuthPage() {
             </div>
 
             {/* Submit Button */}
-            <Button
-              type="submit"
-              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-6 text-lg"
-              disabled={loading}
+            <Button 
+              type="submit" 
+              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              disabled={isLoading || !!emailError}
             >
-              {loading ? "Memproses..." : isLogin ? "Masuk" : "Daftar Gratis"}
+              {isLoading ? "Memproses..." : (isLogin ? "Masuk" : "Daftar Gratis")}
             </Button>
           </form>
 
