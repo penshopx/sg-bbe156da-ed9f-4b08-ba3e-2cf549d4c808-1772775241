@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { Check, X, ArrowRight, Zap } from "lucide-react";
+import { Check, ArrowRight, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -49,19 +49,27 @@ export default function PricingPage() {
     if (billingCycle === "monthly") {
       return plan.price_monthly;
     }
-    return plan.price_yearly ? (plan.price_yearly / 12).toFixed(2) : 0;
+    return plan.price_yearly ? (plan.price_yearly ? (plan.price_yearly / 12).toFixed(2) : 0) : 0;
   };
 
   const getSavings = (plan: SubscriptionPlan) => {
-    if (!plan.price_yearly || billingCycle === "monthly") return 0;
+    if (!plan.price_yearly || !plan.price_monthly || billingCycle === "monthly") return 0;
     const yearlyMonthly = plan.price_monthly * 12;
     const savings = yearlyMonthly - plan.price_yearly;
     return Math.round((savings / yearlyMonthly) * 100);
   };
 
   const getFeatures = (plan: SubscriptionPlan): string[] => {
+    // Handle both array and JSONB cases safely
     if (Array.isArray(plan.features)) {
       return plan.features as string[];
+    }
+    try {
+      if (typeof plan.features === 'string') {
+        return JSON.parse(plan.features);
+      }
+    } catch (e) {
+      return [];
     }
     return [];
   };
@@ -164,7 +172,7 @@ export default function PricingPage() {
                 return (
                   <Card
                     key={plan.id}
-                    className={`relative ${
+                    className={`relative flex flex-col ${
                       isPopular
                         ? "border-2 border-blue-500 shadow-xl shadow-blue-500/20"
                         : "border-white/10"
@@ -172,7 +180,7 @@ export default function PricingPage() {
                   >
                     {isPopular && (
                       <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                        <Badge className="bg-blue-500 text-white">Most Popular</Badge>
+                        <Badge className="bg-blue-500 text-white hover:bg-blue-600">Most Popular</Badge>
                       </div>
                     )}
 
@@ -183,7 +191,7 @@ export default function PricingPage() {
                       </CardDescription>
                     </CardHeader>
 
-                    <CardContent className="space-y-6">
+                    <CardContent className="space-y-6 flex-grow">
                       {/* Price */}
                       <div>
                         {isEnterprise ? (
@@ -194,7 +202,7 @@ export default function PricingPage() {
                               <span className="text-4xl font-bold text-white">
                                 ${pricePerMonth}
                               </span>
-                              <span className="text-gray-400">/month</span>
+                              <span className="text-gray-400">/mo</span>
                             </div>
                             {billingCycle === "yearly" && !isFree && (
                               <div className="text-sm text-gray-400 mt-1">
@@ -211,7 +219,7 @@ export default function PricingPage() {
                       </div>
 
                       {/* Limits */}
-                      <div className="space-y-2 text-sm">
+                      <div className="space-y-2 text-sm border-t border-white/10 pt-4">
                         <div className="flex justify-between text-gray-300">
                           <span>Max Participants</span>
                           <span className="font-semibold text-white">
@@ -233,9 +241,9 @@ export default function PricingPage() {
                       </div>
 
                       {/* Features */}
-                      <div className="space-y-2">
-                        <p className="text-sm font-semibold text-white">Features:</p>
-                        {features.slice(0, 5).map((feature) => (
+                      <div className="space-y-2 border-t border-white/10 pt-4">
+                        <p className="text-sm font-semibold text-white mb-2">Features:</p>
+                        {features.slice(0, 8).map((feature) => (
                           <div key={feature} className="flex items-start gap-2">
                             <Check className="w-4 h-4 text-green-400 mt-0.5 shrink-0" />
                             <span className="text-sm text-gray-300">
@@ -243,15 +251,10 @@ export default function PricingPage() {
                             </span>
                           </div>
                         ))}
-                        {features.length > 5 && (
-                          <p className="text-sm text-gray-400">
-                            + {features.length - 5} more features
-                          </p>
-                        )}
                       </div>
                     </CardContent>
 
-                    <CardFooter>
+                    <CardFooter className="mt-auto">
                       <Link href={isFree ? "/" : "/dashboard"} className="w-full">
                         <Button
                           className={`w-full ${
@@ -270,56 +273,6 @@ export default function PricingPage() {
               })}
             </div>
           )}
-
-          {/* FAQ Section */}
-          <div className="mt-20 text-center">
-            <h2 className="text-3xl font-bold text-white mb-4">Frequently Asked Questions</h2>
-            <div className="max-w-3xl mx-auto space-y-4 text-left">
-              <Card className="bg-white/5 backdrop-blur-sm border-white/10">
-                <CardHeader>
-                  <CardTitle className="text-white text-lg">Can I upgrade or downgrade anytime?</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-300">
-                    Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll prorate the charges.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-white/5 backdrop-blur-sm border-white/10">
-                <CardHeader>
-                  <CardTitle className="text-white text-lg">What payment methods do you accept?</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-300">
-                    We accept all major credit cards (Visa, MasterCard, Amex), PayPal, and local payment methods through Midtrans (for Indonesian users: BCA, Mandiri, GoPay, etc).
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-white/5 backdrop-blur-sm border-white/10">
-                <CardHeader>
-                  <CardTitle className="text-white text-lg">Is there a free trial for paid plans?</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-300">
-                    Yes! All paid plans come with a 14-day free trial. No credit card required to start your trial.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-white/5 backdrop-blur-sm border-white/10">
-                <CardHeader>
-                  <CardTitle className="text-white text-lg">What happens if I exceed my plan limits?</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-300">
-                    We'll notify you when you're approaching your limits. You can upgrade at any time to continue without interruption. We never cut you off mid-meeting!
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
         </div>
       </div>
     </>

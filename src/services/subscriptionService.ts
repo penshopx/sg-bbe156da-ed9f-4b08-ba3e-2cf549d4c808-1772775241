@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
+// Helper types
 type SubscriptionPlan = Database["public"]["Tables"]["subscription_plans"]["Row"];
 type UserSubscription = Database["public"]["Tables"]["user_subscriptions"]["Row"];
 type UsageLog = Database["public"]["Tables"]["usage_logs"]["Row"];
@@ -34,7 +35,8 @@ export const subscriptionService = {
 
     if (error && error.code !== "PGRST116") {
       console.error("Error fetching user subscription:", error);
-      throw error;
+      // Don't throw here, just return null (treat as free tier)
+      return null;
     }
 
     return data || null;
@@ -111,130 +113,65 @@ export const subscriptionService = {
     }
   },
 
-  // Get user usage statistics
-  async getUserUsage(
-    userId: string,
-    startDate?: Date,
-    endDate?: Date
-  ): Promise<{
-    totalMinutes: number;
-    totalMeetings: number;
-    averageParticipants: number;
-  }> {
-    let query = supabase
-      .from("usage_logs")
-      .select("*")
-      .eq("user_id", userId)
-      .eq("event_type", "meeting_ended");
-
-    if (startDate) {
-      query = query.gte("created_at", startDate.toISOString());
-    }
-    if (endDate) {
-      query = query.lte("created_at", endDate.toISOString());
-    }
-
-    const { data, error } = await query;
-
-    if (error) {
-      console.error("Error fetching usage:", error);
-      throw error;
-    }
-
-    const logs = data || [];
-    const totalMinutes = logs.reduce(
-      (sum, log) => sum + (log.duration_minutes || 0),
-      0
-    );
-    const totalMeetings = logs.length;
-    const averageParticipants =
-      logs.length > 0
-        ? logs.reduce((sum, log) => sum + (log.participant_count || 0), 0) /
-          logs.length
-        : 0;
-
-    return {
-      totalMinutes,
-      totalMeetings,
-      averageParticipants: Math.round(averageParticipants),
-    };
-  },
-
-  // Check if user can create meeting based on subscription limits
-  async canCreateMeeting(userId: string): Promise<{
-    allowed: boolean;
-    reason?: string;
-    maxParticipants?: number;
+  // Check meeting limits (duration, participants)
+  async checkMeetingLimits(meetingId: string, hostId: string): Promise<{
+    shouldEnd: boolean;
+    reason?: "duration" | "participants";
+    timeRemaining?: number; // in minutes
     maxDuration?: number;
+    maxParticipants?: number;
+    isPro?: boolean;
   }> {
-    const subscription = await this.getUserSubscription(userId);
+    // 1. Get host's subscription (to know limits)
+    const subscription = await this.getUserSubscription(hostId);
+    
+    // Default to Free Tier limits
+    let maxDuration = 40; // 40 mins for free
+    let maxParticipants = 100;
+    let isPro = false;
 
-    // No subscription = free tier
-    if (!subscription) {
+    if (subscription && subscription.subscription_plans) {
+      // @ts-ignore - Supabase types join handling
+      const plan = subscription.subscription_plans;
+      maxDuration = plan.max_duration_minutes || 999999; // NULL means unlimited
+      maxParticipants = plan.max_participants || 100;
+      isPro = true;
+    }
+
+    // 2. Get meeting details (for start time)
+    const { data: meeting, error: meetingError } = await supabase
+      .from("meetings")
+      .select("created_at")
+      .eq("id", meetingId)
+      .single();
+
+    if (meetingError || !meeting) {
+      return { shouldEnd: false }; // Fail safe
+    }
+
+    // 3. Calculate duration
+    const startTime = new Date(meeting.created_at).getTime();
+    const now = new Date().getTime();
+    const durationMinutes = (now - startTime) / 1000 / 60;
+    const timeRemaining = Math.max(0, maxDuration - durationMinutes);
+
+    if (durationMinutes >= maxDuration) {
       return {
-        allowed: true,
-        maxParticipants: 100,
-        maxDuration: 40,
-        reason: "Free tier limits",
+        shouldEnd: true,
+        reason: "duration",
+        timeRemaining: 0,
+        maxDuration,
+        maxParticipants,
+        isPro
       };
     }
 
-    const plan = subscription.subscription_plans as unknown as SubscriptionPlan;
-
     return {
-      allowed: true,
-      maxParticipants: plan.max_participants,
-      maxDuration: plan.max_duration_minutes || undefined,
+      shouldEnd: false,
+      timeRemaining,
+      maxDuration,
+      maxParticipants,
+      isPro
     };
-  },
-
-  // Create payment transaction
-  async createTransaction(
-    userId: string,
-    amount: number,
-    currency: string,
-    paymentMethod: PaymentTransaction["payment_method"],
-    metadata?: Record<string, any>
-  ): Promise<PaymentTransaction> {
-    const { data, error } = await supabase
-      .from("payment_transactions")
-      .insert({
-        user_id: userId,
-        amount,
-        currency,
-        payment_method: paymentMethod,
-        status: "pending",
-        metadata: metadata || {},
-      })
-      .select()
-      .single();
-
-    if (error) {
-      console.error("Error creating transaction:", error);
-      throw error;
-    }
-
-    return data;
-  },
-
-  // Update transaction status
-  async updateTransactionStatus(
-    transactionId: string,
-    status: PaymentTransaction["status"],
-    paymentId?: string
-  ): Promise<void> {
-    const { error } = await supabase
-      .from("payment_transactions")
-      .update({
-        status,
-        payment_id: paymentId,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", transactionId);
-
-    if (error) {
-      console.error("Error updating transaction:", error);
-      throw error;
-    }
-  },
+  }
 };
