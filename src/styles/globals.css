@@ -32,6 +32,11 @@
 }
 
 @layer base {
+  html, body {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
   :root {
     --radius: 0.55rem;
     --background: 0 0% 100%;

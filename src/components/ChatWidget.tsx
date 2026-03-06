@@ -174,14 +174,10 @@ export function ChatWidget() {
   };
 
   return (
-    <div className="fixed bottom-0 right-0 z-50 flex flex-col items-end pointer-events-none md:bottom-6 md:right-6">
-      <div className={cn(
-        "bg-white dark:bg-gray-900 shadow-2xl transition-all duration-300 transform origin-bottom-right pointer-events-auto flex flex-col overflow-hidden",
-        "fixed inset-0 w-full h-full rounded-none border-0",
-        "md:relative md:inset-auto md:w-[400px] md:h-[600px] md:mb-4 md:rounded-2xl md:border md:border-gray-200 md:dark:border-gray-800",
-        isOpen ? "scale-100 opacity-100" : "scale-0 opacity-0 hidden"
-      )}>
-        <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-4 flex items-center justify-between text-white safe-area-top">
+    <>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 bg-white dark:bg-gray-900 flex flex-col md:inset-auto md:bottom-24 md:right-6 md:w-[400px] md:h-[600px] md:rounded-2xl md:border md:border-gray-200 md:dark:border-gray-800 md:shadow-2xl overflow-hidden">
+          <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-4 flex items-center justify-between text-white safe-area-top">
           <div className="flex items-center gap-3">
             <div className="bg-white/20 p-2 rounded-full">
               <Bot className="w-5 h-5" />
@@ -297,18 +293,19 @@ export function ChatWidget() {
           <div className="text-[10px] text-center text-gray-400 mt-2">
             Didukung oleh Chaesa AI • Jawaban dihasilkan secara otomatis
           </div>
+          </div>
         </div>
-      </div>
+      )}
 
       {!isOpen && (
         <Button
           onClick={() => setIsOpen(true)}
           size="lg"
-          className="rounded-full h-14 w-14 shadow-xl pointer-events-auto transition-all duration-300 hover:scale-110 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 mb-4 mr-4 md:mb-0 md:mr-0"
+          className="fixed bottom-6 right-6 z-50 rounded-full h-14 w-14 shadow-xl transition-all duration-300 hover:scale-110 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
         >
           <MessageSquare className="w-6 h-6" />
         </Button>
       )}
-    </div>
+    </>
   );
 }
