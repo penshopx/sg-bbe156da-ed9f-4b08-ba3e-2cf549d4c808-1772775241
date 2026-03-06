@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/contexts/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { ChatWidget } from "@/components/ChatWidget";
 import { OnboardingWizard } from "@/components/OnboardingWizard";
+import { CommandPalette } from "@/components/CommandPalette";
 
 function RouteLoadingBar() {
   const router = useRouter();
@@ -82,6 +83,7 @@ export default function App({ Component, pageProps }: AppProps) {
       <Toaster />
       <ChatWidget />
       <OnboardingWizard />
+      <CommandPalette />
     </ThemeProvider>
   );
 }

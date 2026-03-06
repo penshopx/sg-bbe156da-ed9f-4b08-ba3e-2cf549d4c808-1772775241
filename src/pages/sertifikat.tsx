@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { ThemeSwitch } from "@/components/ThemeSwitch";
+import { PageHeader } from "@/components/PageHeader";
 import {
   Award, ArrowLeft, Video, Search, Eye, Printer,
   Download, Shield, CheckCircle, XCircle, Calendar,
@@ -395,36 +395,7 @@ export default function SertifikatPage() {
       `}</style>
 
       <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-        <nav className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-40 print:hidden">
-          <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link href="/" className="flex items-center gap-2">
-                <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-1.5 rounded-lg">
-                  <Video className="w-4 h-4 text-white" />
-                </div>
-                <span className="font-bold text-lg text-gray-900 dark:text-white">Chaesa Live</span>
-              </Link>
-              <span className="text-gray-400">|</span>
-              <h1 className="text-gray-700 dark:text-gray-300 font-medium flex items-center gap-2">
-                <Award className="w-4 h-4" />
-                Sertifikat Digital
-              </h1>
-            </div>
-            <div className="flex items-center gap-3">
-              {isLoggedIn ? (
-                <span className="text-xs text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-full">Halo, {userName}</span>
-              ) : !authLoading ? (
-                <Link href="/auth" className="text-xs text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400">Login untuk menyimpan progress</Link>
-              ) : null}
-              <ThemeSwitch />
-              <Link href="/">
-                <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400">
-                  <ArrowLeft className="w-4 h-4 mr-1" /> Beranda
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </nav>
+        <PageHeader title="Sertifikat Digital" icon={Award} />
 
         <main className="max-w-7xl mx-auto px-4 py-8">
           {activeTab === "view" && selectedCert ? (

@@ -3,6 +3,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { SEO } from "@/components/SEO";
+import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -657,20 +658,9 @@ export default function LearningPathPage() {
       </Head>
 
       <div className="min-h-screen bg-gray-50 dark:bg-gradient-to-br dark:from-blue-900 dark:via-purple-900 dark:to-pink-900">
+        <PageHeader title="Learning Path" icon={Map} />
         <div className="container mx-auto px-4 py-8">
           <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <Button variant="ghost" onClick={() => router.push("/")} className="text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-white/10">
-                ← Back to Home
-              </Button>
-              <div className="flex items-center gap-3">
-                {isLoggedIn ? (
-                  <span className="text-xs text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-full">Halo, {userName}</span>
-                ) : !authLoading ? (
-                  <Link href="/auth" className="text-xs text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400">Login untuk menyimpan progress</Link>
-                ) : null}
-              </div>
-            </div>
             <div className="flex items-center gap-3 mb-2">
               <Map className="w-10 h-10 text-emerald-400" />
               <h1 className="text-4xl font-bold text-gray-900 dark:text-white">Learning Path Builder</h1>

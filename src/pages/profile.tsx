@@ -7,13 +7,13 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ThemeSwitch } from "@/components/ThemeSwitch";
+import { PageHeader } from "@/components/PageHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { authService } from "@/services/authService";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import {
-  User, Mail, Edit3, Save, LogOut, Key, ArrowLeft,
+  User, Mail, Edit3, Save, LogOut, Key,
   BarChart3, Settings, Crown, CheckCircle, Loader2
 } from "lucide-react";
 
@@ -146,24 +146,7 @@ export default function ProfilePage() {
       />
 
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-purple-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-purple-950/20">
-        <nav className="border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-40">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Link href="/" className="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-bold text-lg">
-                <User className="w-5 h-5" />
-                Chaesa Live
-              </Link>
-              <span className="text-gray-300 dark:text-gray-600">|</span>
-              <span className="text-gray-600 dark:text-gray-400 text-sm font-medium">Profil</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <ThemeSwitch />
-              <Link href="/" className="text-sm text-gray-500 dark:text-gray-400 hover:text-purple-600 flex items-center gap-1">
-                <ArrowLeft className="w-4 h-4" /> Beranda
-              </Link>
-            </div>
-          </div>
-        </nav>
+        <PageHeader title="Profil" icon={User} />
 
         <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
           <div className="mb-8">

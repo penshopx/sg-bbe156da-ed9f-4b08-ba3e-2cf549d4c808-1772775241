@@ -5,13 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ThemeSwitch } from "@/components/ThemeSwitch";
+import { PageHeader } from "@/components/PageHeader";
 import { useAuth, getUserStorageKey } from "@/hooks/useAuth";
 import {
   Trophy, BookOpen, Award, Target, Star, TrendingUp,
   GraduationCap, Layers, Users, Clock, ChevronRight,
   Sparkles, Zap, Shield, Brain, Rocket, Medal, Crown,
-  ArrowLeft, LogIn, BarChart3, CheckCircle2, Play,
+  BarChart3, CheckCircle2, Play,
   FileText, Map
 } from "lucide-react";
 
@@ -399,35 +399,7 @@ export default function DashboardPage() {
       />
 
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-green-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-green-950/20">
-        <nav className="border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-40">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Link href="/" className="flex items-center gap-2 text-green-600 dark:text-green-400 font-bold text-lg">
-                <BarChart3 className="w-5 h-5" />
-                Chaesa Live
-              </Link>
-              <span className="text-gray-300 dark:text-gray-600">|</span>
-              <span className="text-gray-600 dark:text-gray-400 text-sm font-medium">Dashboard</span>
-            </div>
-            <div className="flex items-center gap-3">
-              {!authLoading && isLoggedIn && (
-                <span className="text-sm text-green-600 dark:text-green-400 font-medium hidden sm:inline">
-                  Halo, {userName}
-                </span>
-              )}
-              {!authLoading && !isLoggedIn && (
-                <Link href="/auth" className="text-sm text-gray-400 hover:text-green-500 transition-colors flex items-center gap-1">
-                  <LogIn className="w-3.5 h-3.5" />
-                  Login untuk menyimpan progress
-                </Link>
-              )}
-              <ThemeSwitch />
-              <Link href="/" className="text-sm text-gray-500 dark:text-gray-400 hover:text-green-600 flex items-center gap-1">
-                <ArrowLeft className="w-4 h-4" /> Beranda
-              </Link>
-            </div>
-          </div>
-        </nav>
+        <PageHeader title="Dashboard" icon={BarChart3} />
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
           <div className="mb-8">

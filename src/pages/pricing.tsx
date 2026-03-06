@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { PageHeader } from "@/components/PageHeader";
 import { Check, X, HelpCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -206,6 +207,8 @@ export default function PricingPage() {
       <Head>
         <title>Pricing Plans - Chaesa Live</title>
       </Head>
+
+      <PageHeader title="Harga" />
 
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">

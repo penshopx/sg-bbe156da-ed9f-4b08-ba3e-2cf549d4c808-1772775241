@@ -3,6 +3,7 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { SEO } from "@/components/SEO";
+import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -242,16 +243,9 @@ export default function MicroLearning() {
       </Head>
 
       <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-pink-900">
+        <PageHeader title="Micro-Learning" icon={Zap} />
         <div className="container mx-auto px-4 py-8">
-          {/* Header */}
           <div className="mb-8">
-            <Button
-              variant="ghost"
-              onClick={() => router.push("/")}
-              className="mb-4 text-white hover:bg-white/10"
-            >
-              ← Back to Home
-            </Button>
             <div className="flex items-center gap-3 mb-2">
               <Zap className="w-10 h-10 text-yellow-400" />
               <h1 className="text-4xl font-bold text-white">Micro-Learning Generator</h1>

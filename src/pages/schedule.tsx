@@ -3,10 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ThemeSwitch } from "@/components/ThemeSwitch";
+import { PageHeader } from "@/components/PageHeader";
 import {
   Calendar, Clock, Plus, Share2, Copy, Check, Trash2,
-  Video, Users, Link as LinkIcon, ArrowLeft, Edit2, X,
+  Video, Users, Link as LinkIcon, Edit2, X,
   Mail, MessageSquare
 } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -217,28 +217,7 @@ export default function SchedulePage() {
       <SEO title="Jadwal Live - Chaesa Live" description="Atur jadwal sesi live Kamu dan undang peserta" />
 
       <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-        <nav className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-40">
-          <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link href="/" className="flex items-center gap-2">
-                <div className="bg-gradient-to-r from-orange-500 to-pink-500 p-1.5 rounded-lg">
-                  <Video className="w-4 h-4 text-white" />
-                </div>
-                <span className="font-bold text-lg text-gray-900 dark:text-white">Chaesa Live</span>
-              </Link>
-              <span className="text-gray-400">|</span>
-              <h1 className="text-gray-700 dark:text-gray-300 font-medium">Jadwal Live</h1>
-            </div>
-            <div className="flex items-center gap-3">
-              <ThemeSwitch />
-              <Link href="/">
-                <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400">
-                  <ArrowLeft className="w-4 h-4 mr-1" /> Beranda
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </nav>
+        <PageHeader title="Jadwal Live" icon={Calendar} />
 
         <main className="max-w-4xl mx-auto px-4 py-8">
           <div className="flex items-center justify-between mb-8">

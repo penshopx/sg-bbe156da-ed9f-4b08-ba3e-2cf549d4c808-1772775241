@@ -2,12 +2,12 @@ import { useState, useEffect, useCallback } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { SEO } from "@/components/SEO";
+import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ThemeSwitch } from "@/components/ThemeSwitch";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth, getUserStorageKey } from "@/hooks/useAuth";
 import {
@@ -796,31 +796,7 @@ export default function StorybookPage() {
       <SEO title="Storybook - Visual Learning" description="Belajar melalui cerita visual interaktif yang mendidik dan menghibur" />
       <Head><link rel="canonical" href="https://chaesa.live/storybook" /></Head>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-        <header className="sticky top-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg border-b border-gray-200 dark:border-gray-800">
-          <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Link href="/" className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                  <BookOpen className="w-4 h-4 text-white" />
-                </div>
-                <span className="font-bold text-gray-900 dark:text-white">Chaesa Live</span>
-              </Link>
-              <span className="text-gray-400 dark:text-gray-600">|</span>
-              <span className="text-gray-600 dark:text-gray-400">Storybook</span>
-            </div>
-            <div className="flex items-center gap-3">
-              {isLoggedIn ? (
-                <span className="text-xs text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-full">Halo, {userName}</span>
-              ) : !authLoading ? (
-                <Link href="/auth" className="text-xs text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400">Login untuk menyimpan progress</Link>
-              ) : null}
-              <ThemeSwitch />
-              <Link href="/" className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 flex items-center gap-1">
-                <ArrowLeft className="w-4 h-4" /> Beranda
-              </Link>
-            </div>
-          </div>
-        </header>
+        <PageHeader title="Storybook Visual" icon={BookMarked} />
 
         <main className="container mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">

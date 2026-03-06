@@ -256,6 +256,29 @@ supabase/         - Supabase configuration
 - 10 accordion questions covering pricing, AI, security, compatibility, refund, mobile, certification
 - Uses shadcn Accordion component
 
+## Shared PageHeader Component
+- Component: `src/components/PageHeader.tsx`
+- Reusable sticky nav bar used by ALL feature pages
+- Props: `title`, `icon?`, `showAuth?`, `backHref?`, `backLabel?`, `rightContent?`
+- Includes: Chaesa Live logo, page title, auth status (login/profile link), search trigger (⌘K), NotificationCenter (bell), ThemeSwitch, back arrow
+- All 14+ feature pages now use this component for consistent navigation
+
+## Command Palette (Ctrl+K)
+- Component: `src/components/CommandPalette.tsx`
+- Global keyboard shortcut: Ctrl+K or Cmd+K
+- Searchable command dialog with 5 groups: Navigasi, Belajar, Creator Tools, HRD & Training, Akun
+- Uses existing cmdk-based `src/components/ui/command.tsx`
+- Renders globally from `_app.tsx`
+
+## Notification Center
+- Component: `src/components/NotificationCenter.tsx`
+- Bell icon with unread count badge (red dot)
+- Popover dropdown showing auto-generated notifications from user activity
+- Sources: certificates, exam results, storybooks, learning paths, skills matrix
+- Mark individual or all as read (stored in localStorage)
+- Relative timestamps ("5 menit lalu", "2 hari lalu")
+- Integrated into PageHeader
+
 ## Navigation
 - Homepage navbar (segment-based):
   - Harga, Jadwal Live
@@ -263,7 +286,7 @@ supabase/         - Supabase configuration
   - "HRD & Training" dropdown: Skills Matrix & Gap Analysis, Exam Center, Training Path, Digital Certificate
   - "Creator Tools" dropdown: AI Studio, Dashboard Kreator, Broadcast & Marketing, Kalender Konten
 - **Mobile hamburger menu**: Sheet drawer (left slide) with accordion sections for all nav groups, auth buttons, closes on navigation
-- All new pages have consistent header with back-to-home link, theme toggle, and auth indicator
+- **Feature pages**: All use shared PageHeader with consistent back navigation, search, notifications
 
 ## Notes
 - Supabase client handles missing env vars gracefully (warns instead of crashing)
