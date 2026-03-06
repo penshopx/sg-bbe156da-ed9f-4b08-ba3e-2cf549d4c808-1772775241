@@ -57,7 +57,7 @@ export default function Home() {
         <div className="bg-gradient-to-r from-yellow-600 to-orange-600 text-white py-3 px-4 text-center sticky top-0 z-50">
           <div className="flex items-center justify-center gap-2 text-sm md:text-base font-semibold">
             <Gift className="w-5 h-5 animate-bounce" />
-            <span>🎉 LIMITED TIME: Lifetime Deal Rp 499.000 (Save 85%!) - First 100 Users Only</span>
+            <span>🎉 LIMITED TIME: Paket 1 Tahun Rp 999.000 (Hemat 16%!) - Serious Creators Only</span>
             <Link href="/pricing">
               <Button size="sm" variant="secondary" className="ml-4">
                 Claim Now →
@@ -388,13 +388,13 @@ export default function Home() {
                     <td className="p-4 font-semibold">Price/Month</td>
                     <td className="p-4 text-center">Rp 240.000</td>
                     <td className="p-4 text-center">Rp 130.000</td>
-                    <td className="p-4 text-center bg-purple-900/20 font-bold text-green-400">Rp 69.000</td>
+                    <td className="p-4 text-center bg-purple-900/20 font-bold text-green-400">Rp 99.000</td>
                   </tr>
                   <tr className="border-b border-white/10">
                     <td className="p-4">Savings vs Competitor</td>
                     <td className="p-4 text-center">-</td>
                     <td className="p-4 text-center">-</td>
-                    <td className="p-4 text-center bg-purple-900/20 font-bold text-green-400">Save 71% (vs Zoom)</td>
+                    <td className="p-4 text-center bg-purple-900/20 font-bold text-green-400">Save 59% (vs Zoom)</td>
                   </tr>
                   <tr className="border-b border-white/10">
                     <td className="p-4">Meeting Duration</td>
@@ -593,19 +593,19 @@ export default function Home() {
           <Card className="p-12 bg-gradient-to-br from-purple-900/40 to-pink-900/40 border-purple-500/30 backdrop-blur-sm text-center">
             <Badge className="mb-6 bg-green-500/20 text-green-300 border-green-500/50">
               <Gift className="w-4 h-4 mr-2" />
-              Limited Time Offer
+              For Serious Creators Only
             </Badge>
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
               Ready to 10x Your Content Revenue?
             </h2>
             <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-              Join 1,000+ creators who are already earning more with less effort. First 100 users get <span className="font-bold text-yellow-400">Lifetime Deal Rp 499K</span> (85% off).
+              Join 1,000+ creators who are already earning more with less effort. Paket 1 Tahun <span className="font-bold text-yellow-400">Rp 999.000</span> - All Pro features, zero regrets. This is an investment, not an expense.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
               <Link href="/pricing">
                 <Button size="lg" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-12 py-6 text-lg">
                   <Rocket className="w-5 h-5 mr-2" />
-                  Claim Lifetime Deal Now
+                  Get Pro Now - Rp 99K/month
                 </Button>
               </Link>
               <Button 
@@ -614,7 +614,7 @@ export default function Home() {
                 onClick={handleStartMeeting}
                 className="border-2 border-purple-500 text-purple-300 hover:bg-purple-500/20 px-12 py-6 text-lg"
               >
-                Start Free Meeting
+                Try Free Meeting First
               </Button>
             </div>
             <p className="text-gray-400 text-sm">

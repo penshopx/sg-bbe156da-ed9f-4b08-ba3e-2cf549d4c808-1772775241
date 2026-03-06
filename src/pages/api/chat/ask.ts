@@ -306,7 +306,65 @@ function generateMockResponse(message: string): string {
     lowerMessage.includes("price") ||
     lowerMessage.includes("berapa")
   ) {
-    return "Oke nih gue kasih tau lengkapnya! 💰\n\n┌─────────────┬──────────────────────────────────────────┐\n│ Paket       │ Detail                                   │\n├─────────────┼──────────────────────────────────────────┤\n│ 🆓 GRATIS   │ Rp 0/bulan                               │\n│             │ • Limit 40 menit per meeting             │\n│             │ • Max 100 peserta                        │\n│             │ • Fitur basic aja                        │\n├─────────────┼──────────────────────────────────────────┤\n│ ⭐ PRO      │ Rp 69.000/bulan                          │\n│             │ • Meeting UNLIMITED (gak ada limit!)     │\n│             │ • AI Course Generator                    │\n│             │ • Live Sales CTA                         │\n│             │ • Studio Mode                            │\n├─────────────┼──────────────────────────────────────────┤\n│ 🚀 BUSINESS │ Rp 99.000/bulan                          │\n│             │ • Semua fitur Pro                        │\n│             │ • Max 300 peserta                        │\n│             │ • Analytics advanced                     │\n│             │ • Custom branding                        │\n├─────────────┼──────────────────────────────────────────┤\n│ 💎 1 TAHUN  │ Rp 499.000 (bayar sekali)                │\n│             │ • Semua fitur Pro selama 1 tahun penuh   │\n│             │ • Hemat 35% vs bayar bulanan!            │\n│             │ • Slot terbatas!                         │\n└─────────────┴──────────────────────────────────────────┘\n\nBandingkan sama Zoom:\n• Zoom Pro: Rp 240.000/bulan\n• Chaesa Pro: Rp 69.000/bulan\n• HEMAT: 71%! 🔥\n\nBelum lagi kita punya fitur AI & Live Commerce yang Zoom gak punya sama sekali!\n\nMau langsung coba? Atau mau tau lebih detail paket yang mana?";
+    return `Oke nih gue kasih tau lengkapnya! 💰
+
+Chaesa Live bukan cuma platform meeting biasa ya kak. Ini buat kreator yang serius mau monetize & scale bisnis mereka. 🚀
+
+┌─────────────┬──────────────────────────────────────────┐
+│ Paket       │ Detail                                   │
+├─────────────┼──────────────────────────────────────────┤
+│ 🆓 GRATIS   │ Rp 0/bulan                               │
+│             │ • Limit 40 menit per meeting             │
+│             │ • Max 100 peserta                        │
+│             │ • Fitur basic aja                        │
+│             │ • Cocok buat coba-coba dulu              │
+├─────────────┼──────────────────────────────────────────┤
+│ ⭐ PRO      │ Rp 99.000/bulan                          │
+│             │ • Meeting UNLIMITED (gak ada limit!)     │
+│             │ • AI Course Generator (hemat 90% waktu)  │
+│             │ • Live Sales CTA (3-5x konversi)         │
+│             │ • Studio Mode (OBS-friendly)             │
+│             │ • Original Sound (audio jernih)          │
+│             │ • Micro-Learning Marketplace             │
+├─────────────┼──────────────────────────────────────────┤
+│ 🚀 BUSINESS │ Rp 149.000/bulan                         │
+│             │ • Semua fitur Pro                        │
+│             │ • Max 300 peserta                        │
+│             │ • Analytics advanced                     │
+│             │ • Custom branding                        │
+│             │ • Priority support                       │
+├─────────────┼──────────────────────────────────────────┤
+│ 💎 1 TAHUN  │ Rp 999.000 (bayar sekali)                │
+│             │ • Semua fitur Pro selama 1 tahun penuh   │
+│             │ • Hemat Rp 189.000 vs bayar bulanan!     │
+│             │ • Free update fitur baru                 │
+│             │ • Investasi terbaik buat long-term       │
+└─────────────┴──────────────────────────────────────────┘
+
+Kenapa harga segini worth it banget:
+
+ROI Calculation:
+• Bikin 1 course manual: 20 jam editing
+• Pake Chaesa AI: 2 jam (hemat 18 jam!)
+• Jual course Rp 500K, dapet 10 buyer = Rp 5 juta
+• Biaya Chaesa: Rp 99K/bulan
+• PROFIT: Rp 4,9 juta (ROI 4900%!) 🔥
+
+Bandingkan sama kompetitor:
+• Zoom Pro: Rp 240.000/bulan (cuma video call, gak ada AI)
+• Udemy: Komisi 50% (lu jual 5 juta, mereka ambil 2,5 juta!)
+• Kajabi: $149/bulan = Rp 2,3 juta! (kemahalan!)
+
+Chaesa Live = All-in-one platform dengan harga 1/10 kompetitor premium.
+
+Cocok banget buat:
+• Content creator yang serius
+• Course creator & coach
+• Live seller & e-commerce
+• YouTuber & podcaster
+• Corporate trainer
+
+Mau langsung coba? Atau mau tau lebih detail fitur yang mana? 😊`;
   }
 
   // AI Features
@@ -375,7 +433,62 @@ function generateMockResponse(message: string): string {
     lowerMessage.includes("beda") ||
     lowerMessage.includes("lebih bagus")
   ) {
-    return "Good question! Gue jelasin perbedaannya ya. 💪\n\nChaesa Live vs Zoom:\n\n┌──────────────────────┬──────────────┬──────────────┐\n│ Fitur                │ Chaesa Live  │ Zoom         │\n├──────────────────────┼──────────────┼──────────────┤\n│ Harga/bulan          │ Rp 69.000    │ Rp 240.000   │\n│ Hemat berapa?        │ 71% murah!   │ -            │\n│ AI Course Generator  │ ✅ Ada       │ ❌ Gak ada   │\n│ Live Sales CTA       │ ✅ Ada       │ ❌ Gak ada   │\n│ Studio Mode          │ ✅ Gampang   │ ⚠️ Ribet     │\n│ Original Sound       │ ✅ 1 klik    │ ⚠️ Setup lama│\n│ Course Marketplace   │ ✅ Komisi 30%│ ❌ Gak ada   │\n│ Micro-Learning       │ ✅ Built-in  │ ❌ Gak ada   │\n└──────────────────────┴──────────────┴──────────────┘\n\nYang Zoom Unggul:\n• Brand gede (lebih terkenal)\n• Integrasi enterprise lebih banyak\n• User base lebih luas\n\nYang Chaesa Unggul:\n• JAUH lebih murah (71%!)\n• Fitur AI content creation\n• Live commerce built-in\n• OBS-friendly tanpa ribet\n• Fokus ke kreator & educator\n\nKesimpulan:\nKalau lu:\n• Kreator konten → Chaesa 100%\n• Jualan online → Chaesa\n• Bikin kursus → Chaesa\n• YouTuber/Streamer → Chaesa\n• Butuh enterprise complex → Zoom\n\nIntinya: Chaesa = Zoom + AI + Live Commerce dengan harga 1/3 nya! 🔥\n\nMau coba langsung atau mau tau detail fitur lainnya?";
+    return `Good question! Gue jelasin perbedaannya ya. 💪
+
+Chaesa Live vs Zoom vs Kajabi:
+
+┌──────────────────────┬──────────────┬──────────────┬──────────────┐
+│ Fitur                │ Chaesa Live  │ Zoom         │ Kajabi       │
+├──────────────────────┼──────────────┼──────────────┼──────────────┤
+│ Harga/bulan          │ Rp 99.000    │ Rp 240.000   │ Rp 2,3 juta  │
+│ Video Meeting        │ ✅ Unlimited │ ✅ Unlimited │ ❌ Gak ada   │
+│ AI Course Generator  │ ✅ Built-in  │ ❌ Gak ada   │ ❌ Gak ada   │
+│ Live Sales CTA       │ ✅ Built-in  │ ❌ Gak ada   │ ⚠️ Manual    │
+│ Studio Mode          │ ✅ One-click │ ⚠️ Ribet     │ ❌ Gak ada   │
+│ Original Sound       │ ✅ One-click │ ⚠️ Complex   │ ❌ Gak ada   │
+│ Course Marketplace   │ ✅ Komisi 30%│ ❌ Gak ada   │ ✅ 100% yours│
+│ Micro-Learning       │ ✅ Built-in  │ ❌ Gak ada   │ ❌ Manual    │
+│ NotebookLM Podcast   │ ✅ Auto      │ ❌ Gak ada   │ ❌ Gak ada   │
+└──────────────────────┴──────────────┴──────────────┴──────────────┘
+
+Kenapa Chaesa Worth It:
+
+1. All-in-One Solution:
+   • Meeting + AI + Marketplace = 1 platform
+   • Gak perlu langganan banyak tool
+   • Save time & money
+
+2. Premium Features, Affordable Price:
+   • Kajabi: Rp 2,3 juta/bulan (kemahalan!)
+   • Zoom: Rp 240K/bulan (cuma meeting doang)
+   • Chaesa: Rp 99K/bulan (dapat semuanya!)
+
+3. Built for Creators:
+   • Fokus ke monetization
+   • AI buat productivity
+   • Tools buat scale bisnis
+
+Yang Kompetitor Unggul:
+• Zoom: Brand besar, enterprise features
+• Kajabi: Email marketing advanced, funnel builder
+• Udemy: Traffic organik besar (tapi komisi 50%!)
+
+Yang Chaesa Unggul:
+• Harga paling affordable (1/10 dari Kajabi!)
+• Fitur AI content creation (otomatis!)
+• Live commerce built-in (konversi tinggi!)
+• Video meeting + course platform = 1 tempat
+
+Kesimpulan:
+Kalau lu butuh:
+• Video meeting + AI + course platform → Chaesa (best value!)
+• Enterprise complex features → Zoom
+• Advanced marketing automation → Kajabi
+• Traffic organik (tapi komisi gede) → Udemy
+
+Chaesa = Best bang for your buck! 💰🔥
+
+Mau coba langsung atau mau tau detail fitur lainnya?`;
   }
 
   // Payment/billing
