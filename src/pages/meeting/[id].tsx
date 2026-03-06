@@ -1378,6 +1378,214 @@ export default function MeetingRoom() {
             </div>
           )}
 
+          {/* Live Sales CTA Panel (Host Control) */}
+          {showCTAPanel && (
+            <div className="w-96 bg-gray-800 border-l border-gray-700 flex flex-col shrink-0 absolute right-0 top-16 bottom-20 z-40">
+              <div className="p-4 border-b border-gray-700 flex items-center justify-between">
+                <h3 className="text-white font-medium">Live Sales CTA</h3>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setShowCTAPanel(false)}
+                  className="text-gray-400 hover:text-white"
+                >
+                  ✕
+                </Button>
+              </div>
+              
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {ctaList.length === 0 ? (
+                  <div className="text-center text-gray-400 mt-8">
+                    <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    <p className="text-sm">No CTAs created yet</p>
+                    <p className="text-xs mt-1">Create one to start selling!</p>
+                  </div>
+                ) : (
+                  ctaList.map((cta) => (
+                    <div key={cta.id} className="bg-gray-900 rounded-lg p-4 space-y-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h4 className="text-white font-medium">{cta.title}</h4>
+                          {cta.price && (
+                            <p className="text-green-400 text-sm mt-1">
+                              Rp {cta.price.toLocaleString('id-ID')}
+                            </p>
+                          )}
+                        </div>
+                        {cta.is_active && (
+                          <span className="text-xs bg-green-600 text-white px-2 py-0.5 rounded">Live</span>
+                        )}
+                      </div>
+                      
+                      <div className="flex items-center gap-2 text-xs text-gray-400">
+                        <span>👆 {cta.clicks_count || 0} clicks</span>
+                      </div>
+
+                      <div className="flex gap-2">
+                        {!cta.is_active ? (
+                          <Button
+                            size="sm"
+                            className="flex-1 bg-green-600 hover:bg-green-700"
+                            onClick={async () => {
+                              await ctaService.activateCTA(cta.id);
+                              toast({
+                                title: "CTA Activated!",
+                                description: "All participants can now see this offer",
+                              });
+                            }}
+                          >
+                            Activate
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            className="flex-1"
+                            onClick={async () => {
+                              await ctaService.deactivateCTA(cta.id);
+                              toast({
+                                title: "CTA Deactivated",
+                                description: "Offer hidden from participants",
+                              });
+                            }}
+                          >
+                            Deactivate
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-red-400"
+                          onClick={async () => {
+                            await ctaService.deleteCTA(cta.id);
+                            setCtaList(prev => prev.filter(c => c.id !== cta.id));
+                            toast({
+                              title: "CTA Deleted",
+                            });
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <div className="p-4 border-t border-gray-700">
+                {!showCTAForm ? (
+                  <Button 
+                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                    onClick={() => setShowCTAForm(true)}
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Create New CTA
+                  </Button>
+                ) : (
+                  <form
+                    className="space-y-3"
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      const formData = new FormData(e.currentTarget);
+                      
+                      if (!meetingId) return;
+                      
+                      const { data, error } = await ctaService.createCTA(meetingId, {
+                        title: formData.get('title') as string,
+                        description: formData.get('description') as string,
+                        button_text: formData.get('button_text') as string,
+                        button_url: formData.get('button_url') as string,
+                        button_color: formData.get('button_color') as string,
+                        duration_seconds: parseInt(formData.get('duration') as string) || 30,
+                        price: parseInt(formData.get('price') as string) || 0,
+                      });
+
+                      if (error) {
+                        toast({
+                          title: "Failed to create CTA",
+                          description: error.message,
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+
+                      if (data) {
+                        setCtaList(prev => [data, ...prev]);
+                        setShowCTAForm(false);
+                        toast({
+                          title: "CTA Created!",
+                          description: "Click Activate to show it to participants",
+                        });
+                      }
+                    }}
+                  >
+                    <Input
+                      name="title"
+                      placeholder="Title (e.g., Flash Sale 50%)"
+                      required
+                      className="bg-gray-900 border-gray-700 text-white"
+                    />
+                    <Input
+                      name="description"
+                      placeholder="Description (optional)"
+                      className="bg-gray-900 border-gray-700 text-white"
+                    />
+                    <Input
+                      name="price"
+                      type="number"
+                      placeholder="Price (Rp)"
+                      className="bg-gray-900 border-gray-700 text-white"
+                    />
+                    <Input
+                      name="button_text"
+                      placeholder="Button Text (e.g., Beli Sekarang)"
+                      required
+                      className="bg-gray-900 border-gray-700 text-white"
+                    />
+                    <Input
+                      name="button_url"
+                      type="url"
+                      placeholder="Link URL"
+                      required
+                      className="bg-gray-900 border-gray-700 text-white"
+                    />
+                    <div className="flex gap-2">
+                      <Input
+                        name="button_color"
+                        type="color"
+                        defaultValue="#3B82F6"
+                        className="w-16 h-10 bg-gray-900 border-gray-700"
+                      />
+                      <Input
+                        name="duration"
+                        type="number"
+                        placeholder="Duration (seconds)"
+                        defaultValue="30"
+                        className="flex-1 bg-gray-900 border-gray-700 text-white"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button type="submit" className="flex-1">
+                        Create
+                      </Button>
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        onClick={() => setShowCTAForm(false)}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Advanced Video/Audio Settings */}
           <div className="flex gap-2">
             <Button
