@@ -130,9 +130,8 @@ export const subscriptionService = {
     let maxParticipants = 100;
     let isPro = false;
 
-    if (subscription && subscription.subscription_plans) {
-      // @ts-ignore - Supabase types join handling
-      const plan = subscription.subscription_plans;
+    if (subscription && (subscription as any).subscription_plans) {
+      const plan = (subscription as any).subscription_plans;
       maxDuration = plan.max_duration_minutes || 999999; // NULL means unlimited
       maxParticipants = plan.max_participants || 100;
       isPro = true;

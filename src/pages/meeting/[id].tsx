@@ -10,10 +10,12 @@ import {
 } from "lucide-react";
 import { meetingService } from "@/services/meetingService";
 import { authService } from "@/services/authService";
+import { subscriptionService } from "@/services/subscriptionService";
 import { useWebRTC } from "@/hooks/useWebRTC";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/useToast";
 import { cn } from "@/lib/utils";
 import { KeyboardShortcutsDialog } from "@/components/KeyboardShortcutsDialog";
+import Link from "next/link";
 
 export default function MeetingRoom() {
   const router = useRouter();
@@ -60,6 +62,18 @@ export default function MeetingRoom() {
   const [currentCaption, setCurrentCaption] = useState("");
   const [showBreakoutRooms, setShowBreakoutRooms] = useState(false);
   const [showQA, setShowQA] = useState(false);
+
+  // Meeting limits and monetization
+  const [meetingLimits, setMeetingLimits] = useState<{
+    shouldEnd: boolean;
+    reason?: "duration" | "participants";
+    timeRemaining?: number;
+    maxDuration?: number;
+    maxParticipants?: number;
+    isPro?: boolean;
+  } | null>(null);
+  const [showLimitWarning, setShowLimitWarning] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   // WebRTC hook will be initialized once we have meetingId and userId
   const {
@@ -526,6 +540,58 @@ export default function MeetingRoom() {
     }
   }, [isJoined, toggleMic, toggleCamera]);
 
+  // Check meeting limits every minute (for Free tier enforcement)
+  useEffect(() => {
+    if (!isJoined || !meetingId || !currentUser?.id) return;
+
+    const checkLimits = async () => {
+      try {
+        const limits = await subscriptionService.checkMeetingLimits(meetingId, currentUser.id);
+        setMeetingLimits(limits);
+
+        // Show warning at 10 minutes remaining for free users
+        if (!limits.isPro && limits.timeRemaining !== undefined && limits.timeRemaining <= 10 && limits.timeRemaining > 0) {
+          if (!showLimitWarning) {
+            setShowLimitWarning(true);
+            toast({
+              title: "⏰ Time Limit Warning",
+              description: `Your meeting will end in ${Math.ceil(limits.timeRemaining)} minutes. Upgrade to Pro for unlimited duration!`,
+              variant: "destructive",
+              duration: 10000,
+            });
+          }
+        }
+
+        // Auto-end meeting if limit reached
+        if (limits.shouldEnd) {
+          setShowUpgradeModal(true);
+          toast({
+            title: "⏱️ Meeting Time Limit Reached",
+            description: limits.reason === "duration" 
+              ? `Free tier meetings are limited to ${limits.maxDuration} minutes. Upgrade to Pro for unlimited meetings!`
+              : "Participant limit reached for this plan.",
+            variant: "destructive",
+          });
+
+          // End meeting after 30 seconds grace period
+          setTimeout(() => {
+            router.push("/pricing");
+          }, 30000);
+        }
+      } catch (error) {
+        console.error("Error checking meeting limits:", error);
+      }
+    };
+
+    // Check immediately
+    checkLimits();
+
+    // Then check every minute
+    const interval = setInterval(checkLimits, 60000);
+
+    return () => clearInterval(interval);
+  }, [isJoined, meetingId, currentUser?.id, showLimitWarning, router, toast]);
+
   // Toggle hand raise
   const toggleHandRaise = async () => {
     if (!meetingId || !currentUser?.id) return;
@@ -710,6 +776,31 @@ export default function MeetingRoom() {
                 </span>
               </div>
             )}
+            {meetingLimits && !meetingLimits.isPro && meetingLimits.timeRemaining !== undefined && (
+              <div className={cn(
+                "flex items-center gap-2 px-3 py-1.5 rounded-lg border",
+                meetingLimits.timeRemaining <= 10 
+                  ? "bg-red-600/20 border-red-600/50 animate-pulse" 
+                  : meetingLimits.timeRemaining <= 20
+                  ? "bg-yellow-600/20 border-yellow-600/50"
+                  : "bg-blue-600/20 border-blue-600/50"
+              )}>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 6v6l4 2" />
+                </svg>
+                <span className={cn(
+                  "font-medium text-sm",
+                  meetingLimits.timeRemaining <= 10 
+                    ? "text-red-400" 
+                    : meetingLimits.timeRemaining <= 20
+                    ? "text-yellow-400"
+                    : "text-blue-400"
+                )}>
+                  {Math.ceil(meetingLimits.timeRemaining)} min left (Free)
+                </span>
+              </div>
+            )}
             <span className="text-gray-400 text-sm hidden sm:inline">
               {participants.length} participant{participants.length !== 1 && "s"}
             </span>
@@ -802,7 +893,7 @@ export default function MeetingRoom() {
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <rect x="3" y="3" width="18" height="18" rx="2" />
-                <path d="M9 9l3 3-3 3M15 12h-3" />
+                <path d="M9 9l3 3-3 3M14 12h-3" />
               </svg>
             </Button>
 
@@ -1341,6 +1432,87 @@ export default function MeetingRoom() {
             </div>
           ))}
         </div>
+
+        {/* Upgrade Modal */}
+        {showUpgradeModal && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-gray-800 rounded-2xl max-w-md w-full p-8 space-y-6 border border-gray-700">
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mx-auto flex items-center justify-center">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                
+                <div>
+                  <h2 className="text-2xl font-bold text-white mb-2">
+                    Free Tier Limit Reached
+                  </h2>
+                  <p className="text-gray-400">
+                    You've reached the {meetingLimits?.maxDuration} minute limit for free meetings. 
+                    Upgrade to Pro for unlimited meeting duration!
+                  </p>
+                </div>
+
+                <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-xl p-4 border border-blue-500/30">
+                  <div className="text-left space-y-2">
+                    <div className="flex items-center gap-2 text-white">
+                      <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="font-medium">Unlimited meeting duration</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-white">
+                      <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="font-medium">Cloud recording & storage</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-white">
+                      <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="font-medium">Breakout rooms & polls</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-white">
+                      <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="font-medium">Priority support</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-white mb-1">
+                    $14.99<span className="text-lg text-gray-400">/month</span>
+                  </div>
+                  <div className="text-sm text-gray-400">
+                    or $149.99/year (save 17%)
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <Link href="/pricing" className="block">
+                  <Button className="w-full h-12 text-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                    Upgrade to Pro
+                  </Button>
+                </Link>
+                <Button
+                  variant="ghost"
+                  className="w-full text-gray-400 hover:text-white"
+                  onClick={() => {
+                    setShowUpgradeModal(false);
+                    router.push("/");
+                  }}
+                >
+                  End Meeting
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Keyboard Shortcuts Dialog */}
         <KeyboardShortcutsDialog 
