@@ -5,20 +5,31 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const SUPABASE_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
 function createNoopProxy(): SupabaseClient<Database> {
-  const noopResult = { data: { session: null, user: null, subscription: null }, error: null, count: null, status: 200, statusText: 'OK' };
-  const handler: ProxyHandler<object> = {
+  const noopResult = { data: null, error: null, count: null, status: 200, statusText: 'OK' };
+
+  function createChainableProxy(): any {
+    const proxy: any = new Proxy(() => {}, {
+      get(_target, prop) {
+        if (prop === 'then') {
+          return (resolve: any) => resolve(noopResult);
+        }
+        if (prop === 'toJSON') return () => ({});
+        return (..._args: any[]) => createChainableProxy();
+      },
+      apply() {
+        return createChainableProxy();
+      },
+    });
+    return proxy;
+  }
+
+  return new Proxy({} as SupabaseClient<Database>, {
     get(_target, prop) {
       if (prop === 'then') return undefined;
       if (prop === 'toJSON') return () => ({});
-      return new Proxy(() => {}, {
-        get: handler.get!,
-        apply() {
-          return Promise.resolve(noopResult);
-        },
-      });
+      return (..._args: any[]) => createChainableProxy();
     },
-  };
-  return new Proxy({} as SupabaseClient<Database>, handler);
+  });
 }
 
 let supabase: SupabaseClient<Database>;

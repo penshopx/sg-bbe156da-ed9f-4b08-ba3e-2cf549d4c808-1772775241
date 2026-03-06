@@ -7,13 +7,14 @@ A Next.js (Pages Router) application for converting meetings into micro-learning
 - **Framework**: Next.js 15.5.9 (Pages Router, `src/pages/`)
 - **Styling**: Tailwind CSS + Radix UI components + Framer Motion
 - **Backend**: Supabase (auth + database), API routes in `src/pages/api/`
-- **Payments**: Stripe + Midtrans integration
+- **Payments**: Mayar.id (replaced Midtrans)
 - **AI**: OpenAI API for meeting analysis and transcription
 
 ## Project Structure
 ```
 src/
   pages/          - Next.js pages and API routes
+    api/mayar/    - Mayar.id payment API (create-payment, webhook)
   components/     - React UI components
   contexts/       - React context providers
   hooks/          - Custom React hooks
@@ -34,11 +35,11 @@ supabase/         - Supabase configuration
 - `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous/public key
 - `OPENAI_API_KEY` - For AI features (meeting analysis, transcription)
-- `MIDTRANS_SERVER_KEY` / `MIDTRANS_CLIENT_KEY` - Payment processing
-- `NEXT_PUBLIC_MIDTRANS_CLIENT_KEY` / `NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION`
+- `MAYAR_API_KEY` - Mayar.id API key for payment processing
+- `MAYAR_IS_PRODUCTION` - Set to "true" for production Mayar environment
 - `NEXT_PUBLIC_BASE_URL` - Base URL for payment callbacks
-- `MIDTRANS_IS_PRODUCTION` - Midtrans environment flag
 
 ## Notes
 - Supabase client handles missing env vars gracefully (warns instead of crashing)
+- Payment gateway: Mayar.id (sandbox: api.mayar.club, production: api.mayar.id)
 - Migrated from Vercel; `vercel.json` kept for reference but not used on Replit

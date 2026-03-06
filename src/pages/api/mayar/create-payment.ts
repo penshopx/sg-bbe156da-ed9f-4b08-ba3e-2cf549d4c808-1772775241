@@ -1,17 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { supabase } from "@/integrations/supabase/client";
 
-/* eslint-disable @typescript-eslint/no-require-imports */
-const midtransClient = require("midtrans-client");
-
-// Initialize Snap API client
-const snap = new midtransClient.Snap({
-  isProduction: process.env.MIDTRANS_IS_PRODUCTION === "true",
-  serverKey: process.env.MIDTRANS_SERVER_KEY || "",
-  clientKey: process.env.MIDTRANS_CLIENT_KEY || "",
-});
-
-type CreateSubscriptionRequest = {
+type CreatePaymentRequest = {
   planId: string;
   planName: string;
   planPrice: number;
@@ -29,6 +19,11 @@ export default async function handler(
     return res.status(405).json({ error: "Method not allowed" });
   }
 
+  const apiKey = process.env.MAYAR_API_KEY;
+  if (!apiKey) {
+    return res.status(500).json({ error: "Payment gateway not configured" });
+  }
+
   try {
     const {
       planId,
@@ -38,17 +33,14 @@ export default async function handler(
       userId,
       userEmail,
       userName,
-    } = req.body as CreateSubscriptionRequest;
+    } = req.body as CreatePaymentRequest;
 
-    // Validate required fields
     if (!planId || !planName || !planPrice || !userId || !userEmail) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Create order ID
     const orderId = `CHAESA-${Date.now()}-${userId.substring(0, 8)}`;
 
-    // Calculate end date based on billing cycle
     const startDate = new Date();
     const endDate = new Date();
     if (billingCycle === "annual") {
@@ -57,14 +49,13 @@ export default async function handler(
       endDate.setMonth(endDate.getMonth() + 1);
     }
 
-    // Create transaction record in database
     const { error: dbError } = await supabase
       .from("payment_transactions")
       .insert({
         user_id: userId,
         amount: planPrice,
         currency: "IDR",
-        payment_method: "midtrans",
+        payment_method: "mayar",
         status: "pending",
         transaction_id: orderId,
         metadata: {
@@ -81,44 +72,65 @@ export default async function handler(
       return res.status(500).json({ error: "Failed to create transaction" });
     }
 
-    // Create Midtrans transaction
-    const parameter = {
-      transaction_details: {
-        order_id: orderId,
-        gross_amount: planPrice,
-      },
-      credit_card: {
-        secure: true,
-      },
-      customer_details: {
-        first_name: userName || "User",
-        email: userEmail,
-      },
-      item_details: [
-        {
-          id: planId,
-          price: planPrice,
-          quantity: 1,
-          name: `${planName} - ${billingCycle === "annual" ? "Annual" : "Monthly"}`,
-        },
-      ],
-      callbacks: {
-        finish: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/success?order_id=${orderId}`,
-        error: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/failed?order_id=${orderId}`,
-        pending: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/pending?order_id=${orderId}`,
-      },
-    };
+    const isProduction = process.env.MAYAR_IS_PRODUCTION === "true";
+    const baseApiUrl = isProduction
+      ? "https://api.mayar.id/hl/v1"
+      : "https://api.mayar.club/hl/v1";
 
-    const transaction = await snap.createTransaction(parameter);
+    const siteUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
+
+    const mayarResponse = await fetch(`${baseApiUrl}/invoice`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: userName || "User",
+        email: userEmail,
+        mobile: "0000000000",
+        redirectUrl: `${siteUrl}/payment/success?order_id=${orderId}`,
+        description: `Chaesa Live - ${planName} (${billingCycle === "annual" ? "Annual" : "Monthly"})`,
+        items: [
+          {
+            quantity: 1,
+            rate: planPrice,
+            description: `${planName} - ${billingCycle === "annual" ? "Annual" : "Monthly"} Subscription`,
+          },
+        ],
+      }),
+    });
+
+    const mayarData = await mayarResponse.json();
+
+    if (!mayarResponse.ok) {
+      console.error("Mayar API error:", mayarData);
+      return res.status(500).json({ error: "Failed to create payment" });
+    }
+
+    const paymentLink = mayarData?.data?.link || mayarData?.link;
+
+    await supabase
+      .from("payment_transactions")
+      .update({
+        metadata: {
+          plan_id: planId,
+          billing_cycle: billingCycle,
+          plan_name: planName,
+          start_date: startDate.toISOString(),
+          end_date: endDate.toISOString(),
+          mayar_id: mayarData?.data?.id || null,
+        },
+      })
+      .eq("transaction_id", orderId);
 
     return res.status(200).json({
       success: true,
-      token: transaction.token,
-      redirectUrl: transaction.redirect_url,
+      paymentLink,
       orderId,
     });
   } catch (error) {
-    console.error("Midtrans error:", error);
+    console.error("Payment error:", error);
     return res.status(500).json({
       error: "Failed to create payment",
       details: error instanceof Error ? error.message : "Unknown error",

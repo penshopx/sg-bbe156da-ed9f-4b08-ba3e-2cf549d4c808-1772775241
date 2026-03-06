@@ -12,11 +12,6 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-declare global {
-  interface Window {
-    snap: any;
-  }
-}
 
 type Plan = {
   id: string;
@@ -38,19 +33,6 @@ export default function PricingPage() {
 
   useEffect(() => {
     fetchPlans();
-    
-    // Load Midtrans Snap Script
-    const script = document.createElement("script");
-    const isProduction = process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION === "true";
-    script.src = isProduction 
-      ? "https://app.midtrans.com/snap/snap.js" 
-      : "https://app.sandbox.midtrans.com/snap/snap.js";
-    script.setAttribute("data-client-key", process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY || "");
-    document.head.appendChild(script);
-
-    return () => {
-      document.head.removeChild(script);
-    };
   }, []);
 
   const fetchPlans = async () => {
@@ -163,8 +145,7 @@ export default function PricingPage() {
       const price = isAnnual ? plan.price_yearly : plan.price_monthly;
       const billingCycle = isAnnual ? "annual" : "monthly";
 
-      // Call API
-      const response = await fetch("/api/midtrans/create-subscription", {
+      const response = await fetch("/api/mayar/create-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -181,37 +162,13 @@ export default function PricingPage() {
       const data = await response.json();
 
       if (!data.success) {
-        throw new Error(data.error || "Failed to create subscription");
+        throw new Error(data.error || "Failed to create payment");
       }
 
-      // Open Snap Popup
-      if (window.snap) {
-        window.snap.pay(data.token, {
-          onSuccess: function(result: any) {
-            router.push(`/payment/success?order_id=${data.orderId}`);
-          },
-          onPending: function(result: any) {
-            router.push(`/payment/pending?order_id=${data.orderId}`);
-          },
-          onError: function(result: any) {
-            toast({
-              title: "Payment Failed",
-              description: "There was an error processing your payment.",
-              variant: "destructive"
-            });
-            console.error(result);
-          },
-          onClose: function() {
-            setProcessingId(null);
-          }
-        });
+      if (data.paymentLink) {
+        window.location.href = data.paymentLink;
       } else {
-        console.error("Snap not loaded");
-        toast({
-          title: "Error",
-          description: "Payment system not ready. Please refresh the page.",
-          variant: "destructive"
-        });
+        throw new Error("No payment link received");
       }
 
     } catch (error) {
@@ -222,7 +179,7 @@ export default function PricingPage() {
         variant: "destructive"
       });
     } finally {
-      if (!window.snap) setProcessingId(null);
+      setProcessingId(null);
     }
   };
 
@@ -350,7 +307,7 @@ export default function PricingPage() {
               <AccordionItem value="item-4">
                 <AccordionTrigger>What payment methods do you accept?</AccordionTrigger>
                 <AccordionContent>
-                  We accept all major credit cards (Visa, Mastercard), bank transfers (BCA, Mandiri, BNI, BRI), and e-wallets (GoPay, ShopeePay, OVO, Dana) via Midtrans.
+                  We accept all major credit cards (Visa, Mastercard), bank transfers (BCA, Mandiri, BNI, BRI), e-wallets (GoPay, ShopeePay, OVO, Dana), QRIS, and PayLater via Mayar.
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
