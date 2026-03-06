@@ -269,9 +269,9 @@ export const microLearningService = {
       .insert({
         user_id: user.id,
         achievement_type: achievementType,
-        title,
-        description,
-        points,
+        achievement_title: title,
+        achievement_description: description,
+        points_earned: points,
       })
       .select()
       .single();
