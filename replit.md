@@ -68,6 +68,15 @@ supabase/         - Supabase configuration
 - Invite button (UserPlus icon) in toolbar, opens side panel while meeting is live
 - WebRTC-based video/audio, recording, reactions, polls, whiteboard, breakout rooms
 
+## PWA (Progressive Web App)
+- Manifest: `public/manifest.json` — app name, icons, shortcuts, theme color
+- Service Worker: `public/sw.js` — network-first caching with offline fallback
+- Offline page: `public/offline.html` — Indonesian offline message with retry button
+- Icons: `public/icons/icon-{72,96,128,144,152,192,384,512}x*.png`
+- Apple Touch Icons and meta tags in `_document.tsx`
+- Service worker registered in `_app.tsx` on mount
+- App installable on Android (Chrome) and iOS (Safari Add to Home Screen)
+
 ## Notes
 - Supabase client handles missing env vars gracefully (warns instead of crashing)
 - Payment gateway: Mayar.id (sandbox: api.mayar.club, production: api.mayar.id)
