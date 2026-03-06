@@ -39,6 +39,18 @@ supabase/         - Supabase configuration
 - `MAYAR_IS_PRODUCTION` - Set to "true" for production Mayar environment
 - `NEXT_PUBLIC_BASE_URL` - Base URL for payment callbacks
 
+## Theme
+- Dark/Light mode via `next-themes` with Tailwind CSS class-based dark mode
+- ThemeProvider configured with `attribute="class"` and `defaultTheme="dark"` in `_app.tsx`
+- Toggle component: `src/components/ThemeSwitch.tsx` (in navbar on index page)
+- Options: Terang (Light), Gelap (Dark), Sistem (System)
+
+## Chatbot
+- ChatWidget component (`src/components/ChatWidget.tsx`) rendered globally via `_app.tsx`
+- API endpoint: `src/pages/api/chat/ask.ts` with OpenAI GPT-4 integration
+- Persona: Santai tapi sopan (casual but polite), uses "saya/aku" and "Kamu/Anda"
+- All UI strings in Indonesian
+
 ## Notes
 - Supabase client handles missing env vars gracefully (warns instead of crashing)
 - Payment gateway: Mayar.id (sandbox: api.mayar.club, production: api.mayar.id)

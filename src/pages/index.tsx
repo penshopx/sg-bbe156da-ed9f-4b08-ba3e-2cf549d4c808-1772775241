@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
+import { ThemeSwitch } from "@/components/ThemeSwitch";
 import { 
   Video, Users, Lock, Share2, Award, MessageSquare, 
   Mic, MonitorPlay, Shield, Sparkles, ArrowRight, 
@@ -101,38 +102,39 @@ export default function Home() {
         description="Satu-satunya platform yang menggabungkan video conference, AI course generator, dan live commerce. Hemat 59% vs platform premium sambil cuan dari konten Anda."
       />
 
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
+      <div className="min-h-screen bg-gradient-to-br from-gray-100 via-purple-50 to-gray-100 dark:from-gray-900 dark:via-purple-900 dark:to-gray-900">
         {/* Header Navigation */}
-        <header className="bg-black/20 backdrop-blur-sm border-b border-white/10 sticky top-0 z-50">
+        <header className="bg-white/80 dark:bg-black/20 backdrop-blur-sm border-b border-gray-200 dark:border-white/10 sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               {/* Logo */}
               <Link href="/">
                 <div className="flex items-center gap-2 cursor-pointer">
-                  <Video className="w-8 h-8 text-purple-400" />
-                  <span className="text-xl font-bold text-white">Chaesa Live</span>
+                  <Video className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+                  <span className="text-xl font-bold text-gray-900 dark:text-white">Chaesa Live</span>
                 </div>
               </Link>
 
               {/* Navigation */}
               <nav className="hidden md:flex items-center gap-6">
-                <Link href="/pricing" className="text-gray-300 hover:text-white transition-colors">
+                <Link href="/pricing" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors">
                   Harga
                 </Link>
-                <Link href="/ai-studio" className="text-gray-300 hover:text-white transition-colors">
+                <Link href="/ai-studio" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors">
                   AI Studio
                 </Link>
-                <Link href="/micro-learning" className="text-gray-300 hover:text-white transition-colors">
+                <Link href="/micro-learning" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors">
                   Micro-Learning
                 </Link>
               </nav>
 
-              {/* Auth Buttons */}
+              {/* Theme Toggle & Auth Buttons */}
               <div className="flex items-center gap-3">
+                <ThemeSwitch />
                 {!isLoggedIn ? (
                   <>
                     <Link href="/auth?mode=login">
-                      <Button variant="ghost" className="text-white hover:bg-white/10">
+                      <Button variant="ghost" className="text-gray-700 hover:bg-gray-200 dark:text-white dark:hover:bg-white/10">
                         Masuk
                       </Button>
                     </Link>
@@ -144,10 +146,10 @@ export default function Home() {
                   </>
                 ) : (
                   <div className="flex items-center gap-3">
-                    <span className="text-sm text-gray-300 hidden sm:block">{userEmail || "User"}</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-300 hidden sm:block">{userEmail || "User"}</span>
                     <Button
                       variant="ghost"
-                      className="text-white hover:bg-white/10"
+                      className="text-gray-700 hover:bg-gray-200 dark:text-white dark:hover:bg-white/10"
                       onClick={async () => {
                         try {
                           console.log("Logging out...");
@@ -195,20 +197,20 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center mb-16">
             {/* Trust Badge */}
-            <Badge className="mb-6 bg-purple-500/20 text-purple-300 border-purple-500/50 px-4 py-2">
+            <Badge className="mb-6 bg-purple-500/20 text-purple-700 dark:text-purple-300 border-purple-500/50 px-4 py-2">
               <Star className="w-4 h-4 mr-2 fill-yellow-400 text-yellow-400" />
               Dipercaya oleh 1.000+ Kreator & Educator
             </Badge>
 
             {/* Main Headline */}
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
+            <h1 className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
               Ubah Meeting Anda<br />
               Jadi <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Kursus Micro-Learning</span><br />
               yang Menghasilkan dalam 15 Menit
             </h1>
 
             {/* Sub-headline */}
-            <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto">
+            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
               Berhenti buang waktu berjam-jam editing rekaman. AI kami otomatis memotong meeting 2 jam Anda jadi 20 modul siap jual lengkap dengan slides, quiz, dan podcast. <span className="text-purple-400 font-semibold">Plus live commerce untuk konversi 3-5x lebih tinggi.</span>
             </p>
 
@@ -226,7 +228,7 @@ export default function Home() {
                 <Button 
                   size="lg" 
                   variant="outline"
-                  className="border-2 border-purple-500 text-purple-300 hover:bg-purple-500/20 px-8 py-6 text-lg rounded-xl"
+                  className="border-2 border-purple-500 text-purple-700 dark:text-purple-300 hover:bg-purple-500/20 px-8 py-6 text-lg rounded-xl"
                 >
                   <PlayCircle className="w-5 h-5 mr-2" />
                   Tonton Demo 2 Menit
@@ -237,24 +239,24 @@ export default function Home() {
             {/* Social Proof Stats */}
             <div className="flex flex-wrap gap-8 justify-center text-center">
               <div>
-                <div className="text-3xl font-bold text-white">{stats.creators.toLocaleString()}+</div>
-                <div className="text-gray-400">Kreator Aktif</div>
+                <div className="text-3xl font-bold text-gray-900 dark:text-white">{stats.creators.toLocaleString()}+</div>
+                <div className="text-gray-500 dark:text-gray-400">Kreator Aktif</div>
               </div>
               <div>
-                <div className="text-3xl font-bold text-white">{stats.courses.toLocaleString()}+</div>
-                <div className="text-gray-400">Kursus Dihasilkan</div>
+                <div className="text-3xl font-bold text-gray-900 dark:text-white">{stats.courses.toLocaleString()}+</div>
+                <div className="text-gray-500 dark:text-gray-400">Kursus Dihasilkan</div>
               </div>
               <div>
-                <div className="text-3xl font-bold text-white">{stats.learners.toLocaleString()}+</div>
-                <div className="text-gray-400">Pelajar Puas</div>
+                <div className="text-3xl font-bold text-gray-900 dark:text-white">{stats.learners.toLocaleString()}+</div>
+                <div className="text-gray-500 dark:text-gray-400">Pelajar Puas</div>
               </div>
             </div>
           </div>
 
           {/* Join Meeting Form */}
-          <Card className="max-w-2xl mx-auto p-8 bg-white/5 backdrop-blur-sm border-white/10">
+          <Card className="max-w-2xl mx-auto p-8 bg-white/80 dark:bg-white/5 backdrop-blur-sm border-gray-200 dark:border-white/10">
             <form onSubmit={handleJoinMeeting} className="space-y-4">
-              <h3 className="text-2xl font-semibold text-white text-center mb-6">
+              <h3 className="text-2xl font-semibold text-gray-900 dark:text-white text-center mb-6">
                 Gabung Meeting yang Sudah Ada
               </h3>
               <div className="flex gap-4">
@@ -263,7 +265,7 @@ export default function Home() {
                   placeholder="Masukkan kode meeting (contoh: abc123xyz)"
                   value={meetingCode}
                   onChange={(e) => setMeetingCode(e.target.value)}
-                  className="flex-1 px-6 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 text-lg"
+                  className="flex-1 px-6 py-4 bg-gray-100 dark:bg-white/10 border border-gray-300 dark:border-white/20 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 text-lg"
                 />
                 <Button 
                   type="submit" 
@@ -278,13 +280,13 @@ export default function Home() {
         </div>
 
         {/* Problem-Agitate-Solution Section */}
-        <div className="bg-black/30 py-20">
+        <div className="bg-gray-50 dark:bg-black/30 py-20">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-              <Badge className="mb-4 bg-red-500/20 text-red-300 border-red-500/50">
+              <Badge className="mb-4 bg-red-500/20 text-red-600 dark:text-red-300 border-red-500/50">
                 Masalah dengan Platform Saat Ini
               </Badge>
-              <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
                 Platform Meeting Konvensional <span className="text-red-400">Bunuh Produktivitas</span> Anda
               </h2>
             </div>
@@ -312,14 +314,14 @@ export default function Home() {
               ].map((item, idx) => (
                 <Card key={idx} className={`p-6 bg-${item.color}-900/20 border-${item.color}-500/30 backdrop-blur-sm`}>
                   <item.icon className={`w-12 h-12 text-${item.color}-400 mb-4`} />
-                  <h3 className="text-xl font-bold text-white mb-3">{item.problem}</h3>
-                  <p className="text-gray-300">{item.description}</p>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{item.problem}</h3>
+                  <p className="text-gray-600 dark:text-gray-300">{item.description}</p>
                 </Card>
               ))}
             </div>
 
             <div className="text-center">
-              <h3 className="text-3xl font-bold text-white mb-4">
+              <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
                 Chaesa Live Selesaikan Semua Ini 👇
               </h3>
             </div>
@@ -329,10 +331,10 @@ export default function Home() {
         {/* 3 Killer Features */}
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center mb-16">
-            <Badge className="mb-4 bg-purple-500/20 text-purple-300 border-purple-500/50">
+            <Badge className="mb-4 bg-purple-500/20 text-purple-700 dark:text-purple-300 border-purple-500/50">
               Fitur Revolusioner
             </Badge>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
               3 Fitur yang <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Gak Ada</span> di Kompetitor
             </h2>
           </div>
@@ -341,14 +343,14 @@ export default function Home() {
             {/* Feature 1: AI Course Factory */}
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div>
-                <Badge className="mb-4 bg-blue-500/20 text-blue-300 border-blue-500/50">
+                <Badge className="mb-4 bg-blue-500/20 text-blue-600 dark:text-blue-300 border-blue-500/50">
                   <Brain className="w-4 h-4 mr-2" />
                   AI Course Factory
                 </Badge>
-                <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                <h3 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                   Bikin Kursus 1 Klik dengan AI Otomatis
                 </h3>
-                <p className="text-xl text-gray-300 mb-6">
+                <p className="text-xl text-gray-600 dark:text-gray-300 mb-6">
                   Rekam 1 meeting → AI potong jadi 20 modul micro (5-7 menit tiap modul) → Otomatis bikin slides, quiz, podcast, ebook → Publish & jual dalam 15 menit.
                 </p>
                 <div className="space-y-3 mb-6">
@@ -359,15 +361,15 @@ export default function Home() {
                     "🎙️ Podcast AI dengan 2 host berbincang",
                     "📱 Optimize untuk platform social media"
                   ].map((feature, idx) => (
-                    <div key={idx} className="flex items-center gap-3 text-gray-300">
+                    <div key={idx} className="flex items-center gap-3 text-gray-600 dark:text-gray-300">
                       <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
                       <span>{feature}</span>
                     </div>
                   ))}
                 </div>
                 <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4 mb-6">
-                  <div className="text-sm text-purple-300 font-semibold mb-1">HEMAT WAKTU</div>
-                  <div className="text-2xl font-bold text-white">
+                  <div className="text-sm text-purple-600 dark:text-purple-300 font-semibold mb-1">HEMAT WAKTU</div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
                     90% (20 jam → 2 jam)
                   </div>
                 </div>
@@ -378,7 +380,7 @@ export default function Home() {
                 </Link>
               </div>
               <div className="relative">
-                <div className="aspect-video bg-gradient-to-br from-blue-900 to-purple-900 rounded-2xl p-8 flex items-center justify-center">
+                <div className="aspect-video bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-2xl p-8 flex items-center justify-center">
                   <Brain className="w-32 h-32 text-purple-400" />
                 </div>
                 <div className="absolute -top-4 -right-4 bg-green-500 text-white px-4 py-2 rounded-full font-bold shadow-lg">
@@ -390,7 +392,7 @@ export default function Home() {
             {/* Feature 2: Live Sales CTA */}
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className="order-2 md:order-1 relative">
-                <div className="aspect-video bg-gradient-to-br from-pink-900 to-orange-900 rounded-2xl p-8 flex items-center justify-center">
+                <div className="aspect-video bg-gradient-to-br from-pink-100 to-orange-100 dark:from-pink-900 dark:to-orange-900 rounded-2xl p-8 flex items-center justify-center">
                   <Zap className="w-32 h-32 text-orange-400" />
                 </div>
                 <div className="absolute -top-4 -left-4 bg-orange-500 text-white px-4 py-2 rounded-full font-bold shadow-lg">
@@ -398,14 +400,14 @@ export default function Home() {
                 </div>
               </div>
               <div className="order-1 md:order-2">
-                <Badge className="mb-4 bg-orange-500/20 text-orange-300 border-orange-500/50">
+                <Badge className="mb-4 bg-orange-500/20 text-orange-600 dark:text-orange-300 border-orange-500/50">
                   <Zap className="w-4 h-4 mr-2" />
                   Live Sales CTA
                 </Badge>
-                <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                <h3 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                   Live Commerce Interaktif (Push CTA ke Semua Viewer)
                 </h3>
-                <p className="text-xl text-gray-300 mb-6">
+                <p className="text-xl text-gray-600 dark:text-gray-300 mb-6">
                   Saat webinar/demo, push tombol "Beli Sekarang" langsung ke layar semua viewer dengan countdown timer. Impulse buying = konversi 3-5x lebih tinggi dari "link di chat".
                 </p>
                 <div className="space-y-3 mb-6">
@@ -416,15 +418,15 @@ export default function Home() {
                     "🎯 CTA warna & copy bisa di-custom",
                     "💳 Checkout langsung via payment gateway"
                   ].map((feature, idx) => (
-                    <div key={idx} className="flex items-center gap-3 text-gray-300">
+                    <div key={idx} className="flex items-center gap-3 text-gray-600 dark:text-gray-300">
                       <CheckCircle className="w-5 h-5 text-orange-400 flex-shrink-0" />
                       <span>{feature}</span>
                     </div>
                   ))}
                 </div>
                 <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4 mb-6">
-                  <div className="text-sm text-orange-300 font-semibold mb-1">BOOST KONVERSI</div>
-                  <div className="text-2xl font-bold text-white">
+                  <div className="text-sm text-orange-600 dark:text-orange-300 font-semibold mb-1">BOOST KONVERSI</div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
                     3-5x vs Webinar Tradisional
                   </div>
                 </div>
@@ -437,14 +439,14 @@ export default function Home() {
             {/* Feature 3: Studio Mode */}
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div>
-                <Badge className="mb-4 bg-green-500/20 text-green-300 border-green-500/50">
+                <Badge className="mb-4 bg-green-500/20 text-green-600 dark:text-green-300 border-green-500/50">
                   <MonitorPlay className="w-4 h-4 mr-2" />
                   Studio Mode
                 </Badge>
-                <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                <h3 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                   Mode Studio untuk Content Creator & Streamer Profesional
                 </h3>
-                <p className="text-xl text-gray-300 mb-6">
+                <p className="text-xl text-gray-600 dark:text-gray-300 mb-6">
                   Platform meeting konvensional bunuh kualitas audio saat streaming? Kami fix itu. Toggle "Studio Mode" → Feed bersih (tanpa UI) + "Original Sound" (tanpa processing) = Sempurna untuk live streaming.
                 </p>
                 <div className="space-y-3 mb-6">
@@ -455,15 +457,15 @@ export default function Home() {
                     "🎬 Sempurna untuk live streaming profesional",
                     "⌨️ Keyboard shortcut (Ctrl+Shift+U)"
                   ].map((feature, idx) => (
-                    <div key={idx} className="flex items-center gap-3 text-gray-300">
+                    <div key={idx} className="flex items-center gap-3 text-gray-600 dark:text-gray-300">
                       <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
                       <span>{feature}</span>
                     </div>
                   ))}
                 </div>
                 <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 mb-6">
-                  <div className="text-sm text-green-300 font-semibold mb-1">KUALITAS AUDIO</div>
-                  <div className="text-2xl font-bold text-white">
+                  <div className="text-sm text-green-600 dark:text-green-300 font-semibold mb-1">KUALITAS AUDIO</div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
                     Kualitas Studio (Tanpa Suara Robot)
                   </div>
                 </div>
@@ -472,7 +474,7 @@ export default function Home() {
                 </Button>
               </div>
               <div className="relative">
-                <div className="aspect-video bg-gradient-to-br from-green-900 to-teal-900 rounded-2xl p-8 flex items-center justify-center">
+                <div className="aspect-video bg-gradient-to-br from-green-100 to-teal-100 dark:from-green-900 dark:to-teal-900 rounded-2xl p-8 flex items-center justify-center">
                   <MonitorPlay className="w-32 h-32 text-green-400" />
                 </div>
                 <div className="absolute -top-4 -right-4 bg-teal-500 text-white px-4 py-2 rounded-full font-bold shadow-lg">
@@ -484,80 +486,80 @@ export default function Home() {
         </div>
 
         {/* Pricing Comparison */}
-        <div className="bg-black/30 py-20">
+        <div className="bg-gray-50 dark:bg-black/30 py-20">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-              <Badge className="mb-4 bg-purple-500/20 text-purple-300 border-purple-500/50">
+              <Badge className="mb-4 bg-purple-500/20 text-purple-700 dark:text-purple-300 border-purple-500/50">
                 Harga Transparan
               </Badge>
-              <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                Hemat <span className="text-green-400">Hingga 60%</span>, Dapat <span className="text-purple-400">10x Lebih Banyak Fitur</span>
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+                Hemat <span className="text-green-500 dark:text-green-400">Hingga 60%</span>, Dapat <span className="text-purple-600 dark:text-purple-400">10x Lebih Banyak Fitur</span>
               </h2>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-white/20">
-                    <th className="p-4 text-white font-semibold">Fitur</th>
-                    <th className="p-4 text-white font-semibold text-center">Platform A</th>
-                    <th className="p-4 text-white font-semibold text-center">Platform B</th>
-                    <th className="p-4 text-white font-semibold text-center bg-purple-900/30">
+                  <tr className="border-b border-gray-300 dark:border-white/20">
+                    <th className="p-4 text-gray-900 dark:text-white font-semibold">Fitur</th>
+                    <th className="p-4 text-gray-900 dark:text-white font-semibold text-center">Platform A</th>
+                    <th className="p-4 text-gray-900 dark:text-white font-semibold text-center">Platform B</th>
+                    <th className="p-4 text-gray-900 dark:text-white font-semibold text-center bg-purple-100 dark:bg-purple-900/30">
                       <Badge className="mb-2">Rekomendasi</Badge>
                       <div>Chaesa Live Pro</div>
                     </th>
                   </tr>
                 </thead>
-                <tbody className="text-gray-300">
-                  <tr className="border-b border-white/10">
+                <tbody className="text-gray-600 dark:text-gray-300">
+                  <tr className="border-b border-gray-200 dark:border-white/10">
                     <td className="p-4 font-semibold">Harga/Bulan</td>
                     <td className="p-4 text-center">Rp 240.000</td>
                     <td className="p-4 text-center">Rp 130.000</td>
-                    <td className="p-4 text-center bg-purple-900/20 font-bold text-green-400">Rp 99.000</td>
+                    <td className="p-4 text-center bg-purple-50 dark:bg-purple-900/20 font-bold text-green-600 dark:text-green-400">Rp 99.000</td>
                   </tr>
-                  <tr className="border-b border-white/10">
+                  <tr className="border-b border-gray-200 dark:border-white/10">
                     <td className="p-4">Hemat vs Platform Premium</td>
                     <td className="p-4 text-center">-</td>
                     <td className="p-4 text-center">-</td>
                     <td className="p-4 text-center bg-purple-900/20 font-bold text-green-400">Hemat 59%</td>
                   </tr>
-                  <tr className="border-b border-white/10">
+                  <tr className="border-b border-gray-200 dark:border-white/10">
                     <td className="p-4">Durasi Meeting</td>
                     <td className="p-4 text-center">Unlimited</td>
                     <td className="p-4 text-center">Unlimited</td>
                     <td className="p-4 text-center bg-purple-900/20">Unlimited</td>
                   </tr>
-                  <tr className="border-b border-white/10">
+                  <tr className="border-b border-gray-200 dark:border-white/10">
                     <td className="p-4">AI Course Generator</td>
                     <td className="p-4 text-center text-red-400">❌</td>
                     <td className="p-4 text-center text-red-400">❌</td>
                     <td className="p-4 text-center bg-purple-900/20 text-green-400">✅</td>
                   </tr>
-                  <tr className="border-b border-white/10">
+                  <tr className="border-b border-gray-200 dark:border-white/10">
                     <td className="p-4">Live Sales CTA</td>
                     <td className="p-4 text-center text-red-400">❌</td>
                     <td className="p-4 text-center text-red-400">❌</td>
                     <td className="p-4 text-center bg-purple-900/20 text-green-400">✅</td>
                   </tr>
-                  <tr className="border-b border-white/10">
+                  <tr className="border-b border-gray-200 dark:border-white/10">
                     <td className="p-4">Studio Mode (Streaming-Friendly)</td>
                     <td className="p-4 text-center text-red-400">❌</td>
                     <td className="p-4 text-center text-red-400">❌</td>
                     <td className="p-4 text-center bg-purple-900/20 text-green-400">✅</td>
                   </tr>
-                  <tr className="border-b border-white/10">
+                  <tr className="border-b border-gray-200 dark:border-white/10">
                     <td className="p-4">Original Sound (Fix Audio)</td>
                     <td className="p-4 text-center text-yellow-400">⚠️ Rumit</td>
                     <td className="p-4 text-center text-red-400">❌</td>
                     <td className="p-4 text-center bg-purple-900/20 text-green-400">✅ Toggle 1x</td>
                   </tr>
-                  <tr className="border-b border-white/10">
+                  <tr className="border-b border-gray-200 dark:border-white/10">
                     <td className="p-4">Podcast AI Otomatis</td>
                     <td className="p-4 text-center text-red-400">❌</td>
                     <td className="p-4 text-center text-red-400">❌</td>
                     <td className="p-4 text-center bg-purple-900/20 text-green-400">✅</td>
                   </tr>
-                  <tr className="border-b border-white/10">
+                  <tr className="border-b border-gray-200 dark:border-white/10">
                     <td className="p-4">Micro-Learning Chunking</td>
                     <td className="p-4 text-center text-red-400">❌</td>
                     <td className="p-4 text-center text-red-400">❌</td>
@@ -580,10 +582,10 @@ export default function Home() {
         {/* Use Cases by Persona */}
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center mb-16">
-            <Badge className="mb-4 bg-purple-500/20 text-purple-300 border-purple-500/50">
+            <Badge className="mb-4 bg-purple-500/20 text-purple-700 dark:text-purple-300 border-purple-500/50">
               Sempurna Untuk
             </Badge>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
               Siapa yang Paling Untung Pakai Chaesa Live?
             </h2>
           </div>
@@ -629,19 +631,19 @@ export default function Home() {
             ].map((useCase, idx) => (
               <Card key={idx} className={`p-8 bg-${useCase.color}-900/20 border-${useCase.color}-500/30 backdrop-blur-sm hover:bg-${useCase.color}-900/30 transition-all`}>
                 <useCase.icon className={`w-12 h-12 text-${useCase.color}-400 mb-4`} />
-                <h3 className="text-2xl font-bold text-white mb-3">{useCase.persona}</h3>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">{useCase.persona}</h3>
                 <div className="space-y-4 mb-6">
                   <div>
-                    <div className="text-sm text-red-400 font-semibold mb-1">❌ Masalah:</div>
-                    <div className="text-gray-300">{useCase.pain}</div>
+                    <div className="text-sm text-red-500 dark:text-red-400 font-semibold mb-1">❌ Masalah:</div>
+                    <div className="text-gray-600 dark:text-gray-300">{useCase.pain}</div>
                   </div>
                   <div>
-                    <div className="text-sm text-green-400 font-semibold mb-1">✅ Solusi Chaesa:</div>
-                    <div className="text-gray-300">{useCase.solution}</div>
+                    <div className="text-sm text-green-500 dark:text-green-400 font-semibold mb-1">✅ Solusi Chaesa:</div>
+                    <div className="text-gray-600 dark:text-gray-300">{useCase.solution}</div>
                   </div>
                   <div className={`bg-${useCase.color}-500/10 border border-${useCase.color}-500/30 rounded-lg p-3`}>
-                    <div className="text-sm text-gray-400 mb-1">ROI</div>
-                    <div className="text-lg font-bold text-white">{useCase.roi}</div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">ROI</div>
+                    <div className="text-lg font-bold text-gray-900 dark:text-white">{useCase.roi}</div>
                   </div>
                 </div>
                 <Button className={`w-full bg-gradient-to-r from-${useCase.color}-600 to-${useCase.color}-700`}>
@@ -653,13 +655,13 @@ export default function Home() {
         </div>
 
         {/* Testimonials */}
-        <div className="bg-black/30 py-20">
+        <div className="bg-gray-50 dark:bg-black/30 py-20">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-              <Badge className="mb-4 bg-purple-500/20 text-purple-300 border-purple-500/50">
+              <Badge className="mb-4 bg-purple-500/20 text-purple-700 dark:text-purple-300 border-purple-500/50">
                 Kisah Sukses
               </Badge>
-              <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
                 Apa Kata Early Adopter
               </h2>
             </div>
@@ -688,14 +690,14 @@ export default function Home() {
                   metric: "Zero masalah audio"
                 }
               ].map((testimonial, idx) => (
-                <Card key={idx} className="p-6 bg-white/5 border-white/10 backdrop-blur-sm">
+                <Card key={idx} className="p-6 bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 backdrop-blur-sm shadow-sm">
                   <div className="flex items-center gap-4 mb-4">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
                       {testimonial.avatar}
                     </div>
                     <div>
-                      <div className="text-white font-semibold">{testimonial.name}</div>
-                      <div className="text-gray-400 text-sm">{testimonial.role}</div>
+                      <div className="text-gray-900 dark:text-white font-semibold">{testimonial.name}</div>
+                      <div className="text-gray-500 dark:text-gray-400 text-sm">{testimonial.role}</div>
                     </div>
                   </div>
                   <div className="flex gap-1 mb-4">
@@ -703,8 +705,8 @@ export default function Home() {
                       <Star key={star} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
                     ))}
                   </div>
-                  <p className="text-gray-300 mb-4 italic">&ldquo;{testimonial.quote}&rdquo;</p>
-                  <Badge className="bg-green-500/20 text-green-300 border-green-500/50">
+                  <p className="text-gray-600 dark:text-gray-300 mb-4 italic">&ldquo;{testimonial.quote}&rdquo;</p>
+                  <Badge className="bg-green-500/20 text-green-600 dark:text-green-300 border-green-500/50">
                     {testimonial.metric}
                   </Badge>
                 </Card>
@@ -715,15 +717,15 @@ export default function Home() {
 
         {/* Final CTA */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <Card className="p-12 bg-gradient-to-br from-purple-900/40 to-pink-900/40 border-purple-500/30 backdrop-blur-sm text-center">
-            <Badge className="mb-6 bg-green-500/20 text-green-300 border-green-500/50">
+          <Card className="p-12 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/40 dark:to-pink-900/40 border-purple-300 dark:border-purple-500/30 backdrop-blur-sm text-center">
+            <Badge className="mb-6 bg-green-500/20 text-green-600 dark:text-green-300 border-green-500/50">
               <Gift className="w-4 h-4 mr-2" />
               Khusus Kreator Serius
             </Badge>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
               Siap 10x Revenue Konten Anda?
             </h2>
-            <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
               Gabung 1.000+ kreator yang sudah cuan lebih dengan usaha lebih sedikit. Paket 1 Tahun <span className="font-bold text-yellow-400">Rp 999.000</span> - Semua fitur Pro, zero penyesalan. Ini investasi, bukan pengeluaran.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
@@ -737,12 +739,12 @@ export default function Home() {
                 size="lg" 
                 variant="outline"
                 onClick={handleStartMeeting}
-                className="border-2 border-purple-500 text-purple-300 hover:bg-purple-500/20 px-12 py-6 text-lg"
+                className="border-2 border-purple-500 text-purple-700 dark:text-purple-300 hover:bg-purple-500/20 px-12 py-6 text-lg"
               >
                 Coba Meeting Gratis Dulu
               </Button>
             </div>
-            <p className="text-gray-400 text-sm">
+            <p className="text-gray-500 dark:text-gray-400 text-sm">
               Tanpa kartu kredit • Batal kapan saja • Garansi uang kembali 7 hari
             </p>
           </Card>
@@ -759,7 +761,7 @@ export default function Home() {
             ].map((trust, idx) => (
               <div key={idx} className="flex flex-col items-center gap-3">
                 <trust.icon className="w-10 h-10 text-purple-400" />
-                <div className="text-gray-300 font-semibold">{trust.label}</div>
+                <div className="text-gray-600 dark:text-gray-300 font-semibold">{trust.label}</div>
               </div>
             ))}
           </div>
@@ -790,16 +792,16 @@ export default function Home() {
         )}
 
         {/* Footer */}
-        <footer className="bg-black/40 border-t border-white/10 py-8">
+        <footer className="bg-gray-100 dark:bg-black/40 border-t border-gray-200 dark:border-white/10 py-8">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <div className="text-gray-400 text-sm">
+              <div className="text-gray-500 dark:text-gray-400 text-sm">
                 © 2026 Chaesa Live. Hak cipta dilindungi.
               </div>
-              <div className="flex gap-6 text-sm text-gray-400">
-                <Link href="/pricing" className="hover:text-white transition-colors">Harga</Link>
-                <Link href="/ai-studio" className="hover:text-white transition-colors">AI Studio</Link>
-                <Link href="/micro-learning" className="hover:text-white transition-colors">Micro-Learning</Link>
+              <div className="flex gap-6 text-sm text-gray-500 dark:text-gray-400">
+                <Link href="/pricing" className="hover:text-gray-900 dark:hover:text-white transition-colors">Harga</Link>
+                <Link href="/ai-studio" className="hover:text-gray-900 dark:hover:text-white transition-colors">AI Studio</Link>
+                <Link href="/micro-learning" className="hover:text-gray-900 dark:hover:text-white transition-colors">Micro-Learning</Link>
               </div>
             </div>
           </div>
