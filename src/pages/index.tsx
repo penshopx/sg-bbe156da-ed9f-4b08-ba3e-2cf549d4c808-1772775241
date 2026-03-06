@@ -2,6 +2,7 @@ import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   Video, Users, Lock, Share2, Award, MessageSquare, 
   Mic, MonitorPlay, Shield, Sparkles, ArrowRight, 
@@ -15,11 +16,25 @@ import { useRouter } from "next/router";
 export default function Home() {
   const router = useRouter();
   const [meetingCode, setMeetingCode] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
   const [stats, setStats] = useState({
     creators: 1234,
     courses: 5678,
     learners: 12340
   });
+
+  // Check if user is logged in
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setIsLoggedIn(true);
+        setUserEmail(session.user.email || "");
+      }
+    };
+    checkAuth();
+  }, []);
 
   // Simulate real-time stats counter
   useEffect(() => {
@@ -49,10 +64,71 @@ export default function Home() {
     <>
       <SEO
         title="Chaesa Live - Ubah Meeting Jadi Kursus Micro-Learning yang Menghasilkan"
-        description="Satu-satunya platform yang menggabungkan video conference, AI course generator, dan live commerce. Hemat 59% vs Zoom sambil cuan dari konten Anda."
+        description="Satu-satunya platform yang menggabungkan video conference, AI course generator, dan live commerce. Hemat 59% vs platform premium sambil cuan dari konten Anda."
       />
 
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
+        {/* Header Navigation */}
+        <header className="bg-black/20 backdrop-blur-sm border-b border-white/10 sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              {/* Logo */}
+              <Link href="/">
+                <div className="flex items-center gap-2 cursor-pointer">
+                  <Video className="w-8 h-8 text-purple-400" />
+                  <span className="text-xl font-bold text-white">Chaesa Live</span>
+                </div>
+              </Link>
+
+              {/* Navigation */}
+              <nav className="hidden md:flex items-center gap-6">
+                <Link href="/pricing" className="text-gray-300 hover:text-white transition-colors">
+                  Harga
+                </Link>
+                <Link href="/ai-studio" className="text-gray-300 hover:text-white transition-colors">
+                  AI Studio
+                </Link>
+                <Link href="/micro-learning" className="text-gray-300 hover:text-white transition-colors">
+                  Micro-Learning
+                </Link>
+              </nav>
+
+              {/* Auth Buttons */}
+              <div className="flex items-center gap-3">
+                {!isLoggedIn ? (
+                  <>
+                    <Link href="/auth?mode=login">
+                      <Button variant="ghost" className="text-white hover:bg-white/10">
+                        Masuk
+                      </Button>
+                    </Link>
+                    <Link href="/auth?mode=register">
+                      <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+                        Daftar Gratis
+                      </Button>
+                    </Link>
+                  </>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-gray-300 hidden sm:block">{userEmail}</span>
+                    <Button
+                      variant="ghost"
+                      className="text-white hover:bg-white/10"
+                      onClick={async () => {
+                        await supabase.auth.signOut();
+                        setIsLoggedIn(false);
+                        router.reload();
+                      }}
+                    >
+                      Keluar
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </header>
+
         {/* Limited Time Offer Banner */}
         <div className="bg-gradient-to-r from-yellow-600 to-orange-600 text-white py-3 px-4 text-center sticky top-0 z-50">
           <div className="flex items-center justify-center gap-2 text-sm md:text-base font-semibold">
