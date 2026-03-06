@@ -79,7 +79,7 @@ export default function CoursePage() {
 
     await microLearningService.updateProgress(courseId, currentModule.id, {
       status: "completed",
-      progress_percentage: 100,
+      progressPercentage: 100,
     });
 
     // Check for achievements
@@ -453,7 +453,7 @@ export default function CoursePage() {
                             .map((content) => (
                               <a
                                 key={content.id}
-                                href={content.content_url || "#"}
+                                href={content.file_url || "#"}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="block p-4 bg-purple-500/10 hover:bg-purple-500/20 rounded-lg border border-purple-500/30 transition-colors"

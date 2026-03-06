@@ -246,6 +246,40 @@ export const microLearningService = {
   },
 
   /**
+   * Get learner progress for a course (alias for consistency)
+   */
+  async getLearnerProgress(courseId: string) {
+    return this.getCourseProgress(courseId);
+  },
+
+  /**
+   * Award achievement to user
+   */
+  async awardAchievement(
+    achievementType: string,
+    title: string,
+    description: string,
+    points: number
+  ) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { data: null, error: new Error("Not authenticated") };
+
+    const { data, error } = await supabase
+      .from("learner_achievements")
+      .insert({
+        user_id: user.id,
+        achievement_type: achievementType,
+        title,
+        description,
+        points,
+      })
+      .select()
+      .single();
+
+    return { data, error };
+  },
+
+  /**
    * Get all achievements for current user
    */
   async getUserAchievements() {
