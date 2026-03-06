@@ -8,7 +8,7 @@ export default function Document() {
       <Head>
         <SEOElements />
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#16a34a" />
+        <meta name="theme-color" content="#7C3AED" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Chaesa Live" />
@@ -17,7 +17,7 @@ export default function Document() {
         <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512x512.png" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="application-name" content="Chaesa Live" />
-        <meta name="msapplication-TileColor" content="#16a34a" />
+        <meta name="msapplication-TileColor" content="#7C3AED" />
         <meta name="msapplication-TileImage" content="/icons/icon-144x144.png" />
         {/*
           CRITICAL: DO NOT REMOVE THIS SCRIPT

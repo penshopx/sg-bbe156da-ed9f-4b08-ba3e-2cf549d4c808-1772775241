@@ -5,7 +5,7 @@ import type { Database } from "@/integrations/supabase/types";
 type SubscriptionPlan = Database["public"]["Tables"]["subscription_plans"]["Row"];
 type UserSubscription = Database["public"]["Tables"]["user_subscriptions"]["Row"];
 type UsageLog = Database["public"]["Tables"]["usage_logs"]["Row"];
-type PaymentTransaction = Database["public"]["Tables"]["payment_transactions"]["Row"];
+type _PaymentTransaction = Database["public"]["Tables"]["payment_transactions"]["Row"];
 
 export const subscriptionService = {
   // Get all active subscription plans

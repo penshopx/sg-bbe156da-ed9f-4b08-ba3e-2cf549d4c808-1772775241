@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
 type Meeting = Database["public"]["Tables"]["meetings"]["Row"];
-type MeetingInsert = Database["public"]["Tables"]["meetings"]["Insert"];
+type _MeetingInsert = Database["public"]["Tables"]["meetings"]["Insert"];
 type MeetingParticipant = Database["public"]["Tables"]["meeting_participants"]["Row"];
 type WebRTCSignal = Database["public"]["Tables"]["webrtc_signals"]["Insert"];
 type ChatMessage = Database["public"]["Tables"]["meeting_chat"]["Row"];

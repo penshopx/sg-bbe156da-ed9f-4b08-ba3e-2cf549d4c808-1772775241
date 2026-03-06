@@ -4,9 +4,10 @@ import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { ThemeSwitch } from "@/components/ThemeSwitch"
 import { 
-  Video, Home, BookOpen, Mic, Brain, Calendar, 
+  Home, BookOpen, Mic, Brain, Calendar, 
   Search, MessageSquare, ArrowLeft, Sparkles 
 } from "lucide-react"
+import { ChaesaLogo } from "@/components/ChaesaLogo"
 
 const quickLinks = [
   { href: "/", label: "Beranda", icon: Home },
@@ -28,9 +29,9 @@ export default function NotFound() {
 
       <main className="min-h-screen bg-gradient-to-br from-gray-100 via-purple-50 to-gray-100 dark:from-gray-900 dark:via-purple-900 dark:to-gray-900 flex flex-col">
         <header className="flex items-center justify-between px-6 py-4">
-          <Link href="/" className="flex items-center gap-2">
-            <Video className="w-7 h-7 text-purple-600 dark:text-purple-400" />
-            <span className="text-lg font-bold text-gray-900 dark:text-white">Chaesa Live</span>
+          <Link href="/" className="flex items-center gap-2.5">
+            <ChaesaLogo size={32} />
+            <span className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">Chaesa Live</span>
           </Link>
           <ThemeSwitch />
         </header>

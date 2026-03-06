@@ -1,11 +1,11 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
-type Course = Database["public"]["Tables"]["courses"]["Row"];
-type CourseModule = Database["public"]["Tables"]["course_modules"]["Row"];
-type ModuleContent = Database["public"]["Tables"]["module_content"]["Row"];
-type ModuleQuiz = Database["public"]["Tables"]["module_quizzes"]["Row"];
-type LearnerProgress = Database["public"]["Tables"]["learner_progress"]["Row"];
+type _Course = Database["public"]["Tables"]["courses"]["Row"];
+type _CourseModule = Database["public"]["Tables"]["course_modules"]["Row"];
+type _ModuleContent = Database["public"]["Tables"]["module_content"]["Row"];
+type _ModuleQuiz = Database["public"]["Tables"]["module_quizzes"]["Row"];
+type _LearnerProgress = Database["public"]["Tables"]["learner_progress"]["Row"];
 
 /**
  * Micro-Learning Service

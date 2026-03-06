@@ -8,7 +8,8 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { Video, Mail, Lock, User, ArrowLeft, CheckCircle } from "lucide-react";
+import { Mail, Lock, User, ArrowLeft, CheckCircle } from "lucide-react";
+import { ChaesaLogo } from "@/components/ChaesaLogo";
 import { authService } from "@/services/authService";
 
 export default function AuthPage() {
@@ -150,9 +151,9 @@ export default function AuthPage() {
           </Link>
 
           {/* Logo */}
-          <div className="flex items-center gap-2 mb-8">
-            <Video className="w-10 h-10 text-purple-400" />
-            <span className="text-2xl font-bold text-white">Chaesa Live</span>
+          <div className="flex items-center gap-3 mb-8">
+            <ChaesaLogo size={44} />
+            <span className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Chaesa Live</span>
           </div>
 
           {/* Title */}
