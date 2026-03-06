@@ -45,20 +45,29 @@ export default function PricingPage() {
         .order("price_monthly", { ascending: true });
 
       if (error) throw error;
+
+      const priceOverrides: Record<string, { monthly: number; yearly: number }> = {
+        "Pro": { monthly: 99000, yearly: 990000 },
+        "Business": { monthly: 399000, yearly: 3990000 },
+      };
       
       if (data && data.length > 0) {
-        setPlans(data.map(p => ({
-          ...p,
-          // Parse features if stored as JSON/Array, or use defaults
-          features: Array.isArray(p.features) 
-            ? p.features.map(f => String(f)) // Ensure all items are strings
-            : [
-              p.max_participants ? `Up to ${p.max_participants} participants` : "Unlimited participants",
-              p.max_duration_minutes ? `${p.max_duration_minutes} mins duration limit` : "Unlimited duration",
-              "Screen sharing",
-              "Chat & Reactions"
-            ]
-        })));
+        setPlans(data.map(p => {
+          const override = priceOverrides[p.name];
+          return {
+            ...p,
+            price_monthly: override ? override.monthly : p.price_monthly,
+            price_yearly: override ? override.yearly : p.price_yearly,
+            features: Array.isArray(p.features) 
+              ? p.features.map(f => String(f))
+              : [
+                p.max_participants ? `Up to ${p.max_participants} participants` : "Unlimited participants",
+                p.max_duration_minutes ? `${p.max_duration_minutes} mins duration limit` : "Unlimited duration",
+                "Screen sharing",
+                "Chat & Reactions"
+              ]
+          };
+        }));
       } else {
         // Fallback if DB is empty (should run seed script in real app)
         setPlans([
