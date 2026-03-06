@@ -1054,6 +1054,27 @@ export type Database = {
           },
         ]
       }
+      onboarding_progress: {
+        Row: {
+          current_step: number | null
+          last_updated: string | null
+          steps_completed: Json | null
+          user_id: string
+        }
+        Insert: {
+          current_step?: number | null
+          last_updated?: string | null
+          steps_completed?: Json | null
+          user_id: string
+        }
+        Update: {
+          current_step?: number | null
+          last_updated?: string | null
+          steps_completed?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       payment_transactions: {
         Row: {
           amount: number
@@ -1327,6 +1348,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          display_name: string | null
+          id: string
+          onboarding_completed: boolean | null
+          role: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id: string
+          onboarding_completed?: boolean | null
+          role?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string
+          onboarding_completed?: boolean | null
+          role?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       user_subscriptions: {
         Row: {
