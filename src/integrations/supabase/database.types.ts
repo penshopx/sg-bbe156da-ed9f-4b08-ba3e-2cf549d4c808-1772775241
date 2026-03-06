@@ -276,6 +276,142 @@ export type Database = {
         }
         Relationships: []
       }
+      course_modules: {
+        Row: {
+          course_id: string
+          created_at: string | null
+          description: string | null
+          duration_seconds: number
+          id: string
+          is_preview: boolean | null
+          key_points: string[] | null
+          module_number: number
+          title: string
+          transcript: string | null
+          updated_at: string | null
+          video_end_time: number
+          video_start_time: number
+          video_url: string | null
+        }
+        Insert: {
+          course_id: string
+          created_at?: string | null
+          description?: string | null
+          duration_seconds: number
+          id?: string
+          is_preview?: boolean | null
+          key_points?: string[] | null
+          module_number: number
+          title: string
+          transcript?: string | null
+          updated_at?: string | null
+          video_end_time: number
+          video_start_time: number
+          video_url?: string | null
+        }
+        Update: {
+          course_id?: string
+          created_at?: string | null
+          description?: string | null
+          duration_seconds?: number
+          id?: string
+          is_preview?: boolean | null
+          key_points?: string[] | null
+          module_number?: number
+          title?: string
+          transcript?: string | null
+          updated_at?: string | null
+          video_end_time?: number
+          video_start_time?: number
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_modules_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      courses: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          difficulty_level: string | null
+          enrollments_count: number | null
+          id: string
+          is_published: boolean | null
+          meeting_id: string | null
+          price_idr: number | null
+          published_at: string | null
+          rating_average: number | null
+          rating_count: number | null
+          tags: string[] | null
+          thumbnail_url: string | null
+          title: string
+          total_duration_seconds: number | null
+          total_modules: number | null
+          updated_at: string | null
+          user_id: string
+          views_count: number | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          difficulty_level?: string | null
+          enrollments_count?: number | null
+          id?: string
+          is_published?: boolean | null
+          meeting_id?: string | null
+          price_idr?: number | null
+          published_at?: string | null
+          rating_average?: number | null
+          rating_count?: number | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title: string
+          total_duration_seconds?: number | null
+          total_modules?: number | null
+          updated_at?: string | null
+          user_id: string
+          views_count?: number | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          difficulty_level?: string | null
+          enrollments_count?: number | null
+          id?: string
+          is_published?: boolean | null
+          meeting_id?: string | null
+          price_idr?: number | null
+          published_at?: string | null
+          rating_average?: number | null
+          rating_count?: number | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title?: string
+          total_duration_seconds?: number | null
+          total_modules?: number | null
+          updated_at?: string | null
+          user_id?: string
+          views_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "courses_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       generated_content: {
         Row: {
           content_type: string
@@ -368,6 +504,105 @@ export type Database = {
           id?: string
         }
         Relationships: []
+      }
+      learner_achievements: {
+        Row: {
+          achievement_description: string | null
+          achievement_title: string
+          achievement_type: string
+          badge_icon_url: string | null
+          earned_at: string | null
+          id: string
+          metadata: Json | null
+          points_earned: number | null
+          user_id: string
+        }
+        Insert: {
+          achievement_description?: string | null
+          achievement_title: string
+          achievement_type: string
+          badge_icon_url?: string | null
+          earned_at?: string | null
+          id?: string
+          metadata?: Json | null
+          points_earned?: number | null
+          user_id: string
+        }
+        Update: {
+          achievement_description?: string | null
+          achievement_title?: string
+          achievement_type?: string
+          badge_icon_url?: string | null
+          earned_at?: string | null
+          id?: string
+          metadata?: Json | null
+          points_earned?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      learner_progress: {
+        Row: {
+          completed_at: string | null
+          course_id: string
+          created_at: string | null
+          id: string
+          last_position_seconds: number | null
+          module_id: string | null
+          progress_percentage: number | null
+          quiz_attempts: number | null
+          quiz_score: number | null
+          status: string
+          time_spent_seconds: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          course_id: string
+          created_at?: string | null
+          id?: string
+          last_position_seconds?: number | null
+          module_id?: string | null
+          progress_percentage?: number | null
+          quiz_attempts?: number | null
+          quiz_score?: number | null
+          status: string
+          time_spent_seconds?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          course_id?: string
+          created_at?: string | null
+          id?: string
+          last_position_seconds?: number | null
+          module_id?: string | null
+          progress_percentage?: number | null
+          quiz_attempts?: number | null
+          quiz_score?: number | null
+          status?: string
+          time_spent_seconds?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learner_progress_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learner_progress_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       meeting_chat: {
         Row: {
@@ -722,6 +957,100 @@ export type Database = {
         }
         Relationships: []
       }
+      module_content: {
+        Row: {
+          content_data: Json | null
+          content_type: string
+          created_at: string | null
+          file_size_bytes: number | null
+          file_type: string | null
+          file_url: string | null
+          id: string
+          module_id: string
+          order_index: number | null
+          title: string
+        }
+        Insert: {
+          content_data?: Json | null
+          content_type: string
+          created_at?: string | null
+          file_size_bytes?: number | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          module_id: string
+          order_index?: number | null
+          title: string
+        }
+        Update: {
+          content_data?: Json | null
+          content_type?: string
+          created_at?: string | null
+          file_size_bytes?: number | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          module_id?: string
+          order_index?: number | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_content_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      module_quizzes: {
+        Row: {
+          correct_answer: string
+          created_at: string | null
+          explanation: string | null
+          id: string
+          module_id: string
+          options: Json | null
+          points: number | null
+          question_number: number
+          question_text: string
+          question_type: string
+        }
+        Insert: {
+          correct_answer: string
+          created_at?: string | null
+          explanation?: string | null
+          id?: string
+          module_id: string
+          options?: Json | null
+          points?: number | null
+          question_number: number
+          question_text: string
+          question_type: string
+        }
+        Update: {
+          correct_answer?: string
+          created_at?: string | null
+          explanation?: string | null
+          id?: string
+          module_id?: string
+          options?: Json | null
+          points?: number | null
+          question_number?: number
+          question_text?: string
+          question_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_quizzes_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_transactions: {
         Row: {
           amount: number
@@ -840,6 +1169,62 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      social_media_exports: {
+        Row: {
+          caption: string | null
+          duration_seconds: number | null
+          engagement_rate: number | null
+          export_format: string
+          exported_at: string | null
+          hashtags: string[] | null
+          id: string
+          module_id: string | null
+          platform: string
+          thumbnail_url: string | null
+          user_id: string
+          video_url: string | null
+          views_count: number | null
+        }
+        Insert: {
+          caption?: string | null
+          duration_seconds?: number | null
+          engagement_rate?: number | null
+          export_format: string
+          exported_at?: string | null
+          hashtags?: string[] | null
+          id?: string
+          module_id?: string | null
+          platform: string
+          thumbnail_url?: string | null
+          user_id: string
+          video_url?: string | null
+          views_count?: number | null
+        }
+        Update: {
+          caption?: string | null
+          duration_seconds?: number | null
+          engagement_rate?: number | null
+          export_format?: string
+          exported_at?: string | null
+          hashtags?: string[] | null
+          id?: string
+          module_id?: string | null
+          platform?: string
+          thumbnail_url?: string | null
+          user_id?: string
+          video_url?: string | null
+          views_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_media_exports_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subscription_plans: {
         Row: {
@@ -1043,6 +1428,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      award_achievement: {
+        Args: {
+          p_achievement_type: string
+          p_description: string
+          p_points?: number
+          p_title: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       get_meeting_stats: { Args: { meeting_uuid: string }; Returns: Json }
       increment_downloads: { Args: { content_id: string }; Returns: undefined }
     }
