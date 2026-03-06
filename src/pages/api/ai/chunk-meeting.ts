@@ -93,12 +93,16 @@ async function simulateChunking(courseId: string, userId: string) {
   ];
 
   const modules = [];
+  let currentTime = 0;
 
   for (let i = 0; i < topics.length; i++) {
     const topic = topics[i];
+    const startTime = currentTime;
+    const endTime = currentTime + topic.duration;
+    currentTime = endTime;
     
     // Create module
-    const { data: module } = await supabase
+    const { data: module, error } = await supabase
       .from("course_modules")
       .insert({
         course_id: courseId,
@@ -106,11 +110,18 @@ async function simulateChunking(courseId: string, userId: string) {
         title: topic.title,
         description: `Learn about ${topic.title.toLowerCase()} in this ${Math.floor(topic.duration / 60)} minute module`,
         duration_seconds: topic.duration,
+        video_start_time: startTime,
+        video_end_time: endTime,
         video_url: `https://placeholder.com/module_${i + 1}.mp4`, // Placeholder
         thumbnail_url: `https://placeholder.com/thumb_${i + 1}.jpg`,
       })
       .select()
       .single();
+
+    if (error) {
+      console.error("Error creating module:", error);
+      continue;
+    }
 
     if (module) {
       // Create content for this module

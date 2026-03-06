@@ -286,6 +286,7 @@ export type Database = {
           is_preview: boolean | null
           key_points: string[] | null
           module_number: number
+          thumbnail_url: string | null
           title: string
           transcript: string | null
           updated_at: string | null
@@ -302,6 +303,7 @@ export type Database = {
           is_preview?: boolean | null
           key_points?: string[] | null
           module_number: number
+          thumbnail_url?: string | null
           title: string
           transcript?: string | null
           updated_at?: string | null
@@ -318,6 +320,7 @@ export type Database = {
           is_preview?: boolean | null
           key_points?: string[] | null
           module_number?: number
+          thumbnail_url?: string | null
           title?: string
           transcript?: string | null
           updated_at?: string | null
