@@ -174,12 +174,14 @@ export function ChatWidget() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end pointer-events-none">
+    <div className="fixed bottom-0 right-0 z-50 flex flex-col items-end pointer-events-none md:bottom-6 md:right-6">
       <div className={cn(
-        "bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl w-[350px] md:w-[400px] h-[500px] md:h-[600px] mb-4 transition-all duration-300 transform origin-bottom-right pointer-events-auto flex flex-col overflow-hidden",
+        "bg-white dark:bg-gray-900 shadow-2xl transition-all duration-300 transform origin-bottom-right pointer-events-auto flex flex-col overflow-hidden",
+        "fixed inset-0 w-full h-full rounded-none border-0",
+        "md:relative md:inset-auto md:w-[400px] md:h-[600px] md:mb-4 md:rounded-2xl md:border md:border-gray-200 md:dark:border-gray-800",
         isOpen ? "scale-100 opacity-100" : "scale-0 opacity-0 hidden"
       )}>
-        <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-4 flex items-center justify-between text-white">
+        <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-4 flex items-center justify-between text-white safe-area-top">
           <div className="flex items-center gap-3">
             <div className="bg-white/20 p-2 rounded-full">
               <Bot className="w-5 h-5" />
@@ -274,7 +276,7 @@ export function ChatWidget() {
           </div>
         </ScrollArea>
 
-        <div className="p-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
+        <div className="p-4 pb-safe bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
           <div className="flex gap-2">
             <Input
               value={input}
@@ -298,16 +300,15 @@ export function ChatWidget() {
         </div>
       </div>
 
-      <Button
-        onClick={() => setIsOpen(!isOpen)}
-        size="lg"
-        className={cn(
-          "rounded-full h-14 w-14 shadow-xl pointer-events-auto transition-all duration-300 hover:scale-110",
-          isOpen ? "bg-gray-800 hover:bg-gray-700 rotate-90" : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-        )}
-      >
-        {isOpen ? <X className="w-6 h-6" /> : <MessageSquare className="w-6 h-6" />}
-      </Button>
+      {!isOpen && (
+        <Button
+          onClick={() => setIsOpen(true)}
+          size="lg"
+          className="rounded-full h-14 w-14 shadow-xl pointer-events-auto transition-all duration-300 hover:scale-110 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 mb-4 mr-4 md:mb-0 md:mr-0"
+        >
+          <MessageSquare className="w-6 h-6" />
+        </Button>
+      )}
     </div>
   );
 }

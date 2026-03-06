@@ -11,6 +11,14 @@
     transform: scaleX(-1);
   }
 
+  .safe-area-top {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+
+  .pb-safe {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
   @keyframes fadeOut {
     0% {
       opacity: 1;
