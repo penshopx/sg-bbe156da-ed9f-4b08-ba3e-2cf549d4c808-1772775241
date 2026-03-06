@@ -12,25 +12,52 @@ import {
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { toast } from "@/hooks/use-toast";
 
 export default function Home() {
   const router = useRouter();
   const [meetingCode, setMeetingCode] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userEmail, setUserEmail] = useState("");
+  const [showDebug, setShowDebug] = useState(false);
   const [stats, setStats] = useState({
     creators: 1234,
     courses: 5678,
     learners: 12340
   });
 
+  // Debug toggle with Ctrl+D
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === 'd') {
+        e.preventDefault();
+        setShowDebug(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   // Check if user is logged in
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        setIsLoggedIn(true);
-        setUserEmail(session.user.email || "");
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        console.log("Auth check:", { session: !!session, error });
+        
+        if (session && !error) {
+          setIsLoggedIn(true);
+          setUserEmail(session.user.email || "");
+          console.log("User logged in:", session.user.email);
+        } else {
+          setIsLoggedIn(false);
+          setUserEmail("");
+          console.log("User not logged in");
+        }
+      } catch (error) {
+        console.error("Auth check error:", error);
+        setIsLoggedIn(false);
+        setUserEmail("");
       }
     };
     checkAuth();
@@ -51,7 +78,14 @@ export default function Home() {
   const handleJoinMeeting = (e: React.FormEvent) => {
     e.preventDefault();
     if (meetingCode.trim()) {
-      router.push(`/meeting/${meetingCode}`);
+      // Just redirect to meeting page - validation will happen there
+      router.push(`/meeting/${meetingCode.trim()}`);
+    } else {
+      toast({
+        title: "Kode Meeting Diperlukan",
+        description: "Silakan masukkan kode meeting untuk bergabung",
+        variant: "destructive"
+      });
     }
   };
 
@@ -110,14 +144,29 @@ export default function Home() {
                   </>
                 ) : (
                   <div className="flex items-center gap-3">
-                    <span className="text-sm text-gray-300 hidden sm:block">{userEmail}</span>
+                    <span className="text-sm text-gray-300 hidden sm:block">{userEmail || "User"}</span>
                     <Button
                       variant="ghost"
                       className="text-white hover:bg-white/10"
                       onClick={async () => {
-                        await supabase.auth.signOut();
-                        setIsLoggedIn(false);
-                        router.reload();
+                        try {
+                          console.log("Logging out...");
+                          await supabase.auth.signOut();
+                          setIsLoggedIn(false);
+                          setUserEmail("");
+                          toast({
+                            title: "Logout Berhasil",
+                            description: "Anda telah keluar dari akun",
+                          });
+                          router.reload();
+                        } catch (error) {
+                          console.error("Logout error:", error);
+                          toast({
+                            title: "Error",
+                            description: "Gagal logout, silakan coba lagi",
+                            variant: "destructive",
+                          });
+                        }
                       }}
                     >
                       Keluar
@@ -715,6 +764,30 @@ export default function Home() {
             ))}
           </div>
         </div>
+
+        {/* Debug Panel (Ctrl+D to toggle) */}
+        {showDebug && (
+          <div className="fixed bottom-4 right-4 bg-black/90 text-white p-4 rounded-lg shadow-2xl border border-purple-500 max-w-sm z-50">
+            <div className="text-xs font-mono space-y-2">
+              <div className="font-bold text-purple-400 mb-2">DEBUG INFO (Ctrl+D to hide)</div>
+              <div>isLoggedIn: <span className={isLoggedIn ? "text-green-400" : "text-red-400"}>{String(isLoggedIn)}</span></div>
+              <div>userEmail: <span className="text-yellow-400">{userEmail || "(empty)"}</span></div>
+              <div>meetingCode: <span className="text-yellow-400">{meetingCode || "(empty)"}</span></div>
+              <div className="pt-2 border-t border-gray-700">
+                <button
+                  onClick={async () => {
+                    const { data } = await supabase.auth.getSession();
+                    console.log("Session data:", data);
+                    alert(JSON.stringify(data, null, 2));
+                  }}
+                  className="text-xs bg-purple-600 px-2 py-1 rounded hover:bg-purple-700"
+                >
+                  Check Session
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Footer */}
         <footer className="bg-black/40 border-t border-white/10 py-8">

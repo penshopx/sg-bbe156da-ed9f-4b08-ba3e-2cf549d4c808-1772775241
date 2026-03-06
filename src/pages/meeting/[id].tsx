@@ -121,12 +121,16 @@ export default function MeetingRoom() {
         const { data: meeting, error } = await meetingService.getMeetingByCode(meetingCode);
         
         if (error || !meeting) {
+          // Only show error once and redirect
           toast({
-            title: "Meeting Not Found",
-            description: "The meeting code is invalid or the meeting has ended.",
+            title: "Meeting Tidak Ditemukan",
+            description: "Kode meeting tidak valid atau meeting sudah berakhir.",
             variant: "destructive"
           });
-          router.push("/");
+          // Give user time to read error before redirect
+          setTimeout(() => {
+            router.push("/");
+          }, 2000);
           return;
         }
 
@@ -150,11 +154,19 @@ export default function MeetingRoom() {
         }
       } catch (error) {
         console.error("Error setting up meeting:", error);
+        toast({
+          title: "Error",
+          description: "Terjadi kesalahan saat memuat meeting",
+          variant: "destructive"
+        });
+        setTimeout(() => {
+          router.push("/");
+        }, 2000);
       }
     };
 
     setupMeeting();
-  }, [meetingCode, router, toast]);
+  }, [meetingCode]);
 
   // Helper to validate UUID
   const isValidUUID = (uuid: string) => {
