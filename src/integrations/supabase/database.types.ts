@@ -190,6 +190,80 @@ export type Database = {
           },
         ]
       }
+      chat_conversations: {
+        Row: {
+          created_at: string | null
+          escalated_to_human: boolean | null
+          escalation_reason: string | null
+          id: string
+          satisfaction_rating: number | null
+          session_id: string
+          status: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          escalated_to_human?: boolean | null
+          escalation_reason?: string | null
+          id?: string
+          satisfaction_rating?: number | null
+          session_id: string
+          status?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          escalated_to_human?: boolean | null
+          escalation_reason?: string | null
+          id?: string
+          satisfaction_rating?: number | null
+          session_id?: string
+          status?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      chat_messages: {
+        Row: {
+          conversation_id: string | null
+          created_at: string | null
+          id: string
+          is_helpful: boolean | null
+          message_metadata: Json | null
+          message_text: string
+          sender_type: string
+        }
+        Insert: {
+          conversation_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_helpful?: boolean | null
+          message_metadata?: Json | null
+          message_text: string
+          sender_type: string
+        }
+        Update: {
+          conversation_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_helpful?: boolean | null
+          message_metadata?: Json | null
+          message_text?: string
+          sender_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "chat_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_exports: {
         Row: {
           completed_at: string | null
@@ -505,6 +579,48 @@ export type Database = {
           display_name?: string
           guest_id?: string
           id?: string
+        }
+        Relationships: []
+      }
+      helpdesk_articles: {
+        Row: {
+          category: string
+          content: string
+          created_at: string | null
+          helpful_count: number | null
+          id: string
+          is_published: boolean | null
+          keywords: string[] | null
+          not_helpful_count: number | null
+          title: string
+          updated_at: string | null
+          view_count: number | null
+        }
+        Insert: {
+          category: string
+          content: string
+          created_at?: string | null
+          helpful_count?: number | null
+          id?: string
+          is_published?: boolean | null
+          keywords?: string[] | null
+          not_helpful_count?: number | null
+          title: string
+          updated_at?: string | null
+          view_count?: number | null
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string | null
+          helpful_count?: number | null
+          id?: string
+          is_published?: boolean | null
+          keywords?: string[] | null
+          not_helpful_count?: number | null
+          title?: string
+          updated_at?: string | null
+          view_count?: number | null
         }
         Relationships: []
       }
@@ -1496,6 +1612,10 @@ export type Database = {
         Returns: string
       }
       get_meeting_stats: { Args: { meeting_uuid: string }; Returns: Json }
+      increment_article_views: {
+        Args: { article_uuid: string }
+        Returns: undefined
+      }
       increment_downloads: { Args: { content_id: string }; Returns: undefined }
     }
     Enums: {
