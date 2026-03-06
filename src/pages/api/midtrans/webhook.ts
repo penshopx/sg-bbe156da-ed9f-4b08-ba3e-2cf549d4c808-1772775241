@@ -117,8 +117,8 @@ export default async function handler(
     };
 
     // Update transaction status
-    const { error: updateError } = await (supabase
-      .from("payment_transactions") as any)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: updateError } = await (supabase.from("payment_transactions") as any)
       .update(updatePayload)
       .eq("transaction_id", order_id);
 

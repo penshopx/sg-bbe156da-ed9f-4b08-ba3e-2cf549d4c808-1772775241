@@ -126,6 +126,50 @@ export type Database = {
           },
         ]
       }
+      meeting_ctas: {
+        Row: {
+          button_text: string
+          created_at: string | null
+          creator_id: string
+          id: string
+          is_active: boolean | null
+          link_url: string
+          meeting_id: string
+          price: number | null
+          title: string
+        }
+        Insert: {
+          button_text: string
+          created_at?: string | null
+          creator_id: string
+          id?: string
+          is_active?: boolean | null
+          link_url: string
+          meeting_id: string
+          price?: number | null
+          title: string
+        }
+        Update: {
+          button_text?: string
+          created_at?: string | null
+          creator_id?: string
+          id?: string
+          is_active?: boolean | null
+          link_url?: string
+          meeting_id?: string
+          price?: number | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_ctas_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       meeting_participants: {
         Row: {
           display_name: string
