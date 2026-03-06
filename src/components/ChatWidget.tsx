@@ -37,6 +37,18 @@ export function ChatWidget() {
     }
   }, [messages, isOpen]);
 
+  // Keyboard shortcut: Ctrl+K or Cmd+K to open chat
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const handleSend = async () => {
     if (!input.trim()) return;
 
