@@ -295,7 +295,7 @@ function generateMockResponse(message: string): string {
     lowerMessage.includes("tentang chaesa") ||
     lowerMessage.includes("chaesa itu apa")
   ) {
-    return "Oke gue jelasin ya kak! 🚀\n\nChaesa Live tuh platform video meeting yang beda banget dari Zoom atau Google Meet. Kenapa? Karena kita punya:\n\n📹 Meeting Video\n• Unlimited peserta (tergantung paket)\n• Kualitas HD, stabil\n• Gampang banget dipake\n\n🤖 AI Course Factory\n• Rekam meeting → AI otomatis bikin jadi kursus\n• Auto-generate slides, quiz, podcast, ebook\n• Hemat 90% waktu editing!\n\n💰 Live Sales CTA\n• Push tombol 'Beli' langsung ke layar viewer\n• Kayak TikTok Shop tapi buat webinar\n• Konversi naik 3-5x lipat!\n\n🎬 Studio Mode\n• Khusus buat YouTuber/streamer\n• Hide semua UI buat OBS capture\n• Audio bersih tanpa gangguan\n\nIntinya: Chaesa Live = Zoom + AI Content Creator + Live Commerce jadi satu! 🔥\n\nPlusnya? 71% lebih murah dari Zoom!\n\nMau tau lebih detail fitur yang mana nih?";
+    return "Oke gue jelasin ya kak! 🚀\n\nChaesa Live tuh platform video meeting yang beda banget dari platform meeting konvensional. Kenapa? Karena kita punya:\n\n📹 Meeting Video\n• Unlimited peserta (tergantung paket)\n• Kualitas HD, stabil\n• Gampang banget dipake\n\n🤖 AI Course Factory\n• Rekam meeting → AI otomatis bikin jadi kursus\n• Auto-generate slides, quiz, podcast, ebook\n• Hemat 90% waktu editing!\n\n💰 Live Sales CTA\n• Push tombol 'Beli' langsung ke layar viewer\n• Live commerce interaktif\n• Konversi naik 3-5x lipat!\n\n🎬 Studio Mode\n• Khusus buat content creator & streamer\n• Hide semua UI buat capture bersih\n• Audio jernih tanpa gangguan\n\nIntinya: Chaesa Live = Meeting + AI Content Creator + Live Commerce jadi satu! 🔥\n\nPlusnya? Harga paling terjangkau dengan fitur paling lengkap!\n\nMau tau lebih detail fitur yang mana nih?";
   }
 
   // Pricing questions
@@ -323,7 +323,7 @@ Chaesa Live bukan cuma platform meeting biasa ya kak. Ini buat kreator yang seri
 │             │ • Meeting UNLIMITED (gak ada limit!)     │
 │             │ • AI Course Generator (hemat 90% waktu)  │
 │             │ • Live Sales CTA (3-5x konversi)         │
-│             │ • Studio Mode (OBS-friendly)             │
+│             │ • Studio Mode (streaming-friendly)       │
 │             │ • Original Sound (audio jernih)          │
 │             │ • Micro-Learning Marketplace             │
 ├─────────────┼──────────────────────────────────────────┤
@@ -350,18 +350,18 @@ ROI Calculation:
 • Biaya Chaesa: Rp 99K/bulan
 • PROFIT: Rp 4,9 juta (ROI 4900%!) 🔥
 
-Bandingkan sama kompetitor:
-• Zoom Pro: Rp 240.000/bulan (cuma video call, gak ada AI)
-• Udemy: Komisi 50% (lu jual 5 juta, mereka ambil 2,5 juta!)
-• Kajabi: $149/bulan = Rp 2,3 juta! (kemahalan!)
+Bandingkan sama platform sejenis:
+• Platform meeting premium: Rp 200-300K/bulan (cuma video call, gak ada AI)
+• Platform kursus online: Komisi 40-50% (lu jual 5 juta, mereka ambil 2,5 juta!)
+• Platform all-in-one: Rp 2-3 juta/bulan (kemahalan!)
 
-Chaesa Live = All-in-one platform dengan harga 1/10 kompetitor premium.
+Chaesa Live = All-in-one platform dengan harga paling terjangkau.
 
 Cocok banget buat:
 • Content creator yang serius
 • Course creator & coach
 • Live seller & e-commerce
-• YouTuber & podcaster
+• Streamer & podcaster
 • Corporate trainer
 
 Mau langsung coba? Atau mau tau lebih detail fitur yang mana? 😊`;
@@ -375,7 +375,7 @@ Mau langsung coba? Atau mau tau lebih detail fitur yang mana? 😊`;
     lowerMessage.includes("generate") ||
     lowerMessage.includes("otomatis")
   ) {
-    return "Wah, ini nih fitur andalannya! AI Course Factory kita tuh kayak punya asisten pribadi yang jagoan editing. 🤖✨\n\nGini cara kerjanya:\n\n1. Lu rekam meeting (bebas berapa jam)\n2. AI langsung kerja, potong-potong jadi modul 5-7 menit\n3. Otomatis bikin:\n   • Slides PowerPoint 📊\n   • PDF ebook & study guide 📖\n   • Quiz + penjelasan jawaban ✅\n   • Podcast 2 host (kayak NotebookLM!) 🎙️\n   • Klip pendek buat TikTok/Reels 📱\n\nBiasanya kalau manual:\n• Download rekaman: 30 menit\n• Transcribe: 2 jam\n• Edit & potong: 5 jam\n• Bikin slides: 3 jam\n• Bikin quiz: 2 jam\nTOTAL: 12+ jam! 😵\n\nPake Chaesa AI:\n• Klik 1 tombol aja\n• Tunggu 15 menit\n• Beres! 🚀\n\nHEMAT: 90% waktu lu!\n\nGue jelasin lebih teknis atau mau langsung coba?";
+    return "Wah, ini nih fitur andalannya! AI Course Factory kita tuh kayak punya asisten pribadi yang jagoan editing. 🤖✨\n\nGini cara kerjanya:\n\n1. Lu rekam meeting (bebas berapa jam)\n2. AI langsung kerja, potong-potong jadi modul 5-7 menit\n3. Otomatis bikin:\n   • Slides PowerPoint 📊\n   • PDF ebook & study guide 📖\n   • Quiz + penjelasan jawaban ✅\n   • Podcast dengan 2 AI host ngobrol (natural banget!) 🎙️\n   • Klip pendek buat TikTok/Reels 📱\n\nBiasanya kalau manual:\n• Download rekaman: 30 menit\n• Transcribe: 2 jam\n• Edit & potong: 5 jam\n• Bikin slides: 3 jam\n• Bikin quiz: 2 jam\nTOTAL: 12+ jam! 😵\n\nPake Chaesa AI:\n• Klik 1 tombol aja\n• Tunggu 15 menit\n• Beres! 🚀\n\nHEMAT: 90% waktu lu!\n\nGue jelasin lebih teknis atau mau langsung coba?";
   }
 
   // Studio Mode / OBS
@@ -386,7 +386,7 @@ Mau langsung coba? Atau mau tau lebih detail fitur yang mana? 😊`;
     lowerMessage.includes("audio") ||
     lowerMessage.includes("youtuber")
   ) {
-    return "Nah ini nih fitur yang bikin para YouTuber & streamer seneng banget! 🎬\n\nJadi gini masalahnya:\n• Zoom + OBS = audio robotik, sering putus-putus\n• Google Meet = UI nya keliatan di stream, jelek\n• Setup ribet, bikin pusing\n\nChaesa Studio Mode solusinya:\n\n1. Join meeting kayak biasa\n2. Tekan Ctrl+Shift+U (atau klik tombol Studio Mode)\n3. BOOM! Semua UI langsung hilang (bersih buat OBS)\n4. Aktifin 'Original Sound' di Audio Settings\n5. Selesai! Audio jernih tanpa processing 🎵\n\nCocok buat:\n• Live streaming YouTube/Twitch\n• Recording podcast\n• Webinar profesional\n• Broadcast TV\n\nFitur teknis:\n• Bypass audio processing (raw audio)\n• Hide semua overlay & control\n• Shortcut keyboard biar cepet\n• Gak conflict sama audio mixer eksternal\n\nMau gue kasih tutorial lengkapnya? Atau ada masalah audio spesifik yang mau lu fix?";
+    return "Nah ini nih fitur yang bikin para content creator & streamer seneng banget! 🎬\n\nJadi gini masalahnya:\n• Platform meeting biasa + software streaming = audio robotik, sering putus-putus\n• UI meeting platform keliatan di stream, jelek\n• Setup ribet, bikin pusing\n\nChaesa Studio Mode solusinya:\n\n1. Join meeting kayak biasa\n2. Tekan Ctrl+Shift+U (atau klik tombol Studio Mode)\n3. BOOM! Semua UI langsung hilang (bersih buat capture)\n4. Aktifin 'Original Sound' di Audio Settings\n5. Selesai! Audio jernih tanpa processing 🎵\n\nCocok buat:\n• Live streaming platform video\n• Recording podcast\n• Webinar profesional\n• Content creation berkualitas tinggi\n\nFitur teknis:\n• Bypass audio processing (raw audio)\n• Hide semua overlay & control\n• Shortcut keyboard biar cepet\n• Gak conflict sama audio mixer eksternal\n• Kompatibel dengan software streaming populer\n\nMau gue kasih tutorial lengkapnya? Atau ada masalah audio spesifik yang mau lu fix?";
   }
 
   // Live Sales CTA
@@ -398,7 +398,7 @@ Mau langsung coba? Atau mau tau lebih detail fitur yang mana? 😊`;
     lowerMessage.includes("duit") ||
     lowerMessage.includes("konversi")
   ) {
-    return "Nah ini dia game changer buat yang jualan online! Live Sales CTA itu senjata rahasia buat naikin konversi 3-5x lipat. 💰🔥\n\nBayangin gini:\n\nCara Lama:\n❌ Lu webinar, kasih link di chat\n❌ Peserta males klik\n❌ Lupa begitu meeting selesai\n❌ Konversi cuma 1-2%\n\nPake Chaesa Live Sales CTA:\n✅ Lu demo produk live\n✅ Tekan tombol 'Push CTA'\n✅ Tombol 'BELI SEKARANG' muncul di layar SEMUA viewer!\n✅ Countdown timer bikin FOMO\n✅ Klik langsung ke checkout\n✅ Konversi naik jadi 5-8%! 🚀\n\nFitur lengkapnya:\n• Push CTA ke semua viewer sekaligus\n• Countdown timer (ciptain urgency)\n• Tracking real-time (berapa yang klik)\n• Customizable (warna, teks, posisi)\n• Direct checkout via Midtrans\n\nKayak TikTok Shop tapi lebih powerful karena:\n1. Lu bisa jelasin produk dulu (build trust)\n2. Live demo bikin lebih yakin\n3. Impulse buying pas lagi hot-hot nya!\n\nCocok banget buat:\n• Live product demo\n• Course launch webinar\n• E-commerce broadcast\n• Flash sale event\n\nMau setup sekarang atau mau tips biar konversinya maksimal?";
+    return "Nah ini dia game changer buat yang jualan online! Live Sales CTA itu senjata rahasia buat naikin konversi 3-5x lipat. 💰🔥\n\nBayangin gini:\n\nCara Lama:\n❌ Lu webinar, kasih link di chat\n❌ Peserta males klik\n❌ Lupa begitu meeting selesai\n❌ Konversi cuma 1-2%\n\nPake Chaesa Live Sales CTA:\n✅ Lu demo produk live\n✅ Tekan tombol 'Push CTA'\n✅ Tombol 'BELI SEKARANG' muncul di layar SEMUA viewer!\n✅ Countdown timer bikin FOMO\n✅ Klik langsung ke checkout\n✅ Konversi naik jadi 5-8%! 🚀\n\nFitur lengkapnya:\n• Push CTA ke semua viewer sekaligus\n• Countdown timer (ciptain urgency)\n• Tracking real-time (berapa yang klik)\n• Customizable (warna, teks, posisi)\n• Direct checkout via payment gateway\n\nKayak live commerce platform tapi lebih powerful karena:\n1. Lu bisa jelasin produk dulu (build trust)\n2. Live demo bikin lebih yakin\n3. Impulse buying pas lagi hot-hot nya!\n\nCocok banget buat:\n• Live product demo\n• Course launch webinar\n• E-commerce broadcast\n• Flash sale event\n\nMau setup sekarang atau mau tips biar konversinya maksimal?";
   }
 
   // Getting started
@@ -433,58 +433,73 @@ Mau langsung coba? Atau mau tau lebih detail fitur yang mana? 😊`;
     lowerMessage.includes("beda") ||
     lowerMessage.includes("lebih bagus")
   ) {
-    return `Good question! Gue jelasin perbedaannya ya. 💪
+    return `Good question! Chaesa Live punya keunggulan unik dibanding platform lain. 💪
 
-Chaesa Live vs Zoom vs Kajabi:
+Fitur Unggulan Chaesa Live:
 
-┌──────────────────────┬──────────────┬──────────────┬──────────────┐
-│ Fitur                │ Chaesa Live  │ Zoom         │ Kajabi       │
-├──────────────────────┼──────────────┼──────────────┼──────────────┤
-│ Harga/bulan          │ Rp 99.000    │ Rp 240.000   │ Rp 2,3 juta  │
-│ Video Meeting        │ ✅ Unlimited │ ✅ Unlimited │ ❌ Gak ada   │
-│ AI Course Generator  │ ✅ Built-in  │ ❌ Gak ada   │ ❌ Gak ada   │
-│ Live Sales CTA       │ ✅ Built-in  │ ❌ Gak ada   │ ⚠️ Manual    │
-│ Studio Mode          │ ✅ One-click │ ⚠️ Ribet     │ ❌ Gak ada   │
-│ Original Sound       │ ✅ One-click │ ⚠️ Complex   │ ❌ Gak ada   │
-│ Course Marketplace   │ ✅ Komisi 30%│ ❌ Gak ada   │ ✅ 100% yours│
-│ Micro-Learning       │ ✅ Built-in  │ ❌ Gak ada   │ ❌ Manual    │
-│ NotebookLM Podcast   │ ✅ Auto      │ ❌ Gak ada   │ ❌ Gak ada   │
-└──────────────────────┴──────────────┴──────────────┴──────────────┘
+┌──────────────────────────────────────────────────────┐
+│ 🎯 ALL-IN-ONE PLATFORM                               │
+├──────────────────────────────────────────────────────┤
+│ ✅ Video Meeting Unlimited                           │
+│ ✅ AI Course Generator (auto-bikin kursus)           │
+│ ✅ Live Sales CTA (push tombol ke semua viewer)      │
+│ ✅ Studio Mode (streaming-friendly, zero UI)         │
+│ ✅ Original Sound (audio jernih tanpa processing)    │
+│ ✅ Micro-Learning Marketplace (jual kursus, komisi 30%) │
+│ ✅ AI Podcast Generator (2 host conversation)        │
+│ ✅ Auto Slides & Quiz Generator                      │
+└──────────────────────────────────────────────────────┘
+
+Perbandingan dengan Platform Lain:
+
+Platform Meeting Biasa:
+• Harga: Rp 200-300K/bulan
+• Fitur: Video call only
+• AI: Gak ada
+• Monetisasi: Gak ada
+
+Platform Kursus Online:
+• Harga: Gratis upload
+• Komisi: 40-50% per sale (gede banget!)
+• Meeting: Gak ada
+• Live commerce: Gak ada
+
+Platform All-in-One Premium:
+• Harga: Rp 2-3 juta/bulan (mahal!)
+• Fitur: Lengkap tapi ribet
+• AI: Manual semua
+• Untuk: Enterprise aja
+
+Chaesa Live:
+• Harga: Rp 99K/bulan (paling terjangkau!)
+• Fitur: All-in-one (meeting + AI + marketplace)
+• AI: Otomatis bikin konten
+• Untuk: Kreator, educator, seller
 
 Kenapa Chaesa Worth It:
 
-1. All-in-One Solution:
-   • Meeting + AI + Marketplace = 1 platform
+1. Hemat Waktu:
+   • Manual: 20 jam bikin 1 course
+   • Chaesa AI: 2 jam (hemat 90%!)
+
+2. Hemat Biaya:
+   • Platform premium: Rp 200-300K/bulan
+   • Chaesa: Rp 99K/bulan (hemat 60%!)
+
+3. Lebih Banyak Revenue:
+   • Platform kursus: Komisi 50%
+   • Chaesa: Komisi 30% (lu dapet 70%!)
+
+4. Fitur Lebih Lengkap:
+   • Meeting + AI + Marketplace = 1 tempat
    • Gak perlu langganan banyak tool
-   • Save time & money
-
-2. Premium Features, Affordable Price:
-   • Kajabi: Rp 2,3 juta/bulan (kemahalan!)
-   • Zoom: Rp 240K/bulan (cuma meeting doang)
-   • Chaesa: Rp 99K/bulan (dapat semuanya!)
-
-3. Built for Creators:
-   • Fokus ke monetization
-   • AI buat productivity
-   • Tools buat scale bisnis
-
-Yang Kompetitor Unggul:
-• Zoom: Brand besar, enterprise features
-• Kajabi: Email marketing advanced, funnel builder
-• Udemy: Traffic organik besar (tapi komisi 50%!)
-
-Yang Chaesa Unggul:
-• Harga paling affordable (1/10 dari Kajabi!)
-• Fitur AI content creation (otomatis!)
-• Live commerce built-in (konversi tinggi!)
-• Video meeting + course platform = 1 tempat
 
 Kesimpulan:
 Kalau lu butuh:
 • Video meeting + AI + course platform → Chaesa (best value!)
-• Enterprise complex features → Zoom
-• Advanced marketing automation → Kajabi
-• Traffic organik (tapi komisi gede) → Udemy
+• Cuma meeting doang → Platform meeting biasa
+• Advanced marketing automation → Platform premium
+• Traffic organik (tapi komisi gede) → Platform marketplace
 
 Chaesa = Best bang for your buck! 💰🔥
 
