@@ -29,10 +29,8 @@ function getTurboRules() {
 
 const nextConfig = {
   reactStrictMode: true,
-  experimental: {
-    turbo: {
-      rules: getTurboRules(),
-    },
+  turbopack: {
+    rules: getTurboRules(),
   },
   images: {
     remotePatterns: [
@@ -42,7 +40,7 @@ const nextConfig = {
       },
     ],
   },
-  allowedDevOrigins: ["*.daytona.work", "*.softgen.dev"],
+  allowedDevOrigins: ["*.daytona.work", "*.softgen.dev", "*.replit.dev", "*.repl.co", "*.riker.replit.dev"],
 };
 
 export default nextConfig;
