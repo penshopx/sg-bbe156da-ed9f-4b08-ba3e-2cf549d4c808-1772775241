@@ -113,9 +113,57 @@ supabase/         - Supabase configuration
 - Service worker registered in `_app.tsx` on mount
 - App installable on Android (Chrome) and iOS (Safari Add to Home Screen)
 
+## HRD & Training Tools
+### Certification & Exam Center (`/sertifikasi`)
+- Page: `src/pages/sertifikasi.tsx`
+- Exam builder: create exams with MCQ, True/False, Essay, Practical Assessment
+- Exam catalog with 8 categories (IT, Marketing, Leadership, etc.)
+- Take exam: timer countdown, question navigation, auto-submit, instant scoring
+- Results history with per-question review
+- 3 sample exams pre-loaded (Digital Marketing, Leadership, K3/Safety)
+- localStorage persistence
+
+### Digital Certificate Generator (`/sertifikat`)
+- Page: `src/pages/sertifikat.tsx`
+- Generate professional certificates with unique ID (CL-XXXX-XXXX-XXXX-XXXX)
+- QR code verification, print/download support
+- Verification tab: verify certificate authenticity by ID
+- My Certificates: list all earned certificates
+- localStorage persistence
+
+### Skills Matrix & Gap Analysis (`/skills-matrix`)
+- Page: `src/pages/skills-matrix.tsx`
+- 6 pre-built competency frameworks (Digital Marketing, Software Dev, PM, Leadership, Customer Service, Data Analytics)
+- Team member management with 1-5 star skill ratings
+- SVG radar/spider chart visualization
+- Gap analysis: current vs required skill levels
+- AI-powered training recommendations based on gaps
+- Individual skill passport per team member
+- Export as text file
+- localStorage persistence
+
+### Learning Path Builder (`/learning-path`)
+- Page: `src/pages/learning-path.tsx`
+- Create structured learning paths with stages/milestones
+- 6 pre-built templates (Digital Marketing Specialist, Full-Stack Developer, PM, Content Creator Pro, HR Professional, Data Analyst)
+- Each stage: modules, exams, assignments, min score to advance, XP, badges
+- Visual timeline/roadmap with stage progression
+- Gamification: XP tracking, badge unlocking, completion celebrations
+- localStorage persistence
+
+### AI Competency Assessment API
+- API: `src/pages/api/ai/generate-exam.ts`
+- Auto-generate competency exam questions using gpt-4o-mini
+- Input: topic, difficulty, questionCount, questionTypes
+- Output: questions with options, answers, explanations, competency tags, passing score, estimated time
+- Fallback to template-based questions if AI unavailable
+
 ## Navigation
-- Homepage navbar: Harga, AI Studio, Micro-Learning, Jadwal Live, Creator Tools (dropdown)
-- Creator Tools dropdown: Dashboard Kreator, Broadcast & Marketing, Kalender Konten
+- Homepage navbar (segment-based):
+  - Harga, Jadwal Live
+  - "Belajar" dropdown: Micro-Learning, Learning Path, Ujian & Sertifikasi, Sertifikat Saya
+  - "HRD & Training" dropdown: Skills Matrix & Gap Analysis, Exam Center, Training Path, Digital Certificate
+  - "Creator Tools" dropdown: AI Studio, Dashboard Kreator, Broadcast & Marketing, Kalender Konten
 - All new pages have consistent header with back-to-home link and theme toggle
 
 ## Notes
