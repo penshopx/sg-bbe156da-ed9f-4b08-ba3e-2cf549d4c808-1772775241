@@ -1,4 +1,4 @@
- 
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 export type Json =
   | string
   | number
@@ -1031,6 +1031,7 @@ export type Database = {
           ai_summary: string | null
           allow_high_quality_audio: boolean | null
           created_at: string | null
+          duration_minutes: number | null
           ended_at: string | null
           host_id: string | null
           id: string
@@ -1038,6 +1039,7 @@ export type Database = {
           is_locked: boolean | null
           key_moments: Json | null
           meeting_code: string
+          started_at: string | null
           title: string | null
           transcription_data: Json | null
           transcription_status: string | null
@@ -1047,6 +1049,7 @@ export type Database = {
           ai_summary?: string | null
           allow_high_quality_audio?: boolean | null
           created_at?: string | null
+          duration_minutes?: number | null
           ended_at?: string | null
           host_id?: string | null
           id?: string
@@ -1054,6 +1057,7 @@ export type Database = {
           is_locked?: boolean | null
           key_moments?: Json | null
           meeting_code: string
+          started_at?: string | null
           title?: string | null
           transcription_data?: Json | null
           transcription_status?: string | null
@@ -1063,6 +1067,7 @@ export type Database = {
           ai_summary?: string | null
           allow_high_quality_audio?: boolean | null
           created_at?: string | null
+          duration_minutes?: number | null
           ended_at?: string | null
           host_id?: string | null
           id?: string
@@ -1070,6 +1075,7 @@ export type Database = {
           is_locked?: boolean | null
           key_moments?: Json | null
           meeting_code?: string
+          started_at?: string | null
           title?: string | null
           transcription_data?: Json | null
           transcription_status?: string | null
@@ -1288,6 +1294,8 @@ export type Database = {
           full_name: string | null
           id: string
           role: string | null
+          subscription_expires_at: string | null
+          subscription_plan: string | null
           updated_at: string | null
         }
         Insert: {
@@ -1297,6 +1305,8 @@ export type Database = {
           full_name?: string | null
           id: string
           role?: string | null
+          subscription_expires_at?: string | null
+          subscription_plan?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -1306,6 +1316,8 @@ export type Database = {
           full_name?: string | null
           id?: string
           role?: string | null
+          subscription_expires_at?: string | null
+          subscription_plan?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -1610,6 +1622,10 @@ export type Database = {
           p_user_id: string
         }
         Returns: string
+      }
+      check_meeting_limits: {
+        Args: { p_meeting_id: string; p_user_id: string }
+        Returns: Json
       }
       get_meeting_stats: { Args: { meeting_uuid: string }; Returns: Json }
       increment: {
