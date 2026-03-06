@@ -4,9 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageSquare, X, Send, User, Bot, Loader2, ThumbsUp, ThumbsDown, HelpCircle } from "lucide-react";
-import { chatbotService } from "@/services/chatbotService";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
   id: string;
@@ -27,18 +25,7 @@ export function ChatWidget() {
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [conversationId, setConversationId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  // Get or create a persistent session ID for guest users
-  const getSessionId = () => {
-    let sid = localStorage.getItem("chat_session_id");
-    if (!sid) {
-      sid = crypto.randomUUID();
-      localStorage.setItem("chat_session_id", sid);
-    }
-    return sid;
-  };
 
   useEffect(() => {
     // Auto-scroll to bottom
@@ -73,29 +60,10 @@ export function ChatWidget() {
     setIsLoading(true);
 
     try {
-      // 1. Ensure conversation exists
-      let currentConvId = conversationId;
-      if (!currentConvId) {
-        const { data: { session } } = await supabase.auth.getSession();
-        const sessionId = getSessionId();
-        
-        // Pass user ID if authenticated, null if anonymous
-        // Also pass the persistent session ID
-        const { data } = await chatbotService.createConversation(session?.user?.id, sessionId);
-        if (data) {
-          currentConvId = data.id;
-          setConversationId(data.id);
-        }
-      }
-
-      if (!currentConvId) throw new Error("Failed to create conversation");
-
-      // 2. Send to API
       const response = await fetch("/api/chat/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          conversationId: currentConvId,
           message: userMsg.text
         })
       });
@@ -105,7 +73,7 @@ export function ChatWidget() {
       const botMsg: Message = {
         id: Date.now().toString() + "_bot",
         role: "bot",
-        text: data.reply,
+        text: data.reply || "Maaf, ada gangguan. Coba lagi ya.",
         metadata: {
           quickReplies: data.quick_replies,
           relatedArticles: data.related_articles
@@ -117,7 +85,7 @@ export function ChatWidget() {
     } catch (error) {
       console.error("Chat error:", error);
       setMessages(prev => [...prev, {
-        id: "error",
+        id: "error_" + Date.now(),
         role: "bot",
         text: "Maaf, saya sedang mengalami gangguan koneksi. Silakan coba lagi nanti ya."
       }]);
