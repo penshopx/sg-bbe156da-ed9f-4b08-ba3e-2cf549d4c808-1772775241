@@ -62,26 +62,26 @@ export default function AIStudio() {
         return;
       }
 
-      // Check subscription (AI Studio requires Pro plan or higher)
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("subscription_plan, subscription_expires_at")
-        .eq("id", user.id)
-        .single();
-
-      const plan = profile?.subscription_plan || "free";
-      const expiresAt = profile?.subscription_expires_at;
-      const isActive = !expiresAt || new Date(expiresAt) > new Date();
-
-      if (plan === "free" || !isActive) {
-        toast({
-          title: "Upgrade Required",
-          description: "AI Studio requires Pro plan or higher",
-          variant: "destructive",
-        });
-        router.push("/pricing");
-        return;
-      }
+      // TODO: Re-enable subscription check after trial period
+      // const { data: profile } = await supabase
+      //   .from("profiles")
+      //   .select("subscription_plan, subscription_expires_at")
+      //   .eq("id", user.id)
+      //   .single();
+      //
+      // const plan = profile?.subscription_plan || "free";
+      // const expiresAt = profile?.subscription_expires_at;
+      // const isActive = !expiresAt || new Date(expiresAt) > new Date();
+      //
+      // if (plan === "free" || !isActive) {
+      //   toast({
+      //     title: "Upgrade Required",
+      //     description: "AI Studio requires Pro plan or higher",
+      //     variant: "destructive",
+      //   });
+      //   router.push("/pricing");
+      //   return;
+      // }
 
       setHasAccess(true);
       loadData();
