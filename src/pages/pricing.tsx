@@ -1,278 +1,364 @@
 import { useState, useEffect } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { Check, ArrowRight, Zap } from "lucide-react";
+import { useRouter } from "next/router";
+import { Check, X, HelpCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { subscriptionService } from "@/services/subscriptionService";
-import type { Database } from "@/integrations/supabase/types";
+import { Label } from "@/components/ui/label";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-type SubscriptionPlan = Database["public"]["Tables"]["subscription_plans"]["Row"];
+type Plan = {
+  id: string;
+  name: string;
+  price_monthly: number;
+  price_yearly: number;
+  features: string[];
+  max_participants: number | null;
+  max_duration_minutes: number | null;
+};
 
 export default function PricingPage() {
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
-  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
-  const [loading, setLoading] = useState(true);
+  const router = useRouter();
   const { toast } = useToast();
+  const [isAnnual, setIsAnnual] = useState(false);
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [processingId, setProcessingId] = useState<string | null>(null);
 
   useEffect(() => {
-    loadPlans();
+    fetchPlans();
+    
+    // Load Midtrans Snap Script
+    const script = document.createElement("script");
+    const isProduction = process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION === "true";
+    script.src = isProduction 
+      ? "https://app.midtrans.com/snap/snap.js" 
+      : "https://app.sandbox.midtrans.com/snap/snap.js";
+    script.setAttribute("data-client-key", process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY || "");
+    document.head.appendChild(script);
+
+    return () => {
+      document.head.removeChild(script);
+    };
   }, []);
 
-  const loadPlans = async () => {
+  const fetchPlans = async () => {
     try {
-      const data = await subscriptionService.getPlans();
-      setPlans(data);
+      // In a real app, you would fetch from DB. For now we'll define them to match DB structure
+      // or fetch if they exist
+      const { data, error } = await supabase
+        .from("subscription_plans")
+        .select("*")
+        .order("price_monthly", { ascending: true });
+
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        setPlans(data.map(p => ({
+          ...p,
+          // Parse features if stored as JSON/Array, or use defaults
+          features: Array.isArray(p.features) ? p.features : [
+            p.max_participants ? `Up to ${p.max_participants} participants` : "Unlimited participants",
+            p.max_duration_minutes ? `${p.max_duration_minutes} mins duration limit` : "Unlimited duration",
+            "Screen sharing",
+            "Chat & Reactions"
+          ]
+        })));
+      } else {
+        // Fallback if DB is empty (should run seed script in real app)
+        setPlans([
+          {
+            id: "free",
+            name: "Free",
+            price_monthly: 0,
+            price_yearly: 0,
+            max_participants: 100,
+            max_duration_minutes: 40,
+            features: [
+              "Up to 100 participants",
+              "40 mins group meetings",
+              "Unlimited 1-on-1 meetings",
+              "Screen sharing",
+              "Chat & Reactions"
+            ]
+          },
+          {
+            id: "pro",
+            name: "Pro",
+            price_monthly: 149000,
+            price_yearly: 1490000,
+            max_participants: 100,
+            max_duration_minutes: null,
+            features: [
+              "Everything in Free",
+              "Unlimited meeting duration",
+              "5GB Cloud Storage",
+              "Cloud Recording",
+              "Breakout Rooms",
+              "Polls & Whiteboard",
+              "Priority Support"
+            ]
+          },
+          {
+            id: "business",
+            name: "Business",
+            price_monthly: 199000,
+            price_yearly: 1990000,
+            max_participants: 300,
+            max_duration_minutes: null,
+            features: [
+              "Everything in Pro",
+              "Up to 300 participants",
+              "10GB Cloud Storage",
+              "Custom Branding",
+              "Advanced Analytics",
+              "API Access",
+              "SSO Integration"
+            ]
+          }
+        ]);
+      }
     } catch (error) {
-      console.error("Error loading plans:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load pricing plans",
-        variant: "destructive",
-      });
+      console.error("Error fetching plans:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const getPrice = (plan: SubscriptionPlan) => {
-    if (billingCycle === "monthly") {
-      return plan.price_monthly;
+  const handleSubscribe = async (plan: Plan) => {
+    // If free plan, just redirect to dashboard
+    if (plan.price_monthly === 0) {
+      router.push("/dashboard");
+      return;
     }
-    return plan.price_yearly;
-  };
 
-  const getPricePerMonth = (plan: SubscriptionPlan) => {
-    if (billingCycle === "monthly") {
-      return plan.price_monthly;
-    }
-    return plan.price_yearly ? (plan.price_yearly ? (plan.price_yearly / 12).toFixed(2) : 0) : 0;
-  };
-
-  const getSavings = (plan: SubscriptionPlan) => {
-    if (!plan.price_yearly || !plan.price_monthly || billingCycle === "monthly") return 0;
-    const yearlyMonthly = plan.price_monthly * 12;
-    const savings = yearlyMonthly - plan.price_yearly;
-    return Math.round((savings / yearlyMonthly) * 100);
-  };
-
-  const getFeatures = (plan: SubscriptionPlan): string[] => {
-    // Handle both array and JSONB cases safely
-    if (Array.isArray(plan.features)) {
-      return plan.features as string[];
-    }
     try {
-      if (typeof plan.features === 'string') {
-        return JSON.parse(plan.features);
+      setProcessingId(plan.id);
+      
+      // Check auth
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Authentication required",
+          description: "Please login to subscribe to a plan",
+          variant: "destructive"
+        });
+        // Redirect to login (assuming there's a login page/modal)
+        // router.push("/login?redirect=/pricing"); 
+        return;
       }
-    } catch (e) {
-      return [];
+
+      const price = isAnnual ? plan.price_yearly : plan.price_monthly;
+      const billingCycle = isAnnual ? "annual" : "monthly";
+
+      // Call API
+      const response = await fetch("/api/midtrans/create-subscription", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          planId: plan.id,
+          planName: plan.name,
+          planPrice: price,
+          billingCycle,
+          userId: user.id,
+          userEmail: user.email,
+          userName: user.user_metadata?.full_name || user.email,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.error || "Failed to create subscription");
+      }
+
+      // Open Snap Popup
+      if (window.snap) {
+        window.snap.pay(data.token, {
+          onSuccess: function(result: any) {
+            router.push(`/payment/success?order_id=${data.orderId}`);
+          },
+          onPending: function(result: any) {
+            router.push(`/payment/pending?order_id=${data.orderId}`);
+          },
+          onError: function(result: any) {
+            toast({
+              title: "Payment Failed",
+              description: "There was an error processing your payment.",
+              variant: "destructive"
+            });
+            console.error(result);
+          },
+          onClose: function() {
+            setProcessingId(null);
+          }
+        });
+      } else {
+        console.error("Snap not loaded");
+        toast({
+          title: "Error",
+          description: "Payment system not ready. Please refresh the page.",
+          variant: "destructive"
+        });
+      }
+
+    } catch (error) {
+      console.error("Subscribe error:", error);
+      toast({
+        title: "Subscription Failed",
+        description: error instanceof Error ? error.message : "Unknown error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      if (!window.snap) setProcessingId(null);
     }
-    return [];
   };
 
-  const featureLabels: Record<string, string> = {
-    unlimited_1on1: "Unlimited 1-on-1 meetings",
-    screen_sharing: "Screen sharing",
-    chat: "Group chat",
-    reactions: "Reactions & emojis",
-    local_recording: "Local recording",
-    unlimited_duration: "Unlimited meeting duration",
-    cloud_recording: "Cloud recording",
-    breakout_rooms: "Breakout rooms",
-    polls: "Live polls",
-    whiteboard: "Collaborative whiteboard",
-    priority_support: "Priority support",
-    custom_backgrounds: "Custom virtual backgrounds",
-    custom_branding: "Custom branding",
-    advanced_analytics: "Advanced analytics",
-    api_access: "API access",
-    unlimited_participants: "Unlimited participants",
-    unlimited_storage: "Unlimited cloud storage",
-    dedicated_server: "Dedicated server",
-    sla_guarantee: "SLA guarantee",
-    white_label: "White-label solution",
-    custom_integration: "Custom integrations",
-    dedicated_support: "Dedicated support manager",
+  const formatPrice = (amount: number) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
   };
 
   return (
     <>
       <Head>
-        <title>Pricing - Chaesa Live</title>
-        <meta name="description" content="Choose the perfect plan for your video conferencing needs" />
+        <title>Pricing Plans - Chaesa Live</title>
       </Head>
 
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900">
-        {/* Header */}
-        <div className="border-b border-white/10 backdrop-blur-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <Link href="/" className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                  <Zap className="w-5 h-5 text-white" />
-                </div>
-                <span className="text-xl font-bold text-white">Chaesa Live</span>
-              </Link>
-              <Link href="/">
-                <Button variant="ghost" className="text-white hover:bg-white/10">
-                  Back to Home
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Pricing Section */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-5xl font-bold text-white mb-4">
-              Simple, Transparent Pricing
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl">
+              Simple, transparent pricing
             </h1>
-            <p className="text-xl text-gray-300 mb-8">
-              Choose the plan that fits your needs. Start free, upgrade anytime.
+            <p className="mt-4 max-w-2xl mx-auto text-xl text-gray-500">
+              Choose the perfect plan for your meeting needs. Start for free, upgrade when you need to scale.
             </p>
-
-            {/* Billing Toggle */}
-            <div className="flex items-center justify-center gap-4">
-              <span className={`text-sm font-medium ${billingCycle === "monthly" ? "text-white" : "text-gray-400"}`}>
-                Monthly
-              </span>
-              <Switch
-                checked={billingCycle === "yearly"}
-                onCheckedChange={(checked) => setBillingCycle(checked ? "yearly" : "monthly")}
-              />
-              <span className={`text-sm font-medium ${billingCycle === "yearly" ? "text-white" : "text-gray-400"}`}>
-                Yearly
-                <Badge variant="secondary" className="ml-2 bg-green-500/20 text-green-400 border-green-500/30">
-                  Save up to 20%
-                </Badge>
-              </span>
-            </div>
           </div>
 
-          {/* Plans Grid */}
-          {loading ? (
-            <div className="text-center text-white">Loading plans...</div>
-          ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {plans.map((plan, index) => {
-                const features = getFeatures(plan);
-                const price = getPrice(plan);
-                const pricePerMonth = getPricePerMonth(plan);
-                const savings = getSavings(plan);
-                const isPopular = plan.name === "Pro";
-                const isFree = plan.price_monthly === 0 && plan.name === "Free";
-                const isEnterprise = plan.name === "Enterprise";
+          {/* Billing Toggle */}
+          <div className="flex justify-center items-center gap-4 mb-12">
+            <span className={`text-sm font-medium ${!isAnnual ? "text-gray-900" : "text-gray-500"}`}>
+              Monthly
+            </span>
+            <Switch
+              checked={isAnnual}
+              onCheckedChange={setIsAnnual}
+            />
+            <span className={`text-sm font-medium ${isAnnual ? "text-gray-900" : "text-gray-500"}`}>
+              Annual <Badge variant="secondary" className="ml-1 text-green-600 bg-green-50">Save 17%</Badge>
+            </span>
+          </div>
 
+          {/* Pricing Cards */}
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 lg:gap-8 max-w-7xl mx-auto">
+            {loading ? (
+              <div className="col-span-3 flex justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+              </div>
+            ) : (
+              plans.map((plan) => {
+                const price = isAnnual ? plan.price_yearly : plan.price_monthly;
+                const isFree = plan.price_monthly === 0;
+                
                 return (
-                  <Card
-                    key={plan.id}
-                    className={`relative flex flex-col ${
-                      isPopular
-                        ? "border-2 border-blue-500 shadow-xl shadow-blue-500/20"
-                        : "border-white/10"
-                    } bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-all`}
-                  >
-                    {isPopular && (
-                      <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                        <Badge className="bg-blue-500 text-white hover:bg-blue-600">Most Popular</Badge>
+                  <Card key={plan.id} className={`flex flex-col relative ${plan.name === 'Pro' ? 'border-blue-500 shadow-xl scale-105 z-10' : ''}`}>
+                    {plan.name === 'Pro' && (
+                      <div className="absolute top-0 right-0 -mt-2 -mr-2">
+                        <Badge className="bg-blue-600 hover:bg-blue-700">Most Popular</Badge>
                       </div>
                     )}
-
                     <CardHeader>
-                      <CardTitle className="text-2xl text-white">{plan.name}</CardTitle>
-                      <CardDescription className="text-gray-300">
-                        {plan.description}
+                      <CardTitle className="text-2xl font-bold">{plan.name}</CardTitle>
+                      <CardDescription>
+                        {isFree ? "Perfect for getting started" : 
+                         plan.name === 'Pro' ? "Best for professionals & small teams" : 
+                         "For growing organizations"}
                       </CardDescription>
                     </CardHeader>
-
-                    <CardContent className="space-y-6 flex-grow">
-                      {/* Price */}
-                      <div>
-                        {isEnterprise ? (
-                          <div className="text-4xl font-bold text-white">Custom</div>
-                        ) : (
-                          <>
-                            <div className="flex items-baseline gap-2">
-                              <span className="text-4xl font-bold text-white">
-                                ${pricePerMonth}
-                              </span>
-                              <span className="text-gray-400">/mo</span>
-                            </div>
-                            {billingCycle === "yearly" && !isFree && (
-                              <div className="text-sm text-gray-400 mt-1">
-                                Billed ${price}/year
-                                {savings > 0 && (
-                                  <span className="text-green-400 ml-1">
-                                    (Save {savings}%)
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                          </>
-                        )}
+                    <CardContent className="flex-1">
+                      <div className="mb-6">
+                        <span className="text-4xl font-bold">{formatPrice(price)}</span>
+                        {!isFree && <span className="text-gray-500">/{isAnnual ? 'year' : 'mo'}</span>}
                       </div>
-
-                      {/* Limits */}
-                      <div className="space-y-2 text-sm border-t border-white/10 pt-4">
-                        <div className="flex justify-between text-gray-300">
-                          <span>Max Participants</span>
-                          <span className="font-semibold text-white">
-                            {plan.max_participants === 1000 ? "Unlimited" : plan.max_participants}
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-gray-300">
-                          <span>Meeting Duration</span>
-                          <span className="font-semibold text-white">
-                            {plan.max_duration_minutes ? `${plan.max_duration_minutes} min` : "Unlimited"}
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-gray-300">
-                          <span>Cloud Storage</span>
-                          <span className="font-semibold text-white">
-                            {plan.cloud_storage_gb === 100 ? "Unlimited" : `${plan.cloud_storage_gb}GB`}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Features */}
-                      <div className="space-y-2 border-t border-white/10 pt-4">
-                        <p className="text-sm font-semibold text-white mb-2">Features:</p>
-                        {features.slice(0, 8).map((feature) => (
-                          <div key={feature} className="flex items-start gap-2">
-                            <Check className="w-4 h-4 text-green-400 mt-0.5 shrink-0" />
-                            <span className="text-sm text-gray-300">
-                              {featureLabels[feature] || feature}
-                            </span>
-                          </div>
+                      <ul className="space-y-4">
+                        {plan.features.map((feature, i) => (
+                          <li key={i} className="flex items-start">
+                            <Check className="h-5 w-5 text-green-500 mr-2 shrink-0" />
+                            <span className="text-sm text-gray-600">{feature}</span>
+                          </li>
                         ))}
-                      </div>
+                      </ul>
                     </CardContent>
-
-                    <CardFooter className="mt-auto">
-                      <Link href={isFree ? "/" : "/dashboard"} className="w-full">
-                        <Button
-                          className={`w-full ${
-                            isPopular
-                              ? "bg-blue-500 hover:bg-blue-600"
-                              : "bg-white/10 hover:bg-white/20 text-white"
-                          }`}
-                        >
-                          {isFree ? "Get Started Free" : isEnterprise ? "Contact Sales" : "Upgrade Now"}
-                          <ArrowRight className="w-4 h-4 ml-2" />
-                        </Button>
-                      </Link>
+                    <CardFooter>
+                      <Button 
+                        className="w-full" 
+                        variant={plan.name === 'Pro' ? 'default' : 'outline'}
+                        onClick={() => handleSubscribe(plan)}
+                        disabled={!!processingId}
+                      >
+                        {processingId === plan.id ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : null}
+                        {isFree ? "Get Started Free" : `Subscribe to ${plan.name}`}
+                      </Button>
                     </CardFooter>
                   </Card>
                 );
-              })}
-            </div>
-          )}
+              })
+            )}
+          </div>
+
+          {/* FAQ Section */}
+          <div className="mt-20 max-w-3xl mx-auto">
+            <h2 className="text-3xl font-bold text-center mb-8">Frequently Asked Questions</h2>
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="item-1">
+                <AccordionTrigger>How does the free tier limit work?</AccordionTrigger>
+                <AccordionContent>
+                  Free meetings are limited to 40 minutes for group calls (3+ participants). 1-on-1 meetings are unlimited. When the time limit is reached, the meeting will automatically end for everyone.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-2">
+                <AccordionTrigger>Can I cancel anytime?</AccordionTrigger>
+                <AccordionContent>
+                  Yes, you can cancel your subscription at any time. Your premium features will remain active until the end of your current billing period.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-3">
+                <AccordionTrigger>Do you offer refunds?</AccordionTrigger>
+                <AccordionContent>
+                  We do not offer refunds for partial use. However, if you experienced technical issues that prevented you from using the service, please contact support.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-4">
+                <AccordionTrigger>What payment methods do you accept?</AccordionTrigger>
+                <AccordionContent>
+                  We accept all major credit cards (Visa, Mastercard), bank transfers (BCA, Mandiri, BNI, BRI), and e-wallets (GoPay, ShopeePay, OVO, Dana) via Midtrans.
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
+
+          {/* Enterprise CTA */}
+          <div className="mt-20 text-center bg-gray-900 rounded-2xl p-12 text-white">
+            <h2 className="text-3xl font-bold mb-4">Need a custom solution?</h2>
+            <p className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto">
+              We offer tailored plans for large enterprises, educational institutions, and government organizations.
+            </p>
+            <Button variant="secondary" size="lg" className="bg-white text-gray-900 hover:bg-gray-100">
+              Contact Sales
+            </Button>
+          </div>
         </div>
       </div>
     </>

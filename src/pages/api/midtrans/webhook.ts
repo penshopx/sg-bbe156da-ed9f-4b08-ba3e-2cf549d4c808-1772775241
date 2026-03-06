@@ -116,7 +116,7 @@ export default async function handler(
           payment_type: payment_type,
           settlement_time: statusResponse.settlement_time,
         },
-      })
+      } as any)
       .eq("transaction_id", order_id);
 
     if (updateError) {
