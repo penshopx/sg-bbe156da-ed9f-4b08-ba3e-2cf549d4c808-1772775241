@@ -309,6 +309,9 @@ export default function Home() {
                       </>
                     ) : (
                       <>
+                        <Link href="/profile" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 text-sm font-medium text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg">
+                          Profil Saya
+                        </Link>
                         <div className="px-3 py-2 text-sm text-gray-600 dark:text-gray-300">{userEmail || "User"}</div>
                         <Button
                           variant="outline"
@@ -360,7 +363,7 @@ export default function Home() {
                   </>
                 ) : (
                   <div className="flex items-center gap-3">
-                    <span className="text-sm text-gray-600 dark:text-gray-300 hidden sm:block">{userEmail || "User"}</span>
+                    <Link href="/profile" className="text-sm text-gray-600 dark:text-gray-300 hidden sm:block hover:text-purple-600 dark:hover:text-purple-400 transition-colors">{userEmail || "User"}</Link>
                     <Button
                       variant="ghost"
                       className="text-gray-700 hover:bg-gray-200 dark:text-white dark:hover:bg-white/10"

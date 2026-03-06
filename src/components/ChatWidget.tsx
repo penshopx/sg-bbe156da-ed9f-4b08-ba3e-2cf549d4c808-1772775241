@@ -37,6 +37,7 @@ const PAGE_GREETINGS: Record<string, string> = {
   "/pricing": "Halo Kak! Ini halaman **Harga**. Mau saya jelaskan perbedaan paket atau bantu pilih yang paling cocok untuk kebutuhan Kamu?",
   "/ai-studio": "Halo Kak! Kamu di **AI Studio**. Mau generate kursus dari meeting, atau tanya tentang fitur AI lainnya?",
   "/dashboard": "Halo Kak! Ini **Dashboard Progress** Kamu. Di sini Kamu bisa lihat XP, pencapaian, dan progress belajar. Ada yang mau ditanyakan?",
+  "/profile": "Halo Kak! Ini halaman **Profil** Kamu. Di sini Kamu bisa ubah nama, lihat status langganan, dan kelola akun. Ada yang bisa saya bantu?",
 };
 
 const PAGE_SUGGESTIONS: Record<string, string[]> = {
@@ -54,6 +55,7 @@ const PAGE_SUGGESTIONS: Record<string, string[]> = {
   "/pricing": ["Paket mana yang cocok?", "Bandingkan dengan Zoom", "Daftar gratis"],
   "/ai-studio": ["Generate kursus", "Fitur AI lainnya", "Cara mulai"],
   "/dashboard": ["Cara dapat XP?", "Pencapaian apa saja?", "Fitur apa saja?"],
+  "/profile": ["Ubah nama saya", "Upgrade langganan", "Reset password"],
 };
 
 function BotMarkdown({ content }: { content: string }) {

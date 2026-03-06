@@ -198,6 +198,41 @@ supabase/         - Supabase configuration
 - Auth-aware with useAuth hook
 - XP system: certs=100 XP, exam pass=50 XP, exam complete=20 XP, story=30 XP, skills framework=25 XP
 
+## Profile Page (`/profile`)
+- Page: `src/pages/profile.tsx`
+- Auth-required: redirects to /auth if not logged in
+- User info: avatar placeholder (initial letter), display name, email
+- Editable display name via authService.updateProfile
+- Subscription status card (Free/Pro/Business/Yearly)
+- Account actions: Change Password (Supabase reset email), Logout
+- Quick links to Dashboard, Pricing, AI Studio, Creator Dashboard
+
+## Auth Page Enhancements
+- Google OAuth: "Masuk dengan Google" button using authService.signInWithGoogle()
+- Visual divider between social and email auth
+- Located at `src/pages/auth.tsx`
+
+## 404 Page
+- Themed with Chaesa Live dark/purple gradient
+- Animated 404 badge with gradient text
+- 6 quick-link cards to popular pages
+- CTA buttons: Kembali ke Beranda, Buka Dashboard
+- Dark/light mode with theme toggle
+
+## Page Transition Loading Bar
+- Green gradient progress bar at top of page
+- Animates during route transitions (routeChangeStart/Complete/Error)
+- Implemented in `src/pages/_app.tsx` as `RouteLoadingBar` component
+- z-index 9999 to appear above all content
+
+## OnboardingWizard
+- Component: `src/components/OnboardingWizard.tsx`
+- Renders globally via `_app.tsx`
+- Automatically shows for first-time authenticated users
+- Checks `user_profiles.onboarding_completed` in Supabase
+- 2-step wizard: select role (Creator/Seller/Streamer/Corporate) → enter display name
+- Saves role and display name to `user_profiles` table
+
 ## Footer Component
 - Component: `src/components/Footer.tsx`
 - 4 columns: Produk, Fitur, Bantuan, Legal
