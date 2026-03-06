@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageSquare, X, Send, User, Bot, Loader2, ThumbsUp, ThumbsDown, HelpCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface Message {
   id: string;
@@ -12,6 +14,76 @@ interface Message {
   text: string;
   isHelpful?: boolean;
   metadata?: any;
+}
+
+function BotMarkdown({ content }: { content: string }) {
+  return (
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      components={{
+        h1: ({ children }) => <h1 className="text-base font-bold mt-2 mb-1">{children}</h1>,
+        h2: ({ children }) => <h2 className="text-sm font-bold mt-2 mb-1">{children}</h2>,
+        h3: ({ children }) => <h3 className="text-sm font-semibold mt-1.5 mb-0.5">{children}</h3>,
+        p: ({ children }) => <p className="mb-1.5 last:mb-0 leading-relaxed">{children}</p>,
+        strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+        em: ({ children }) => <em className="italic">{children}</em>,
+        ul: ({ children }) => <ul className="list-disc list-inside mb-1.5 space-y-0.5">{children}</ul>,
+        ol: ({ children }) => <ol className="list-decimal list-inside mb-1.5 space-y-0.5">{children}</ol>,
+        li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+        hr: () => <hr className="my-2 border-gray-200 dark:border-gray-700" />,
+        code: ({ className, children, ...props }) => {
+          const isInline = !className;
+          if (isInline) {
+            return (
+              <code className="bg-gray-100 dark:bg-gray-700 text-green-600 dark:text-green-400 px-1 py-0.5 rounded text-xs font-mono">
+                {children}
+              </code>
+            );
+          }
+          return (
+            <pre className="bg-gray-100 dark:bg-gray-800 p-2 rounded-lg my-1.5 overflow-x-auto">
+              <code className="text-xs font-mono text-gray-800 dark:text-gray-200">{children}</code>
+            </pre>
+          );
+        },
+        pre: ({ children }) => <>{children}</>,
+        blockquote: ({ children }) => (
+          <blockquote className="border-l-3 border-green-500 pl-2 my-1.5 italic text-gray-600 dark:text-gray-400">
+            {children}
+          </blockquote>
+        ),
+        a: ({ href, children }) => (
+          <a href={href} target="_blank" rel="noopener noreferrer" className="text-green-600 dark:text-green-400 underline hover:text-green-700">
+            {children}
+          </a>
+        ),
+        table: ({ children }) => (
+          <div className="overflow-x-auto my-2 rounded-lg border border-gray-200 dark:border-gray-700">
+            <table className="w-full text-xs border-collapse">{children}</table>
+          </div>
+        ),
+        thead: ({ children }) => (
+          <thead className="bg-green-50 dark:bg-green-900/30">{children}</thead>
+        ),
+        tbody: ({ children }) => <tbody>{children}</tbody>,
+        tr: ({ children }) => (
+          <tr className="border-b border-gray-200 dark:border-gray-700 last:border-0">{children}</tr>
+        ),
+        th: ({ children }) => (
+          <th className="px-2 py-1.5 text-left font-semibold text-green-700 dark:text-green-400 border-r border-gray-200 dark:border-gray-700 last:border-r-0">
+            {children}
+          </th>
+        ),
+        td: ({ children }) => (
+          <td className="px-2 py-1.5 text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700 last:border-r-0">
+            {children}
+          </td>
+        ),
+      }}
+    >
+      {content}
+    </ReactMarkdown>
+  );
 }
 
 export function ChatWidget() {
@@ -28,13 +100,11 @@ export function ChatWidget() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Auto-scroll to bottom
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, isOpen]);
 
-  // Keyboard shortcut: Ctrl+K or Cmd+K to open chat
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
@@ -101,18 +171,14 @@ export function ChatWidget() {
 
   const handleQuickReply = (text: string) => {
     setInput(text);
-    // Optional: auto-send
-    // handleSend();
   };
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end pointer-events-none">
-      {/* Chat Window */}
       <div className={cn(
         "bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl w-[350px] md:w-[400px] h-[500px] md:h-[600px] mb-4 transition-all duration-300 transform origin-bottom-right pointer-events-auto flex flex-col overflow-hidden",
         isOpen ? "scale-100 opacity-100" : "scale-0 opacity-0 hidden"
       )}>
-        {/* Header */}
         <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-4 flex items-center justify-between text-white">
           <div className="flex items-center gap-3">
             <div className="bg-white/20 p-2 rounded-full">
@@ -136,7 +202,6 @@ export function ChatWidget() {
           </Button>
         </div>
 
-        {/* Messages */}
         <ScrollArea className="flex-1 p-4 bg-gray-50 dark:bg-gray-950" ref={scrollRef}>
           <div className="space-y-4">
             {messages.map((msg) => (
@@ -156,15 +221,14 @@ export function ChatWidget() {
                 
                 <div className="flex flex-col gap-2">
                   <div className={cn(
-                    "p-3 rounded-2xl text-sm shadow-sm whitespace-pre-wrap",
+                    "p-3 rounded-2xl text-sm shadow-sm",
                     msg.role === "user" 
-                      ? "bg-green-600 text-white rounded-tr-none" 
+                      ? "bg-green-600 text-white rounded-tr-none whitespace-pre-wrap" 
                       : "bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-tl-none"
                   )}>
-                    {msg.text}
+                    {msg.role === "user" ? msg.text : <BotMarkdown content={msg.text} />}
                   </div>
 
-                  {/* Related Articles */}
                   {msg.metadata?.relatedArticles?.length > 0 && (
                     <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-xl border border-green-100 dark:border-green-800/30">
                       <p className="text-xs font-semibold text-green-600 dark:text-green-400 mb-2 flex items-center gap-1">
@@ -180,7 +244,6 @@ export function ChatWidget() {
                     </div>
                   )}
 
-                  {/* Quick Replies */}
                   {msg.metadata?.quickReplies?.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-1">
                       {msg.metadata.quickReplies.map((reply: string) => (
@@ -211,7 +274,6 @@ export function ChatWidget() {
           </div>
         </ScrollArea>
 
-        {/* Input Area */}
         <div className="p-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
           <div className="flex gap-2">
             <Input
@@ -236,7 +298,6 @@ export function ChatWidget() {
         </div>
       </div>
 
-      {/* Toggle Button */}
       <Button
         onClick={() => setIsOpen(!isOpen)}
         size="lg"

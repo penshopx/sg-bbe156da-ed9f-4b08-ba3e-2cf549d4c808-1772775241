@@ -417,7 +417,7 @@ export default function SchedulePage() {
 
                     {showShareModal === session.id && (
                       <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-                        <h5 className="font-medium text-gray-900 dark:text-white mb-3">Bagikan & Undang</h5>
+                        <h5 className="font-medium text-gray-900 dark:text-white mb-3">Bagikan & Undang Peserta</h5>
 
                         <div className="flex items-center gap-2 mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <LinkIcon className="w-4 h-4 text-gray-400 shrink-0" />
@@ -427,22 +427,43 @@ export default function SchedulePage() {
                           </Button>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">
+                        <div className="mb-4">
+                          <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">Undang via Email</label>
+                          <div className="flex gap-2">
+                            <Input
+                              type="email"
+                              placeholder="email@contoh.com"
+                              value={inviteEmail}
+                              onChange={(e) => setInviteEmail(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" && inviteEmail.trim()) {
+                                  shareViaEmail(session);
+                                }
+                              }}
+                              className="flex-1 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-sm"
+                            />
+                            <Button
+                              size="sm"
+                              onClick={() => shareViaEmail(session)}
+                              disabled={!inviteEmail.trim()}
+                              className="bg-blue-600 hover:bg-blue-700 text-white"
+                            >
+                              <Mail className="w-4 h-4 mr-1" /> Kirim
+                            </Button>
+                          </div>
+                          <p className="text-xs text-gray-400 mt-1">Tekan Enter atau klik Kirim untuk membuka email client</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
                           <Button variant="outline" size="sm" onClick={() => shareViaWhatsApp(session)} className="border-green-300 dark:border-green-700 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20">
-                            <MessageSquare className="w-4 h-4 mr-1" /> WhatsApp
+                            <MessageSquare className="w-4 h-4 mr-1" /> Bagikan via WhatsApp
                           </Button>
                           <Button variant="outline" size="sm" onClick={() => copyInviteText(session)} className="border-gray-300 dark:border-gray-700">
-                            <Copy className="w-4 h-4 mr-1" /> Salin Teks
-                          </Button>
-                          <Button variant="outline" size="sm" onClick={() => {
-                            const emailTo = prompt("Masukkan email tujuan:");
-                            if (emailTo) { setInviteEmail(emailTo); shareViaEmail(session); }
-                          }} className="border-blue-300 dark:border-blue-700 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20">
-                            <Mail className="w-4 h-4 mr-1" /> Email
+                            <Copy className="w-4 h-4 mr-1" /> Salin Teks Undangan
                           </Button>
                         </div>
 
-                        <Button variant="ghost" size="sm" onClick={() => setShowShareModal(null)} className="text-gray-500">
+                        <Button variant="ghost" size="sm" onClick={() => { setShowShareModal(null); setInviteEmail(""); }} className="text-gray-500">
                           Tutup
                         </Button>
                       </div>
