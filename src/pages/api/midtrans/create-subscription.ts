@@ -62,13 +62,13 @@ export default async function handler(
       .from("payment_transactions")
       .insert({
         user_id: userId,
-        subscription_plan_id: planId,
         amount: planPrice,
         currency: "IDR",
         payment_method: "midtrans",
         status: "pending",
         transaction_id: orderId,
         metadata: {
+          plan_id: planId,
           billing_cycle: billingCycle,
           plan_name: planName,
           start_date: startDate.toISOString(),

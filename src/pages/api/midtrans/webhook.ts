@@ -22,6 +22,18 @@ function generateSignatureKey(
   return crypto.createHash("sha512").update(signatureString).digest("hex");
 }
 
+type TransactionMetadata = {
+  plan_id: string;
+  start_date: string;
+  end_date: string;
+  billing_cycle?: string;
+  plan_name?: string;
+  midtrans_status?: string;
+  fraud_status?: string;
+  payment_type?: string;
+  settlement_time?: string;
+};
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -80,7 +92,7 @@ export default async function handler(
     // Update transaction status in database
     const { data: transactionData, error: fetchError } = await supabase
       .from("payment_transactions")
-      .select("user_id, subscription_plan_id, metadata")
+      .select("user_id, metadata")
       .eq("transaction_id", order_id)
       .single();
 
@@ -89,6 +101,8 @@ export default async function handler(
       return res.status(404).json({ error: "Transaction not found" });
     }
 
+    const metadata = transactionData.metadata as TransactionMetadata;
+
     // Update transaction status
     const { error: updateError } = await supabase
       .from("payment_transactions")
@@ -96,7 +110,7 @@ export default async function handler(
         status: finalStatus,
         payment_method: payment_type,
         metadata: {
-          ...(transactionData.metadata as Record<string, unknown>),
+          ...metadata,
           midtrans_status: transaction_status,
           fraud_status: fraud_status,
           payment_type: payment_type,
@@ -112,11 +126,6 @@ export default async function handler(
 
     // If payment successful, activate subscription
     if (finalStatus === "completed") {
-      const metadata = transactionData.metadata as {
-        start_date: string;
-        end_date: string;
-      };
-
       // Check if subscription already exists
       const { data: existingSub } = await supabase
         .from("user_subscriptions")
@@ -129,20 +138,21 @@ export default async function handler(
         await supabase
           .from("user_subscriptions")
           .update({
-            subscription_plan_id: transactionData.subscription_plan_id,
+            plan_id: metadata.plan_id,
             status: "active",
-            start_date: metadata.start_date,
-            end_date: metadata.end_date,
+            current_period_start: metadata.start_date,
+            current_period_end: metadata.end_date,
           })
           .eq("user_id", transactionData.user_id);
       } else {
         // Create new subscription
         await supabase.from("user_subscriptions").insert({
           user_id: transactionData.user_id,
-          subscription_plan_id: transactionData.subscription_plan_id,
+          plan_id: metadata.plan_id,
           status: "active",
-          start_date: metadata.start_date,
-          end_date: metadata.end_date,
+          current_period_start: metadata.start_date,
+          current_period_end: metadata.end_date,
+          billing_cycle: metadata.billing_cycle === "annual" ? "yearly" : "monthly",
         });
       }
     }
