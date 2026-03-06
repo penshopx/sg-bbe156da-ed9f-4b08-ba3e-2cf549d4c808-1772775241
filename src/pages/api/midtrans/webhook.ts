@@ -103,20 +103,23 @@ export default async function handler(
 
     const metadata = transactionData.metadata as TransactionMetadata;
 
+    // Define update payload with any type to avoid deep type instantiation errors with JSONB
+    const updatePayload: any = {
+      status: finalStatus,
+      payment_method: payment_type,
+      metadata: {
+        ...metadata,
+        midtrans_status: transaction_status,
+        fraud_status: fraud_status,
+        payment_type: payment_type,
+        settlement_time: statusResponse.settlement_time,
+      },
+    };
+
     // Update transaction status
     const { error: updateError } = await supabase
       .from("payment_transactions")
-      .update({
-        status: finalStatus,
-        payment_method: payment_type,
-        metadata: {
-          ...metadata,
-          midtrans_status: transaction_status,
-          fraud_status: fraud_status,
-          payment_type: payment_type,
-          settlement_time: statusResponse.settlement_time,
-        },
-      } as any)
+      .update(updatePayload)
       .eq("transaction_id", order_id);
 
     if (updateError) {

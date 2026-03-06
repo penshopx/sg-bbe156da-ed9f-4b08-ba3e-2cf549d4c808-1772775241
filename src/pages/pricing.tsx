@@ -12,6 +12,12 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
+declare global {
+  interface Window {
+    snap: any;
+  }
+}
+
 type Plan = {
   id: string;
   name: string;
@@ -62,12 +68,14 @@ export default function PricingPage() {
         setPlans(data.map(p => ({
           ...p,
           // Parse features if stored as JSON/Array, or use defaults
-          features: Array.isArray(p.features) ? p.features : [
-            p.max_participants ? `Up to ${p.max_participants} participants` : "Unlimited participants",
-            p.max_duration_minutes ? `${p.max_duration_minutes} mins duration limit` : "Unlimited duration",
-            "Screen sharing",
-            "Chat & Reactions"
-          ]
+          features: Array.isArray(p.features) 
+            ? p.features.map(f => String(f)) // Ensure all items are strings
+            : [
+              p.max_participants ? `Up to ${p.max_participants} participants` : "Unlimited participants",
+              p.max_duration_minutes ? `${p.max_duration_minutes} mins duration limit` : "Unlimited duration",
+              "Screen sharing",
+              "Chat & Reactions"
+            ]
         })));
       } else {
         // Fallback if DB is empty (should run seed script in real app)
