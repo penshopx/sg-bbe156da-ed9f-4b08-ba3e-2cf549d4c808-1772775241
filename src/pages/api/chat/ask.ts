@@ -277,7 +277,7 @@ function generateMockResponse(message: string): string {
     lowerMessage.includes("apa itu chaesa") ||
     lowerMessage.includes("about chaesa")
   ) {
-    return "Chaesa Live is an AI-powered video conferencing platform designed for creators & educators. 🚀\n\n**Key Features:**\n• 📹 Video meetings (100+ participants)\n• 🤖 AI Course Generator (turn meetings into courses)\n• 💰 Live Sales CTA (monetize webinars)\n• 🎬 Studio Mode (OBS-friendly)\n\nWe're 71% cheaper than Zoom while offering 10x more features!\n\nWould you like to learn more about any specific feature?";
+    return "Chaesa Live is an AI-powered video conferencing platform designed for creators & educators. 🚀\n\nKey Features:\n• 📹 Video meetings (100+ participants)\n• 🤖 AI Course Generator (turn meetings into courses)\n• 💰 Live Sales CTA (monetize webinars)\n• 🎬 Studio Mode (OBS-friendly)\n\nWe're 71% cheaper than Zoom while offering 10x more features!\n\nWould you like to learn more about any specific feature?";
   }
 
   // Pricing questions
@@ -288,7 +288,7 @@ function generateMockResponse(message: string): string {
     lowerMessage.includes("plan") ||
     lowerMessage.includes("subscription")
   ) {
-    return "Great question! Chaesa Live has 4 pricing tiers:\n\n**🆓 FREE:** Rp 0/month\n• 40 min meeting limit\n• 100 participants\n• Basic features\n\n**⭐ PRO:** Rp 69.000/month\n• Unlimited meetings\n• AI Course Generator\n• Live Sales CTA\n• Studio Mode\n\n**🚀 BUSINESS:** Rp 99.000/month\n• Everything in Pro\n• 300 participants\n• Advanced analytics\n• Custom branding\n\n**💎 LIFETIME:** Rp 499.000 (one-time)\n• All Pro features forever\n• Limited availability\n\nWe're 71% cheaper than Zoom! 💰\n\nWhich plan interests you most?";
+    return "Great question! Chaesa Live has 4 pricing tiers:\n\n┌─────────────┬──────────────────────────────────────────┐\n│ Plan        │ Details                                  │\n├─────────────┼──────────────────────────────────────────┤\n│ 🆓 FREE     │ Rp 0/month                               │\n│             │ • 40 min meeting limit                   │\n│             │ • 100 participants                       │\n│             │ • Basic features                         │\n├─────────────┼──────────────────────────────────────────┤\n│ ⭐ PRO      │ Rp 69,000/month                          │\n│             │ • Unlimited meetings                     │\n│             │ • AI Course Generator                    │\n│             │ • Live Sales CTA                         │\n│             │ • Studio Mode                            │\n├─────────────┼──────────────────────────────────────────┤\n│ 🚀 BUSINESS │ Rp 99,000/month                          │\n│             │ • Everything in Pro                      │\n│             │ • 300 participants                       │\n│             │ • Advanced analytics                     │\n│             │ • Custom branding                        │\n├─────────────┼──────────────────────────────────────────┤\n│ 💎 LIFETIME │ Rp 499,000 (one-time)                    │\n│             │ • All Pro features forever               │\n│             │ • Limited availability                   │\n└─────────────┴──────────────────────────────────────────┘\n\nWe're 71% cheaper than Zoom! 💰\n\nWhich plan interests you most?";
   }
 
   // AI Features
@@ -298,7 +298,7 @@ function generateMockResponse(message: string): string {
     lowerMessage.includes("generate") ||
     lowerMessage.includes("automation")
   ) {
-    return "Our AI Course Factory is like NotebookLM for video! 🤖✨\n\n**Here's how it works:**\n1. Record your meeting (any length)\n2. AI automatically chunks into 5-7 min modules\n3. Generates:\n   • PowerPoint slides 📊\n   • PDF ebooks & study guides 📖\n   • Quizzes with explanations ✅\n   • AI podcast (2-host conversation) 🎙️\n   • Social media clips (TikTok/Reels) 📱\n\n**Time Saved:** 90% (20 hours → 2 hours)\n\nWant to see a demo?";
+    return "Our AI Course Factory is like NotebookLM for video! 🤖✨\n\nHere's how it works:\n\n1. Record your meeting (any length)\n2. AI automatically chunks into 5-7 min modules\n3. Generates:\n   • PowerPoint slides 📊\n   • PDF ebooks & study guides 📖\n   • Quizzes with explanations ✅\n   • AI podcast (2-host conversation) 🎙️\n   • Social media clips (TikTok/Reels) 📱\n\nTime Saved: 90% (20 hours → 2 hours)\n\nWant to see a demo?";
   }
 
   // Studio Mode / OBS
@@ -309,7 +309,7 @@ function generateMockResponse(message: string): string {
     lowerMessage.includes("audio issue") ||
     lowerMessage.includes("audio problem")
   ) {
-    return "Studio Mode is perfect for content creators! 🎬\n\n**How to use:**\n1. Join your meeting\n2. Press **Ctrl+Shift+U** (or click Studio Mode button)\n3. All UI elements disappear (clean feed for OBS)\n4. Enable 'Original Sound' in Audio Settings\n5. Zero audio conflicts! 🎵\n\n**Perfect for:**\n• YouTubers & streamers\n• Podcast recordings\n• Professional broadcasts\n\nThis fixes the common \"robotic audio\" issue with Zoom + OBS!\n\nNeed help setting it up?";
+    return "Studio Mode is perfect for content creators! 🎬\n\nHow to use:\n\n1. Join your meeting\n2. Press Ctrl+Shift+U (or click Studio Mode button)\n3. All UI elements disappear (clean feed for OBS)\n4. Enable 'Original Sound' in Audio Settings\n5. Zero audio conflicts! 🎵\n\nPerfect for:\n• YouTubers & streamers\n• Podcast recordings\n• Professional broadcasts\n\nThis fixes the common 'robotic audio' issue with Zoom + OBS!\n\nNeed help setting it up?";
   }
 
   // Live Sales CTA
@@ -320,7 +320,7 @@ function generateMockResponse(message: string): string {
     lowerMessage.includes("monetize") ||
     lowerMessage.includes("conversion")
   ) {
-    return "Live Sales CTA works like TikTok Shop for webinars! 💰\n\n**How it works:**\n1. During your live webinar/demo\n2. Push \"Buy Now\" button to ALL viewers' screens\n3. Add FOMO countdown timer ⏱️\n4. Direct to checkout page\n5. Real-time click tracking 📊\n\n**Result:** 3-5x higher conversion vs traditional \"link in chat\"\n\nThis is PERFECT for:\n• Live product demos\n• Course launches\n• Webinar sales\n• E-commerce broadcasts\n\nWant to see how to set it up?";
+    return "Live Sales CTA works like TikTok Shop for webinars! 💰\n\nHow it works:\n\n1. During your live webinar/demo\n2. Push 'Buy Now' button to ALL viewers' screens\n3. Add FOMO countdown timer ⏱️\n4. Direct to checkout page\n5. Real-time click tracking 📊\n\nResult: 3-5x higher conversion vs traditional 'link in chat'\n\nThis is PERFECT for:\n• Live product demos\n• Course launches\n• Webinar sales\n• E-commerce broadcasts\n\nWant to see how to set it up?";
   }
 
   // Getting started
@@ -331,7 +331,7 @@ function generateMockResponse(message: string): string {
     lowerMessage.includes("create meeting") ||
     lowerMessage.includes("cara mulai")
   ) {
-    return "Getting started is super easy! 🚀\n\n**Option 1: Start New Meeting**\n1. Click \"Start New Meeting\" on homepage\n2. Meeting room opens instantly\n3. Share meeting code with participants\n\n**Option 2: Join Existing Meeting**\n1. Get meeting code from host\n2. Enter code on homepage\n3. Click \"Join Meeting\"\n\n**Pro Tips:**\n• Test your camera/mic before joining\n• Use Chrome/Edge for best experience\n• Enable Studio Mode if streaming to OBS\n\nReady to create your first meeting?";
+    return "Getting started is super easy! 🚀\n\nOption 1: Start New Meeting\n1. Click 'Start New Meeting' on homepage\n2. Meeting room opens instantly\n3. Share meeting code with participants\n\nOption 2: Join Existing Meeting\n1. Get meeting code from host\n2. Enter code on homepage\n3. Click 'Join Meeting'\n\nPro Tips:\n• Test your camera/mic before joining\n• Use Chrome/Edge for best experience\n• Enable Studio Mode if streaming to OBS\n\nReady to create your first meeting?";
   }
 
   // Troubleshooting
@@ -343,7 +343,7 @@ function generateMockResponse(message: string): string {
     lowerMessage.includes("fix") ||
     lowerMessage.includes("help")
   ) {
-    return "I'm here to help troubleshoot! 🔧\n\n**Common issues & fixes:**\n\n**Camera not working:**\n• Check browser permissions (allow camera access)\n• Try different browser (Chrome recommended)\n• Restart your device\n\n**Audio issues:**\n• Enable 'Original Sound' mode\n• Check microphone permissions\n• Disable other apps using mic\n\n**Connection problems:**\n• Check internet speed (minimum 5 Mbps)\n• Disable VPN temporarily\n• Try different network\n\n**Can't generate course:**\n• Ensure meeting was recorded\n• Wait 2-3 minutes for processing\n• Check subscription plan (Pro required)\n\nWhat specific issue are you facing?";
+    return "I'm here to help troubleshoot! 🔧\n\nCommon issues & fixes:\n\nCamera not working:\n• Check browser permissions (allow camera access)\n• Try different browser (Chrome recommended)\n• Restart your device\n\nAudio issues:\n• Enable 'Original Sound' mode\n• Check microphone permissions\n• Disable other apps using mic\n\nConnection problems:\n• Check internet speed (minimum 5 Mbps)\n• Disable VPN temporarily\n• Try different network\n\nCan't generate course:\n• Ensure meeting was recorded\n• Wait 2-3 minutes for processing\n• Check subscription plan (Pro required)\n\nWhat specific issue are you facing?";
   }
 
   // Features comparison
@@ -353,7 +353,7 @@ function generateMockResponse(message: string): string {
     lowerMessage.includes("difference") ||
     lowerMessage.includes("better than")
   ) {
-    return "Great question! Here's how we compare to Zoom:\n\n**Chaesa Live vs Zoom:**\n\n✅ **Price:** 71% cheaper (Rp 69K vs Rp 240K/month)\n✅ **AI Course Generator:** We have it, Zoom doesn't\n✅ **Live Sales CTA:** We have it, Zoom doesn't\n✅ **Studio Mode:** We have it, Zoom makes it complex\n✅ **Original Sound:** One toggle vs complex setup\n✅ **Marketplace:** Built-in course sales (30% commission vs Udemy's 50%)\n\n**What Zoom has:**\n• Larger enterprise features\n• More integrations\n• Bigger brand recognition\n\n**Best for:** Creators, educators, live sellers, content creators\n\nMakes sense?";
+    return "Great question! Here's how we compare to Zoom:\n\nChaesa Live vs Zoom:\n\n┌──────────────────────┬──────────────┬──────────────┐\n│ Feature              │ Chaesa Live  │ Zoom         │\n├──────────────────────┼──────────────┼──────────────┤\n│ Price                │ Rp 69,000    │ Rp 240,000   │\n│ Savings              │ 71% cheaper  │ -            │\n│ AI Course Generator  │ ✅ Yes       │ ❌ No        │\n│ Live Sales CTA       │ ✅ Yes       │ ❌ No        │\n│ Studio Mode          │ ✅ Yes       │ ⚠️ Complex   │\n│ Original Sound       │ ✅ One click │ ⚠️ Complex   │\n│ Course Marketplace   │ ✅ 30% fee   │ ❌ No        │\n└──────────────────────┴──────────────┴──────────────┘\n\nWhat Zoom has:\n• Larger enterprise features\n• More integrations\n• Bigger brand recognition\n\nBest for: Creators, educators, live sellers, content creators\n\nMakes sense?";
   }
 
   // Payment/billing
@@ -364,7 +364,7 @@ function generateMockResponse(message: string): string {
     lowerMessage.includes("card") ||
     lowerMessage.includes("transfer")
   ) {
-    return "We accept multiple payment methods! 💳\n\n**Available options:**\n• Credit/Debit Cards (Visa, Mastercard)\n• Bank Transfer (All major banks)\n• E-Wallets (GoPay, OVO, Dana)\n• QRIS Payment\n\n**How to subscribe:**\n1. Choose your plan (Free, Pro, Business, Lifetime)\n2. Click \"Subscribe Now\"\n3. Select payment method\n4. Complete payment\n5. Account upgraded instantly!\n\n**Secure Payment:**\n• Processed by Midtrans (certified secure)\n• No card details stored on our servers\n• 7-day money-back guarantee\n\nReady to upgrade?";
+    return "We accept multiple payment methods! 💳\n\nAvailable options:\n• Credit/Debit Cards (Visa, Mastercard)\n• Bank Transfer (All major banks)\n• E-Wallets (GoPay, OVO, Dana)\n• QRIS Payment\n\nHow to subscribe:\n1. Choose your plan (Free, Pro, Business, Lifetime)\n2. Click 'Subscribe Now'\n3. Select payment method\n4. Complete payment\n5. Account upgraded instantly!\n\nSecure Payment:\n• Processed by Midtrans (certified secure)\n• No card details stored on our servers\n• 7-day money-back guarantee\n\nReady to upgrade?";
   }
 
   // Contact/support
@@ -375,9 +375,9 @@ function generateMockResponse(message: string): string {
     lowerMessage.includes("talk to") ||
     lowerMessage.includes("speak to")
   ) {
-    return "I'd be happy to connect you with our support team! 👨‍💼\n\n**Support Options:**\n\n📧 **Email:** support@chaesa.live\n⏰ **Response time:** Within 24 hours\n\n💬 **Live Chat:** Available Mon-Fri, 9 AM - 5 PM WIB\n\n📱 **Community:** Join our Discord for peer support\n\nWould you like me to escalate your question to a human agent now?";
+    return "I'd be happy to connect you with our support team! 👨‍💼\n\nSupport Options:\n\n📧 Email: support@chaesa.live\n   Response time: Within 24 hours\n\n💬 Live Chat: Available Mon-Fri, 9 AM - 5 PM WIB\n\n📱 Community: Join our Discord for peer support\n\nWould you like me to escalate your question to a human agent now?";
   }
 
   // Default response with suggestions
-  return `I'd be happy to help! While I search for the best answer, here are some topics I can assist with:\n\n• **About Chaesa Live** - What we do & how we're different\n• **Features** - AI Course Factory, Live Sales CTA, Studio Mode\n• **Pricing** - Plans & billing\n• **Getting Started** - How to create/join meetings\n• **Troubleshooting** - Common issues & fixes\n• **Technical Support** - OBS setup, audio/video issues\n\nCould you tell me more about what you're looking for? Or feel free to ask any specific question! 😊`;
+  return "I'd be happy to help! While I search for the best answer, here are some topics I can assist with:\n\n• About Chaesa Live - What we do & how we're different\n• Features - AI Course Factory, Live Sales CTA, Studio Mode\n• Pricing - Plans & billing\n• Getting Started - How to create/join meetings\n• Troubleshooting - Common issues & fixes\n• Technical Support - OBS setup, audio/video issues\n\nCould you tell me more about what you're looking for? Or feel free to ask any specific question! 😊";
 }
