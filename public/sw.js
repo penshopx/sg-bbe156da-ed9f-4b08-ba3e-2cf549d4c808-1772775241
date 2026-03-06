@@ -1,11 +1,10 @@
-const CACHE_NAME = "chaesa-live-v1";
+const CACHE_NAME = "chaesa-live-v2";
 const OFFLINE_URL = "/offline.html";
 
 const PRECACHE_URLS = [
   "/",
   "/offline.html",
   "/manifest.json",
-  "/favicon.ico",
   "/icons/icon-192x192.png",
   "/icons/icon-512x512.png"
 ];
