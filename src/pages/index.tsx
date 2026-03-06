@@ -16,6 +16,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { toast } from "@/hooks/use-toast";
+import { Footer } from "@/components/Footer";
 
 export default function Home() {
   const router = useRouter();
@@ -146,6 +147,10 @@ export default function Home() {
                     <Link href="/storybook" className="block px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
                       Storybook Visual
                     </Link>
+                    <div className="border-t border-gray-100 dark:border-gray-800 my-1" />
+                    <Link href="/dashboard" className="block px-4 py-2.5 text-sm text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 font-medium">
+                      📊 Dashboard Progress
+                    </Link>
                   </div>
                 </div>
                 <div className="relative group">
@@ -235,6 +240,9 @@ export default function Home() {
                           </Link>
                           <Link href="/storybook" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
                             Storybook Visual
+                          </Link>
+                          <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 text-sm text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg font-medium">
+                            📊 Dashboard Progress
                           </Link>
                         </div>
                       </AccordionContent>
@@ -973,6 +981,114 @@ export default function Home() {
           </div>
         </div>
 
+        {/* FAQ Section */}
+        <div id="faq" className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+          <div className="text-center mb-12">
+            <Badge className="mb-4 bg-purple-500/20 text-purple-700 dark:text-purple-300 border-purple-500/50 px-4 py-2">
+              <MessageSquare className="w-4 h-4 mr-2" />
+              FAQ
+            </Badge>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              Pertanyaan yang Sering Diajukan
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              Temukan jawaban untuk pertanyaan umum tentang Chaesa Live
+            </p>
+          </div>
+
+          <Accordion type="single" collapsible className="w-full space-y-3">
+            <AccordionItem value="faq-1" className="border border-gray-200 dark:border-white/10 rounded-xl px-6 bg-white/50 dark:bg-white/5 backdrop-blur-sm">
+              <AccordionTrigger className="text-base font-semibold text-gray-900 dark:text-white hover:no-underline">
+                Berapa harga berlangganan Chaesa Live?
+              </AccordionTrigger>
+              <AccordionContent className="text-gray-600 dark:text-gray-300">
+                Chaesa Live menawarkan paket mulai dari Rp 99.000/bulan untuk paket Pro. Kami juga menyediakan paket tahunan seharga Rp 999.000 (hemat 16%). Tersedia juga paket gratis dengan fitur dasar seperti video meeting hingga 45 menit dan akses micro-learning terbatas. Kunjungi halaman Harga untuk detail lengkap.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="faq-2" className="border border-gray-200 dark:border-white/10 rounded-xl px-6 bg-white/50 dark:bg-white/5 backdrop-blur-sm">
+              <AccordionTrigger className="text-base font-semibold text-gray-900 dark:text-white hover:no-underline">
+                Bagaimana AI mengubah meeting saya jadi kursus micro-learning?
+              </AccordionTrigger>
+              <AccordionContent className="text-gray-600 dark:text-gray-300">
+                AI kami secara otomatis mentranskrip dan menganalisis rekaman meeting Anda. Kemudian, AI memotong konten menjadi modul-modul pendek (5-15 menit), menghasilkan slides presentasi, membuat quiz interaktif, dan bahkan mengubahnya menjadi format podcast. Semua proses ini selesai dalam hitungan menit, bukan berjam-jam.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="faq-3" className="border border-gray-200 dark:border-white/10 rounded-xl px-6 bg-white/50 dark:bg-white/5 backdrop-blur-sm">
+              <AccordionTrigger className="text-base font-semibold text-gray-900 dark:text-white hover:no-underline">
+                Apakah data dan rekaman meeting saya aman?
+              </AccordionTrigger>
+              <AccordionContent className="text-gray-600 dark:text-gray-300">
+                Keamanan adalah prioritas utama kami. Semua data dienkripsi end-to-end, baik saat transit maupun saat disimpan. Kami menggunakan infrastruktur enterprise-grade dengan kepatuhan GDPR, dan menjamin uptime 99,9% SLA. Rekaman meeting Anda hanya bisa diakses oleh Anda dan peserta yang Anda izinkan.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="faq-4" className="border border-gray-200 dark:border-white/10 rounded-xl px-6 bg-white/50 dark:bg-white/5 backdrop-blur-sm">
+              <AccordionTrigger className="text-base font-semibold text-gray-900 dark:text-white hover:no-underline">
+                Apakah Chaesa Live kompatibel dengan perangkat saya?
+              </AccordionTrigger>
+              <AccordionContent className="text-gray-600 dark:text-gray-300">
+                Chaesa Live berbasis web dan bisa diakses dari browser modern manapun (Chrome, Firefox, Safari, Edge) tanpa perlu install aplikasi tambahan. Platform kami juga mendukung Progressive Web App (PWA), sehingga bisa dipasang di smartphone dan tablet untuk pengalaman seperti aplikasi native.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="faq-5" className="border border-gray-200 dark:border-white/10 rounded-xl px-6 bg-white/50 dark:bg-white/5 backdrop-blur-sm">
+              <AccordionTrigger className="text-base font-semibold text-gray-900 dark:text-white hover:no-underline">
+                Bagaimana kebijakan refund jika saya tidak puas?
+              </AccordionTrigger>
+              <AccordionContent className="text-gray-600 dark:text-gray-300">
+                Kami menawarkan garansi uang kembali 7 hari tanpa syarat. Jika Anda tidak puas dengan layanan kami dalam 7 hari pertama setelah berlangganan, hubungi tim support kami dan kami akan memproses refund penuh. Anda juga bisa membatalkan langganan kapan saja tanpa biaya tambahan.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="faq-6" className="border border-gray-200 dark:border-white/10 rounded-xl px-6 bg-white/50 dark:bg-white/5 backdrop-blur-sm">
+              <AccordionTrigger className="text-base font-semibold text-gray-900 dark:text-white hover:no-underline">
+                Bagaimana cara mulai menggunakan Chaesa Live?
+              </AccordionTrigger>
+              <AccordionContent className="text-gray-600 dark:text-gray-300">
+                Sangat mudah! Cukup daftar akun gratis, lalu Anda bisa langsung memulai meeting pertama Anda. Untuk fitur AI course generator, cukup rekam meeting Anda dan biarkan AI kami yang bekerja. Kami juga menyediakan template siap pakai dan panduan onboarding untuk membantu Anda memulai dengan cepat.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="faq-7" className="border border-gray-200 dark:border-white/10 rounded-xl px-6 bg-white/50 dark:bg-white/5 backdrop-blur-sm">
+              <AccordionTrigger className="text-base font-semibold text-gray-900 dark:text-white hover:no-underline">
+                Apa bedanya Chaesa Live dengan Zoom atau Google Meet?
+              </AccordionTrigger>
+              <AccordionContent className="text-gray-600 dark:text-gray-300">
+                Chaesa Live bukan sekadar platform video conference. Kami menggabungkan video meeting, AI course generator, dan live commerce dalam satu platform. Sementara Zoom/Meet hanya merekam meeting, Chaesa Live secara otomatis mengubah rekaman menjadi kursus micro-learning yang bisa Anda monetisasi. Plus, fitur live commerce memungkinkan konversi 3-5x lebih tinggi langsung saat presentasi.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="faq-8" className="border border-gray-200 dark:border-white/10 rounded-xl px-6 bg-white/50 dark:bg-white/5 backdrop-blur-sm">
+              <AccordionTrigger className="text-base font-semibold text-gray-900 dark:text-white hover:no-underline">
+                Apakah Chaesa Live mendukung akses mobile?
+              </AccordionTrigger>
+              <AccordionContent className="text-gray-600 dark:text-gray-300">
+                Ya! Chaesa Live sepenuhnya responsif dan dioptimalkan untuk perangkat mobile. Anda bisa mengikuti meeting, mengakses kursus micro-learning, dan mengelola konten langsung dari smartphone Anda. Dengan dukungan PWA, Anda bisa menginstall Chaesa Live di home screen untuk akses cepat tanpa perlu download dari app store.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="faq-9" className="border border-gray-200 dark:border-white/10 rounded-xl px-6 bg-white/50 dark:bg-white/5 backdrop-blur-sm">
+              <AccordionTrigger className="text-base font-semibold text-gray-900 dark:text-white hover:no-underline">
+                Berapa banyak peserta yang bisa ikut dalam satu meeting?
+              </AccordionTrigger>
+              <AccordionContent className="text-gray-600 dark:text-gray-300">
+                Paket gratis mendukung hingga 10 peserta per meeting. Paket Pro mendukung hingga 100 peserta dengan fitur breakout room dan recording. Untuk kebutuhan enterprise dengan peserta lebih banyak, hubungi tim sales kami untuk solusi kustom yang disesuaikan dengan kebutuhan organisasi Anda.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="faq-10" className="border border-gray-200 dark:border-white/10 rounded-xl px-6 bg-white/50 dark:bg-white/5 backdrop-blur-sm">
+              <AccordionTrigger className="text-base font-semibold text-gray-900 dark:text-white hover:no-underline">
+                Apakah ada fitur sertifikasi untuk peserta kursus?
+              </AccordionTrigger>
+              <AccordionContent className="text-gray-600 dark:text-gray-300">
+                Ya! Chaesa Live menyediakan sistem sertifikasi digital lengkap. Setelah peserta menyelesaikan kursus dan lulus ujian, mereka akan mendapatkan sertifikat digital yang bisa diverifikasi. Fitur ini sangat berguna untuk program training korporat, sertifikasi profesional, dan bukti kompetensi yang bisa dibagikan di LinkedIn.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+
         {/* Debug Panel (Ctrl+D to toggle) */}
         {showDebug && (
           <div className="fixed bottom-4 right-4 bg-black/90 text-white p-4 rounded-lg shadow-2xl border border-purple-500 max-w-sm z-50">
@@ -997,21 +1113,7 @@ export default function Home() {
           </div>
         )}
 
-        {/* Footer */}
-        <footer className="bg-gray-100 dark:bg-black/40 border-t border-gray-200 dark:border-white/10 py-8">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <div className="text-gray-500 dark:text-gray-400 text-sm">
-                © 2026 Chaesa Live. Hak cipta dilindungi.
-              </div>
-              <div className="flex gap-6 text-sm text-gray-500 dark:text-gray-400">
-                <Link href="/pricing" className="hover:text-gray-900 dark:hover:text-white transition-colors">Harga</Link>
-                <Link href="/ai-studio" className="hover:text-gray-900 dark:hover:text-white transition-colors">AI Studio</Link>
-                <Link href="/micro-learning" className="hover:text-gray-900 dark:hover:text-white transition-colors">Micro-Learning</Link>
-              </div>
-            </div>
-          </div>
-        </footer>
+        <Footer />
       </div>
     </>
   );

@@ -868,6 +868,7 @@ const FEATURE_LINK_MAP: Record<string, { label: string; path: string }> = {
   "schedule": { label: "Jadwal Live", path: "/schedule" },
   "pricing": { label: "Harga", path: "/pricing" },
   "auth": { label: "Daftar/Login", path: "/auth" },
+  "dashboard": { label: "Dashboard Progress", path: "/dashboard" },
 };
 
 function extractFeatureLinks(botReply: string, userMessage: string): { label: string; path: string }[] {

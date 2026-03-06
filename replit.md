@@ -187,10 +187,32 @@ supabase/         - Supabase configuration
 - `getUserStorageKey(userId, key)` — generates user-scoped localStorage keys
 - All feature pages use this hook to show user info and persist data per-user
 
+## User Progress Dashboard (`/dashboard`)
+- Page: `src/pages/dashboard.tsx`
+- Aggregated view of user's activity across ALL features
+- Stats: Total XP (ring chart), Certificates, Exams Passed, Stories Created, Learning Paths, Skills Rated, Achievements
+- 12 achievements with unlock conditions (Bookworm, Storyteller, Exam Ace, Certified, Pathfinder, etc.)
+- Achievement filter by category (Semua, Belajar, Ujian, Milestone)
+- Recent activity timeline with links to relevant pages
+- Quick action cards: Storybook, Learning Path, Ujian, Skills Matrix
+- Auth-aware with useAuth hook
+- XP system: certs=100 XP, exam pass=50 XP, exam complete=20 XP, story=30 XP, skills framework=25 XP
+
+## Footer Component
+- Component: `src/components/Footer.tsx`
+- 4 columns: Produk, Fitur, Bantuan, Legal
+- Logo, tagline, social media icons
+- Dark/light mode, responsive
+
+## FAQ Section
+- Added to landing page (`src/pages/index.tsx`) before footer
+- 10 accordion questions covering pricing, AI, security, compatibility, refund, mobile, certification
+- Uses shadcn Accordion component
+
 ## Navigation
 - Homepage navbar (segment-based):
   - Harga, Jadwal Live
-  - "Belajar" dropdown: Micro-Learning, Learning Path, Ujian & Sertifikasi, Sertifikat Saya, Storybook Visual
+  - "Belajar" dropdown: Micro-Learning, Learning Path, Ujian & Sertifikasi, Sertifikat Saya, Storybook Visual, Dashboard Progress
   - "HRD & Training" dropdown: Skills Matrix & Gap Analysis, Exam Center, Training Path, Digital Certificate
   - "Creator Tools" dropdown: AI Studio, Dashboard Kreator, Broadcast & Marketing, Kalender Konten
 - **Mobile hamburger menu**: Sheet drawer (left slide) with accordion sections for all nav groups, auth buttons, closes on navigation
