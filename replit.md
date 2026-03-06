@@ -210,7 +210,19 @@ supabase/         - Supabase configuration
 ## Auth Page Enhancements
 - Google OAuth: "Masuk dengan Google" button using authService.signInWithGoogle()
 - Visual divider between social and email auth
+- "Lupa Password?" link under password field (login mode only)
+- Sends reset email via `supabase.auth.resetPasswordForEmail()`
+- Auth callback page: `src/pages/auth/callback.tsx` handles OAuth redirect
 - Located at `src/pages/auth.tsx`
+
+## Micro-Learning Tabs
+- **Marketplace**: Course browsing grid with category filters, search, price badges, "Mulai Belajar" CTA
+- **Analytics**: Summary stats (courses, modules, learners, duration), course performance table with progress bars, 7-day activity streak grid
+
+## Creator Dashboard
+- Dynamic stats from localStorage + Supabase: Total Konten, Total Modul, Sertifikat Dibuat, Skills Framework
+- Recent content merged from courses + storybooks, sorted by date
+- Empty state with CTA when no content exists
 
 ## 404 Page
 - Themed with Chaesa Live dark/purple gradient

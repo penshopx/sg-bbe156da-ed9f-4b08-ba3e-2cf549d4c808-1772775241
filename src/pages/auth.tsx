@@ -291,6 +291,55 @@ export default function AuthPage() {
               </div>
             </div>
 
+            {/* Forgot Password (Login only) */}
+            {isLogin && (
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!email) {
+                      toast({
+                        title: "Email Diperlukan",
+                        description: "Masukkan email Anda terlebih dahulu, lalu klik Lupa Password",
+                        variant: "destructive"
+                      });
+                      return;
+                    }
+                    if (!validateEmail(email)) {
+                      toast({
+                        title: "Email Tidak Valid",
+                        description: "Masukkan email yang valid untuk reset password",
+                        variant: "destructive"
+                      });
+                      return;
+                    }
+                    try {
+                      setIsLoading(true);
+                      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                        redirectTo: `${window.location.origin}/auth`,
+                      });
+                      if (error) throw error;
+                      toast({
+                        title: "Email Terkirim",
+                        description: "Link reset password telah dikirim ke email Anda. Periksa inbox Anda.",
+                      });
+                    } catch (err: any) {
+                      toast({
+                        title: "Gagal",
+                        description: err?.message || "Gagal mengirim email reset password",
+                        variant: "destructive"
+                      });
+                    } finally {
+                      setIsLoading(false);
+                    }
+                  }}
+                  className="text-sm text-purple-400 hover:text-purple-300 transition-colors"
+                >
+                  Lupa Password?
+                </button>
+              </div>
+            )}
+
             {/* Submit Button */}
             <Button 
               type="submit" 
