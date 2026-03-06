@@ -33,13 +33,14 @@ export async function getSubscriptionStatus(userId: string): Promise<Subscriptio
       .eq("id", userId)
       .single();
 
-    if (error || !profile) {
+    if (error) {
       console.error("Error fetching subscription:", error);
       return null;
     }
 
-    const plan = profile.subscription_plan as SubscriptionPlan;
-    const expiresAt = profile.subscription_expires_at;
+    // Cast to expected types since DB types might be strict
+    const plan = (profile?.subscription_plan || "free") as SubscriptionPlan;
+    const expiresAt = profile?.subscription_expires_at || null;
     
     // Check if subscription is active
     const isActive = !expiresAt || new Date(expiresAt) > new Date();
@@ -140,7 +141,18 @@ export async function checkMeetingLimits(
       return null;
     }
 
-    return data;
+    // Safely cast the JSONB response
+    if (data && typeof data === 'object' && !Array.isArray(data)) {
+        return {
+            shouldEnd: Boolean((data as any).should_end),
+            reason: (data as any).reason as "duration" | "participants" | undefined,
+            timeRemaining: Number((data as any).time_remaining),
+            maxDuration: Number((data as any).max_duration),
+            isPro: Boolean((data as any).is_pro)
+        };
+    }
+    
+    return null;
   } catch (error) {
     console.error("Error in checkMeetingLimits:", error);
     return null;

@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
+import { getSubscriptionStatus } from "@/middleware/subscriptionMiddleware";
 
 export const authService = {
   // Get current session
@@ -160,28 +161,11 @@ export const authService = {
     localStorage.removeItem("chaesa_guest_user");
   },
 
-  // Get user subscription status
+  /**
+   * Get current user's subscription status
+   * Reuses the centralized logic from middleware
+   */
   async getSubscriptionStatus(userId: string) {
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("subscription_plan, subscription_expires_at")
-      .eq("id", userId)
-      .single();
-
-    if (error) {
-      console.error("Error fetching subscription:", error);
-      return null;
-    }
-
-    const plan = data.subscription_plan || "free";
-    const expiresAt = data.subscription_expires_at;
-    const isActive = !expiresAt || new Date(expiresAt) > new Date();
-
-    return {
-      plan,
-      isActive,
-      expiresAt,
-      isPro: plan !== "free" && isActive,
-    };
+    return await getSubscriptionStatus(userId);
   }
 };

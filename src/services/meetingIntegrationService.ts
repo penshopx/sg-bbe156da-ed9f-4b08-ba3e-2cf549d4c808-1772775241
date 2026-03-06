@@ -166,13 +166,17 @@ export const meetingIntegrationService = {
       duration: number;
       participants: string[];
       hasRecording: boolean;
+      ai_processing_status?: string;
     }
   ) {
     try {
+      // Cast metadata to any to satisfy JSONB type requirement
+      const metadataJson = metadata as any;
+      
       const { error } = await supabase
         .from("meetings")
         .update({
-          metadata: metadata as any,
+          metadata: metadataJson,
         })
         .eq("id", meetingId);
 
