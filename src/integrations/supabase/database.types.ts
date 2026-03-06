@@ -15,6 +15,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_meeting_notes: {
+        Row: {
+          confidence: number | null
+          created_at: string | null
+          id: string
+          meeting_id: string
+          metadata: Json | null
+          note_type: string | null
+          sentiment: number | null
+          speaker_id: string | null
+          speaker_name: string | null
+          text: string
+          timestamp: string
+        }
+        Insert: {
+          confidence?: number | null
+          created_at?: string | null
+          id?: string
+          meeting_id: string
+          metadata?: Json | null
+          note_type?: string | null
+          sentiment?: number | null
+          speaker_id?: string | null
+          speaker_name?: string | null
+          text: string
+          timestamp: string
+        }
+        Update: {
+          confidence?: number | null
+          created_at?: string | null
+          id?: string
+          meeting_id?: string
+          metadata?: Json | null
+          note_type?: string | null
+          sentiment?: number | null
+          speaker_id?: string | null
+          speaker_name?: string | null
+          text?: string
+          timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_meeting_notes_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_meeting_notes_speaker_id_fkey"
+            columns: ["speaker_id"]
+            isOneToOne: false
+            referencedRelation: "meeting_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_processing_jobs: {
         Row: {
           completed_at: string | null
@@ -129,6 +186,56 @@ export type Database = {
             columns: ["meeting_id"]
             isOneToOne: false
             referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_exports: {
+        Row: {
+          completed_at: string | null
+          content_id: string
+          created_at: string | null
+          error_message: string | null
+          export_destination: string | null
+          export_format: string
+          file_url: string | null
+          id: string
+          metadata: Json | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          content_id: string
+          created_at?: string | null
+          error_message?: string | null
+          export_destination?: string | null
+          export_format: string
+          file_url?: string | null
+          id?: string
+          metadata?: Json | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          content_id?: string
+          created_at?: string | null
+          error_message?: string | null
+          export_destination?: string | null
+          export_format?: string
+          file_url?: string | null
+          id?: string
+          metadata?: Json | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_exports_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "generated_content"
             referencedColumns: ["id"]
           },
         ]
@@ -566,6 +673,8 @@ export type Database = {
       }
       meetings: {
         Row: {
+          action_items: Json | null
+          ai_summary: string | null
           allow_high_quality_audio: boolean | null
           created_at: string | null
           ended_at: string | null
@@ -573,10 +682,15 @@ export type Database = {
           id: string
           is_active: boolean | null
           is_locked: boolean | null
+          key_moments: Json | null
           meeting_code: string
           title: string | null
+          transcription_data: Json | null
+          transcription_status: string | null
         }
         Insert: {
+          action_items?: Json | null
+          ai_summary?: string | null
           allow_high_quality_audio?: boolean | null
           created_at?: string | null
           ended_at?: string | null
@@ -584,10 +698,15 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_locked?: boolean | null
+          key_moments?: Json | null
           meeting_code: string
           title?: string | null
+          transcription_data?: Json | null
+          transcription_status?: string | null
         }
         Update: {
+          action_items?: Json | null
+          ai_summary?: string | null
           allow_high_quality_audio?: boolean | null
           created_at?: string | null
           ended_at?: string | null
@@ -595,8 +714,11 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_locked?: boolean | null
+          key_moments?: Json | null
           meeting_code?: string
           title?: string | null
+          transcription_data?: Json | null
+          transcription_status?: string | null
         }
         Relationships: []
       }
@@ -921,6 +1043,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_meeting_stats: { Args: { meeting_uuid: string }; Returns: Json }
       increment_downloads: { Args: { content_id: string }; Returns: undefined }
     }
     Enums: {

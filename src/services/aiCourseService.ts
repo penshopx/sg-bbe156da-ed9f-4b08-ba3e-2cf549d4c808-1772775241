@@ -40,6 +40,89 @@ export const aiCourseService = {
   },
 
   /**
+   * Start real-time transcription for meeting
+   */
+  async startTranscription(meetingId: string) {
+    const { data: session } = await supabase.auth.getSession();
+    if (!session.session) {
+      return { data: null, error: new Error("Not authenticated") };
+    }
+
+    const { data, error } = await supabase
+      .from("meetings")
+      .update({
+        transcription_status: "processing",
+      })
+      .eq("id", meetingId)
+      .select()
+      .single();
+
+    return { data, error };
+  },
+
+  /**
+   * Subscribe to real-time transcription updates
+   */
+  subscribeToTranscription(meetingId: string, callback: (note: any) => void) {
+    return supabase
+      .channel(`transcription_${meetingId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "ai_meeting_notes",
+          filter: `meeting_id=eq.${meetingId}`,
+        },
+        (payload) => {
+          callback(payload.new);
+        }
+      )
+      .subscribe();
+  },
+
+  /**
+   * Get meeting transcription
+   */
+  async getMeetingNotes(meetingId: string) {
+    const { data, error } = await supabase
+      .from("ai_meeting_notes")
+      .select("*")
+      .eq("meeting_id", meetingId)
+      .order("timestamp", { ascending: true });
+
+    return { data, error };
+  },
+
+  /**
+   * Analyze meeting and generate insights
+   */
+  async analyzeMeeting(meetingId: string) {
+    const { data: session } = await supabase.auth.getSession();
+    if (!session.session) {
+      return { data: null, error: new Error("Not authenticated") };
+    }
+
+    // Call the analysis API
+    const response = await fetch("/api/ai/analyze-meeting", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.session.access_token}`,
+      },
+      body: JSON.stringify({ meetingId }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      return { data: null, error: new Error(error.error || "Analysis failed") };
+    }
+
+    const data = await response.json();
+    return { data, error: null };
+  },
+
+  /**
    * Get processing job status
    */
   async getJobStatus(jobId: string) {
