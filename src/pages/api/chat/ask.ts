@@ -1,4 +1,3 @@
-<![CDATA[
 import type { NextApiRequest, NextApiResponse } from "next";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -286,7 +285,7 @@ function generateMockResponse(message: string): string {
     lowerMessage === "hello" ||
     lowerMessage === "halo"
   ) {
-    return "Halo kak! 👋 Gue Chaesa, asisten AI lu di sini.\n\nGue bisa bantu lu soal:\n• Penjelasan fitur Chaesa Live\n• Info harga & paket langganan\n• Tutorial cara pake platform\n• Troubleshooting masalah teknis\n• Saran & tips biar maksimal hasilnya\n\nMau tanya apa nih? Santai aja, gue siap bantu! 😊";
+    return "Halo kak! 👋 Gue Chaesa, asisten AI lu di sini.\n\nGue bisa bantu lu soal:\n\n• Penjelasan fitur Chaesa Live\n• Info harga & paket langganan\n• Tutorial cara pake platform\n• Troubleshooting masalah teknis\n• Saran & tips biar maksimal hasilnya\n\nMau tanya apa nih? Santai aja, gue siap bantu! 😊";
   }
 
   // What is Chaesa Live?
@@ -405,4 +404,3 @@ function generateMockResponse(message: string): string {
   // Default response with suggestions
   return "Hmm, pertanyaan lu menarik nih! 🤔\n\nGue lagi cari jawaban yang paling pas buat lu. Sementara itu, ini beberapa hal yang sering ditanyain:\n\n🎯 Tentang Chaesa Live\n• Platform video meeting + AI content creator\n• Lebih murah 71% dari Zoom\n• Fitur live commerce built-in\n\n💰 Info Harga\n• Gratis: Basic features\n• Pro: Rp 69K/bulan (unlimited!)\n• 1 Tahun: Rp 499K (hemat 35%)\n\n🚀 Fitur Unggulan\n• AI Course Factory (auto-generate kursus)\n• Live Sales CTA (push CTA ke viewer)\n• Studio Mode (OBS-friendly)\n\n🔧 Bantuan Teknis\n• Tutorial setup meeting\n• Fix masalah audio/video\n• Tips & tricks biar maksimal\n\nMau tanya lebih spesifik yang mana? Atau gue jelasin dari awal? Santai aja, gue siap bantu! 💪";
 }
-]]></![CDATA[>
