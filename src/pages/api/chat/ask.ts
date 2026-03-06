@@ -27,7 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }));
 
       const response = await openai.chat.completions.create({
-        model: "gpt-5-mini",
+        model: "gpt-4o-mini",
         messages: [
           { role: "system", content: CHAESA_LIVE_SYSTEM_PROMPT },
           ...chatHistory,
