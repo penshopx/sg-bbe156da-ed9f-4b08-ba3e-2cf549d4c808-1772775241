@@ -119,6 +119,7 @@ export default function MeetingRoom() {
   // Initial setup: Validate meeting code and check user session
   useEffect(() => {
     if (!meetingCode || typeof meetingCode !== "string") return;
+    let cancelled = false;
 
     const setupMeeting = async () => {
       try {
@@ -127,6 +128,8 @@ export default function MeetingRoom() {
         // 1. Check user session first
         const { userId, displayName, isGuest } = await authService.getUserInfo();
         console.log("User info:", { userId, displayName, isGuest });
+        
+        if (cancelled) return;
         
         if (userId || displayName) {
           setCurrentUser({ id: userId, name: displayName });
@@ -151,13 +154,15 @@ export default function MeetingRoom() {
           .eq("is_active", true)
           .maybeSingle(); // Use maybeSingle() to handle missing meetings gracefully
 
+        if (cancelled) return;
         let meeting = meetingData;
         
         if (meetingError || !meeting) {
           console.log("Meeting not found, creating new one...");
-          // Auto-create meeting if not found
+          // Auto-create meeting if not found, using the URL code as the meeting_code
           const { data: newMeeting, error: createError } = await meetingService.createMeeting(
-            userId || "guest",
+            userId || null,
+            `Chaesa Live - ${meetingCode}`,
             meetingCode
           );
           
@@ -189,6 +194,7 @@ export default function MeetingRoom() {
     };
 
     setupMeeting();
+    return () => { cancelled = true; };
   }, [meetingCode]);
 
   // Helper to validate UUID
@@ -363,22 +369,34 @@ export default function MeetingRoom() {
       // If no user ID (new guest), create one
       if (!userId) {
         console.log("Creating guest user...");
-        const { guestUserId, error } = await authService.createGuestUser(finalName);
-        if (error || !guestUserId) {
-          console.error("Failed to create guest:", error);
-          throw error || new Error("Failed to create guest user");
+        try {
+          const { guestUserId, error } = await authService.createGuestUser(finalName);
+          if (!error && guestUserId) {
+            userId = guestUserId;
+            authService.setGuestUser(userId, finalName);
+            console.log("Guest user created in DB:", userId);
+          } else {
+            console.warn("DB guest creation failed, using local UUID:", error);
+            userId = crypto.randomUUID();
+            authService.setGuestUser(userId, finalName);
+            console.log("Guest user created locally:", userId);
+          }
+        } catch (guestError) {
+          console.warn("Guest creation error, using local UUID:", guestError);
+          userId = crypto.randomUUID();
+          authService.setGuestUser(userId, finalName);
         }
-        
-        userId = guestUserId;
-        authService.setGuestUser(userId, finalName);
-        console.log("Guest user created:", userId);
       }
 
       setCurrentUser({ id: userId, name: finalName });
 
       // Join meeting in DB
       console.log("Joining meeting in DB...", { meetingId, userId, finalName });
-      await meetingService.joinMeeting(meetingId, userId, finalName);
+      try {
+        await meetingService.joinMeeting(meetingId, userId, finalName);
+      } catch (joinError) {
+        console.warn("DB join failed, continuing locally:", joinError);
+      }
       
       console.log("Successfully joined meeting!");
       setIsJoined(true);

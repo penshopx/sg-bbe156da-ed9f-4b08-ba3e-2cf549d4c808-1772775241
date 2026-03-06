@@ -14,8 +14,8 @@ export const meetingService = {
   },
 
   // Create a new meeting
-  async createMeeting(hostId: string | null, title?: string): Promise<{ data: Meeting | null; error: any }> {
-    const meetingCode = this.generateMeetingCode();
+  async createMeeting(hostId: string | null, title?: string, specificCode?: string): Promise<{ data: Meeting | null; error: any }> {
+    const meetingCode = specificCode || this.generateMeetingCode();
     
     const { data, error } = await supabase
       .from("meetings")
