@@ -160,7 +160,7 @@ export default function Home() {
                 Masalah dengan Platform Saat Ini
               </Badge>
               <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                Zoom & Google Meet <span className="text-red-400">Bunuh Produktivitas</span> Anda
+                Platform Meeting Konvensional <span className="text-red-400">Bunuh Produktivitas</span> Anda
               </h2>
             </div>
 
@@ -174,8 +174,8 @@ export default function Home() {
                 },
                 {
                   icon: DollarSign,
-                  problem: "Rugi Duit",
-                  description: "Zoom biaya Rp 240K/bulan. Plus gak bisa jual kursus langsung dari meeting.",
+                  problem: "Biaya Mahal",
+                  description: "Platform meeting premium biaya Rp 200-300K/bulan. Plus gak bisa jual kursus langsung dari meeting.",
                   color: "orange"
                 },
                 {
@@ -221,7 +221,7 @@ export default function Home() {
                   AI Course Factory
                 </Badge>
                 <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                  Bikin Kursus 1 Klik (Kayak NotebookLM untuk Video)
+                  Bikin Kursus 1 Klik dengan AI Otomatis
                 </h3>
                 <p className="text-xl text-gray-300 mb-6">
                   Rekam 1 meeting → AI potong jadi 20 modul micro (5-7 menit tiap modul) → Otomatis bikin slides, quiz, podcast, ebook → Publish & jual dalam 15 menit.
@@ -231,8 +231,8 @@ export default function Home() {
                     "📊 Bikin slides PowerPoint otomatis",
                     "📖 Bikin ebook PDF & study guide",
                     "✅ Bikin quiz lengkap dengan penjelasan",
-                    "🎙️ Podcast AI (gaya 2 host ngobrol)",
-                    "📱 Optimize untuk TikTok/Reels/YouTube Shorts"
+                    "🎙️ Podcast AI dengan 2 host berbincang",
+                    "📱 Optimize untuk platform social media"
                   ].map((feature, idx) => (
                     <div key={idx} className="flex items-center gap-3 text-gray-300">
                       <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
@@ -278,7 +278,7 @@ export default function Home() {
                   Live Sales CTA
                 </Badge>
                 <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                  Live Commerce Gaya TikTok Shop (Push CTA ke Semua Viewer)
+                  Live Commerce Interaktif (Push CTA ke Semua Viewer)
                 </h3>
                 <p className="text-xl text-gray-300 mb-6">
                   Saat webinar/demo, push tombol "Beli Sekarang" langsung ke layar semua viewer dengan countdown timer. Impulse buying = konversi 3-5x lebih tinggi dari "link di chat".
@@ -286,10 +286,10 @@ export default function Home() {
                 <div className="space-y-3 mb-6">
                   {[
                     "💰 Push penawaran produk saat demo live",
-                    "⏱️ Countdown timer FOMO",
+                    "⏱️ Countdown timer untuk urgency",
                     "📊 Tracking klik real-time",
                     "🎯 CTA warna & copy bisa di-custom",
-                    "💳 Checkout langsung via Midtrans"
+                    "💳 Checkout langsung via payment gateway"
                   ].map((feature, idx) => (
                     <div key={idx} className="flex items-center gap-3 text-gray-300">
                       <CheckCircle className="w-5 h-5 text-orange-400 flex-shrink-0" />
@@ -317,17 +317,17 @@ export default function Home() {
                   Studio Mode
                 </Badge>
                 <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                  OBS-Friendly untuk YouTuber & Streamer (Zero Masalah Audio)
+                  Mode Studio untuk Content Creator & Streamer Profesional
                 </h3>
                 <p className="text-xl text-gray-300 mb-6">
-                  Zoom/Meet bunuh audio OBS Anda? Kami fix itu. Toggle "Studio Mode" → Feed bersih (tanpa UI) + "Original Sound" (tanpa processing) = Sempurna untuk live streaming.
+                  Platform meeting konvensional bunuh kualitas audio saat streaming? Kami fix itu. Toggle "Studio Mode" → Feed bersih (tanpa UI) + "Original Sound" (tanpa processing) = Sempurna untuk live streaming.
                 </p>
                 <div className="space-y-3 mb-6">
                   {[
-                    "🎥 Feed bersih (sembunyikan semua UI untuk capture OBS)",
+                    "🎥 Feed bersih (sembunyikan semua UI untuk capture)",
                     "🎵 Mode Original Sound (tanpa audio processing)",
-                    "🎙️ Zero konflik dengan OBS/Streamlabs",
-                    "🎬 Sempurna untuk YouTube Live/Twitch",
+                    "🎙️ Kompatibel dengan software streaming populer",
+                    "🎬 Sempurna untuk live streaming profesional",
                     "⌨️ Keyboard shortcut (Ctrl+Shift+U)"
                   ].map((feature, idx) => (
                     <div key={idx} className="flex items-center gap-3 text-gray-300">
@@ -339,7 +339,7 @@ export default function Home() {
                 <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 mb-6">
                   <div className="text-sm text-green-300 font-semibold mb-1">KUALITAS AUDIO</div>
                   <div className="text-2xl font-bold text-white">
-                    Kualitas Studio (Tanpa Suara Robot Zoom)
+                    Kualitas Studio (Tanpa Suara Robot)
                   </div>
                 </div>
                 <Button className="bg-gradient-to-r from-green-600 to-teal-600">
@@ -366,7 +366,7 @@ export default function Home() {
                 Harga Transparan
               </Badge>
               <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                Hemat <span className="text-green-400">59% vs Zoom</span>, Dapat <span className="text-purple-400">10x Lebih Banyak Fitur</span>
+                Hemat <span className="text-green-400">Hingga 60%</span>, Dapat <span className="text-purple-400">10x Lebih Banyak Fitur</span>
               </h2>
             </div>
 
@@ -375,8 +375,8 @@ export default function Home() {
                 <thead>
                   <tr className="border-b border-white/20">
                     <th className="p-4 text-white font-semibold">Fitur</th>
-                    <th className="p-4 text-white font-semibold text-center">Zoom Pro</th>
-                    <th className="p-4 text-white font-semibold text-center">Google Meet</th>
+                    <th className="p-4 text-white font-semibold text-center">Platform A</th>
+                    <th className="p-4 text-white font-semibold text-center">Platform B</th>
                     <th className="p-4 text-white font-semibold text-center bg-purple-900/30">
                       <Badge className="mb-2">Rekomendasi</Badge>
                       <div>Chaesa Live Pro</div>
@@ -391,10 +391,10 @@ export default function Home() {
                     <td className="p-4 text-center bg-purple-900/20 font-bold text-green-400">Rp 99.000</td>
                   </tr>
                   <tr className="border-b border-white/10">
-                    <td className="p-4">Hemat vs Kompetitor</td>
+                    <td className="p-4">Hemat vs Platform Premium</td>
                     <td className="p-4 text-center">-</td>
                     <td className="p-4 text-center">-</td>
-                    <td className="p-4 text-center bg-purple-900/20 font-bold text-green-400">Hemat 59% (vs Zoom)</td>
+                    <td className="p-4 text-center bg-purple-900/20 font-bold text-green-400">Hemat 59%</td>
                   </tr>
                   <tr className="border-b border-white/10">
                     <td className="p-4">Durasi Meeting</td>
@@ -415,7 +415,7 @@ export default function Home() {
                     <td className="p-4 text-center bg-purple-900/20 text-green-400">✅</td>
                   </tr>
                   <tr className="border-b border-white/10">
-                    <td className="p-4">Studio Mode (OBS-Friendly)</td>
+                    <td className="p-4">Studio Mode (Streaming-Friendly)</td>
                     <td className="p-4 text-center text-red-400">❌</td>
                     <td className="p-4 text-center text-red-400">❌</td>
                     <td className="p-4 text-center bg-purple-900/20 text-green-400">✅</td>
@@ -427,7 +427,7 @@ export default function Home() {
                     <td className="p-4 text-center bg-purple-900/20 text-green-400">✅ Toggle 1x</td>
                   </tr>
                   <tr className="border-b border-white/10">
-                    <td className="p-4">Podcast Gaya NotebookLM</td>
+                    <td className="p-4">Podcast AI Otomatis</td>
                     <td className="p-4 text-center text-red-400">❌</td>
                     <td className="p-4 text-center text-red-400">❌</td>
                     <td className="p-4 text-center bg-purple-900/20 text-green-400">✅</td>
@@ -468,7 +468,7 @@ export default function Home() {
               {
                 icon: Brain,
                 persona: "Kreator E-Course & Coach",
-                pain: "Buang 10-20 jam bikin kursus dari rekaman Zoom",
+                pain: "Buang 10-20 jam bikin kursus dari rekaman meeting",
                 solution: "Rekam 1 webinar → AI bikin 20 modul → Jual dalam 15 menit",
                 roi: "Hemat 90% waktu, Cuan 5x lebih banyak kursus",
                 cta: "Bikin Kursus Pertama",
@@ -485,8 +485,8 @@ export default function Home() {
               },
               {
                 icon: Video,
-                persona: "YouTuber & Content Creator",
-                pain: "Masalah audio OBS, gak bisa pakai Zoom buat streaming",
+                persona: "Content Creator & Streamer",
+                pain: "Masalah audio saat streaming, gak bisa pakai platform meeting untuk broadcast",
                 solution: "Studio Mode + Original Sound → Zero konflik audio",
                 roi: "Kualitas streaming profesional",
                 cta: "Fix Masalah Audio",
@@ -497,7 +497,7 @@ export default function Home() {
                 persona: "Corporate Trainer & HR",
                 pain: "Platform training mahal, susah tracking progress",
                 solution: "Rekam training sekali → Auto-chunk → Gamified learning",
-                roi: "Hemat 80% vs LinkedIn Learning",
+                roi: "Hemat 80% biaya training",
                 cta: "Mulai Corporate Training",
                 color: "purple"
               }
