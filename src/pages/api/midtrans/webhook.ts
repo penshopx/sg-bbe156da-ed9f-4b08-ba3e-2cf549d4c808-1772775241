@@ -103,7 +103,8 @@ export default async function handler(
 
     const metadata = transactionData.metadata as TransactionMetadata;
 
-    // Update transaction status with explicit type casting to avoid deep instantiation
+    // Update transaction status
+    // @ts-expect-error - Supabase JSONB type inference causes deep instantiation error
     const { error: updateError } = await supabase
       .from("payment_transactions")
       .update({
@@ -115,8 +116,8 @@ export default async function handler(
           fraud_status: fraud_status,
           payment_type: payment_type,
           settlement_time: statusResponse.settlement_time,
-        } as any,
-      } as any)
+        },
+      })
       .eq("transaction_id", order_id);
 
     if (updateError) {
