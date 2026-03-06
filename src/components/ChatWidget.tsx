@@ -22,7 +22,7 @@ export function ChatWidget() {
     {
       id: "welcome",
       role: "bot",
-      text: "Hi there! 👋 I'm Chaesa AI. How can I help you today?",
+      text: "Halo Kak! 👋 Saya Chaesa, asisten AI Kamu. Ada yang bisa saya bantu hari ini?",
     }
   ]);
   const [input, setInput] = useState("");
@@ -119,7 +119,7 @@ export function ChatWidget() {
       setMessages(prev => [...prev, {
         id: "error",
         role: "bot",
-        text: "Sorry, I'm having trouble connecting right now. Please try again later."
+        text: "Maaf, saya sedang mengalami gangguan koneksi. Silakan coba lagi nanti ya."
       }]);
     } finally {
       setIsLoading(false);
@@ -149,7 +149,7 @@ export function ChatWidget() {
               <h3 className="font-bold">Chaesa Helpdesk</h3>
               <p className="text-xs text-white/80 flex items-center gap-1">
                 <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                AI Online
+                AI Aktif
               </p>
             </div>
           </div>
@@ -183,7 +183,7 @@ export function ChatWidget() {
                 
                 <div className="flex flex-col gap-2">
                   <div className={cn(
-                    "p-3 rounded-2xl text-sm shadow-sm",
+                    "p-3 rounded-2xl text-sm shadow-sm whitespace-pre-wrap",
                     msg.role === "user" 
                       ? "bg-green-600 text-white rounded-tr-none" 
                       : "bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-tl-none"
@@ -195,7 +195,7 @@ export function ChatWidget() {
                   {msg.metadata?.relatedArticles?.length > 0 && (
                     <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-xl border border-green-100 dark:border-green-800/30">
                       <p className="text-xs font-semibold text-green-600 dark:text-green-400 mb-2 flex items-center gap-1">
-                        <HelpCircle className="w-3 h-3" /> Related Help Articles:
+                        <HelpCircle className="w-3 h-3" /> Artikel Terkait:
                       </p>
                       <div className="space-y-1">
                         {msg.metadata.relatedArticles.map((article: any) => (
@@ -231,7 +231,7 @@ export function ChatWidget() {
                 </div>
                 <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl rounded-tl-none border shadow-sm flex items-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin text-green-500" />
-                  <span className="text-xs text-gray-400">Thinking...</span>
+                  <span className="text-xs text-gray-400">Sedang mengetik...</span>
                 </div>
               </div>
             )}
@@ -245,7 +245,7 @@ export function ChatWidget() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
-              placeholder="Ask a question..."
+              placeholder="Tulis pertanyaan Kamu..."
               className="flex-1 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus-visible:ring-green-500"
             />
             <Button 
@@ -258,7 +258,7 @@ export function ChatWidget() {
             </Button>
           </div>
           <div className="text-[10px] text-center text-gray-400 mt-2">
-            Powered by Chaesa AI • Answers may be generated automatically
+            Didukung oleh Chaesa AI • Jawaban dihasilkan secara otomatis
           </div>
         </div>
       </div>
