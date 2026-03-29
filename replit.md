@@ -1,7 +1,7 @@
 # Chaesa Live - Micro-Learning Platform
 
 ## Overview
-A Next.js (Pages Router) application for converting meetings into micro-learning courses. Built with React 18, TypeScript, Tailwind CSS, and Supabase. Features creator tools for influencers, content creators, and digital marketers.
+A Next.js (Pages Router) application for converting meetings into micro-learning courses, now integrated with competency-based learning (SKKNI/BNSP standard). Built with React 18, TypeScript, Tailwind CSS, and Supabase. Features creator tools, HRD tools, and an AI-powered Competency E-Course Builder integrated from https://competency-builder-1-kucing44441.replit.app.
 
 ## Architecture
 - **Framework**: Next.js 15.5.9 (Pages Router, `src/pages/`)
@@ -129,6 +129,30 @@ supabase/         - Supabase configuration
 - Text "Chaesa Live" rendered with `bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent`
 
 ## HRD & Training Tools
+
+### Competency E-Course Builder (`/competency-builder`)
+- Page: `src/pages/competency-builder.tsx`
+- Integration with https://competency-builder-1-kucing44441.replit.app framework
+- 6-step structured e-course wizard: Orientasi, Konteks, Microlearning, Praktik, Asesmen, Refleksi
+- 4-level competency progression: L1 (Awareness) → L2 (Application) → L3 (Mastery) → L4 (Strategic)
+- SKKNI sector mapping with unit competency codes
+- AI content generation for indicators, case studies, microlearning topics, tasks, and reflection prompts
+- 6 assessment method selection: APL, Observasi, Wawancara, Tes Tertulis, Portfolio, Simulasi
+- Course library with localStorage persistence and progress tracking
+- Cross-links to AI Studio, Skills Matrix, and Exam Center
+
+### Competency Passport (`/competency-passport`)
+- Page: `src/pages/competency-passport.tsx`
+- Digital portfolio of all verified competencies with SKKNI unit codes
+- Unique passport ID with QR verification URL
+- Level distribution dashboard (L1-L4) with progress bars
+- Filter by sector and level
+- Manual add competency with: title, SKKNI unit, sector, level, assessment method, score, date, status
+- Sample data pre-loaded for new users
+- LSP/BNSP feature section: APL, Assessor Management, SKKNI Mapping, 6 Assessment Methods
+- Download PDF and Share functionality
+- Cross-links to Competency Builder, Exam Center, Skills Matrix
+
 ### Certification & Exam Center (`/sertifikasi`)
 - Page: `src/pages/sertifikasi.tsx`
 - Exam builder: create exams with MCQ, True/False, Essay, Practical Assessment
