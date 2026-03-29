@@ -17,6 +17,28 @@ A Next.js (Pages Router) application for converting meetings into micro-learning
 - Gradient CTA banner
 - Nav: "🚀 Platform" link added to both desktop nav and mobile Sheet menu
 
+### `/ai-agents` — Chaesa Multi-Agent AI System (OpenClaw-style)
+- Full-screen chat UI with split-pane layout: agent roster sidebar (left) + chat (right)
+- **8 AI Expert agents**: Struktur Beton, K3 Keselamatan, MEP Spesialis, Geoteknik, Kontrak/Hukum, Manajer Proyek, RAB/QS, BIM & Teknologi
+- **Auto-Route mode**: Orchestrator (gpt-4o-mini) analyzes query and auto-routes to best agent
+- **Manual mode**: User directly selects any of the 8 agents
+- Agent response includes: routing confidence %, routing reason, 3 AI-generated follow-up suggestions
+- Message copy-to-clipboard, new session clear, animated loading indicator
+- 3 sample prompts per agent in sidebar
+- Nav: "🤖 AI Experts" (amber) added to desktop + mobile nav
+- **API**: `src/pages/api/ai/multi-agent.ts` — two-step: orchestrator → specialist
+- **Shared data**: `src/lib/agents-data.ts` — AGENTS const + AgentId type (safe for client import)
+
+### `/hub` — ChaesaHub Skill Marketplace
+- ClawHub-style skill library with 35+ skills
+- **Hero** with stats ticker (35+ skills, 178K+ activations, 4.8 avg rating, 8 new)
+- **Editor's Spotlight** — 3 featured gradient cards (Editor's Pick)
+- **"Baru Minggu Ini"** — horizontal scroll strip of 8 new skills
+- **Sidebar**: 12 categories with count badges + Level filter (Semua/Pemula/Menengah/Lanjutan)
+- **Sort**: Terpopuler/Terbaru/Top Rating/Unggulan; Grid/List view toggle
+- **Skill cards**: icon, level badge, activity progress bar, weeklyActive count, last updated, duration
+- **Skill Bundles** — 4 curated packs (Starter Pack, Creator Pro, Corporate Compliance, Mahasiswa→Professional)
+
 ## Architecture
 - **Framework**: Next.js 15.5.9 (Pages Router, `src/pages/`)
 - **Styling**: Tailwind CSS + Radix UI components + Framer Motion

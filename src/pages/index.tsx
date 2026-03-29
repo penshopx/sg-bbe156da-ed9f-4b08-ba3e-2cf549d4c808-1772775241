@@ -131,6 +131,9 @@ export default function Home() {
                 <Link href="/hub" className="text-sm font-semibold text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 transition-colors flex items-center gap-1">
                   🧩 ChaesaHub
                 </Link>
+                <Link href="/ai-agents" className="text-sm font-semibold text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors flex items-center gap-1">
+                  🤖 AI Experts
+                </Link>
                 <Link href="/pricing" className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors">
                   Harga
                 </Link>
@@ -238,6 +241,9 @@ export default function Home() {
                     </Link>
                     <Link href="/hub" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 px-3 py-2.5 text-sm font-bold text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg">
                       🧩 ChaesaHub — Skill Library
+                    </Link>
+                    <Link href="/ai-agents" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 px-3 py-2.5 text-sm font-bold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg">
+                      🤖 AI Experts — 8 Ahli Konstruksi
                     </Link>
                     <Link href="/pricing" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
                       Harga
