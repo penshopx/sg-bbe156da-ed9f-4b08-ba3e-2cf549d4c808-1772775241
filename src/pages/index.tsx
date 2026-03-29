@@ -26,6 +26,7 @@ export default function Home() {
   const [userEmail, setUserEmail] = useState("");
   const [showDebug, setShowDebug] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeUseCaseFilter, setActiveUseCaseFilter] = useState("Semua");
   const [stats, setStats] = useState({
     creators: 1234,
     courses: 5678,
@@ -713,6 +714,92 @@ export default function Home() {
 
           </div>
         </div>
+
+        {/* What People Build — Use Cases Grid */}
+        {(() => {
+          const USE_CASES = [
+            { cat: "Otomasi Belajar", icon: "⚡", title: "Jadwal Belajar Otomatis Harian", desc: "AI menyusun jadwal belajar 30 menit/hari berdasarkan gap kompetensi dan kalender kerja Anda — tanpa perlu mikir.", user: "Rudi H., Pelaksana Lapangan" },
+            { cat: "Konstruksi & BIMTEK", icon: "🏗️", title: "Rekaman Training K3 → 18 Modul", desc: "Upload rekaman induction K3 2 jam, AI memotong jadi 18 modul siap distribusi ke seluruh tim proyek dalam 15 menit.", user: "Sinta M., HSE Manager Cikarang" },
+            { cat: "Creator & Konten", icon: "🎬", title: "Webinar → Kursus + Podcast + Caption", desc: "Dari 1 rekaman webinar: e-course 15 modul, naskah podcast 3 episode, dan 20 caption IG/TikTok/LinkedIn — otomatis.", user: "Maya R., Edu-Creator Bandung" },
+            { cat: "Akademik", icon: "🎓", title: "Rekaman Kuliah → Mind Map + Ringkasan", desc: "Rekam kuliah 90 menit, AI buat mind map visual + ringkasan 1 halaman + 10 soal latihan — siap belajar saat commute.", user: "Dimas A., Mahasiswa Sipil ITS" },
+            { cat: "Karir & Profesi", icon: "💼", title: "Competency Gap Finder", desc: "Masukkan jabatan target Anda, AI analisa gap kompetensi vs standar SKKNI dan rekomendasikan jalur belajar prioritas.", user: "Ari B., Site Engineer Bandung" },
+            { cat: "Corporate & HRD", icon: "🏢", title: "Onboarding Kit Karyawan Baru Otomatis", desc: "Upload SOP perusahaan → AI buat modul onboarding interaktif + quiz kompetensi awal untuk setiap departemen.", user: "Fitri N., HRD PT Adhi Karya" },
+            { cat: "Sertifikasi BNSP", icon: "🛡️", title: "Simulator Asesmen SKK 65+ Soal", desc: "Latihan soal persis seperti asesmen LSP — AI analisa kelemahan per unit kompetensi dan buat jadwal intensif 3 minggu.", user: "Hendra W., Teknisi MEP Jakarta" },
+            { cat: "Otomasi Belajar", icon: "⚡", title: "PKB 150 Jam Terpenuhi Otomatis", desc: "Setiap modul BIMTEK yang diselesaikan otomatis tercatat ke PKB tracker — dapat notifikasi kalau sudah 80% dari target tahunan.", user: "Bowo S., Pengawas Lapangan Semarang" },
+            { cat: "Konstruksi & BIMTEK", icon: "🏗️", title: "Tanya AI Expert Soal Pondasi", desc: "\"Tentukan jenis pondasi untuk SPT < 5\" — dijawab AI Expert Geoteknik dalam 10 detik dengan rumus dan rekomendasi lapangan.", user: "Eko P., Konsultan Perencana" },
+            { cat: "Corporate & HRD", icon: "🏢", title: "Dashboard SKK Kedaluarsa 50 Karyawan", desc: "Skills matrix seluruh tim dengan alert otomatis 3 bulan sebelum SKK kedaluarsa — HRD tidak perlu tracking manual lagi.", user: "Dewi K., HR Director PP Konstruksi" },
+            { cat: "Creator & Konten", icon: "🎬", title: "Live Commerce: Jual Kursus Saat Live", desc: "Push CTA beli kursus langsung di tengah live — integrasi Mayar.id, konversi 3–5x lebih tinggi dari link bio biasa.", user: "Bagas T., Instructor Konstruksi" },
+            { cat: "Akademik", icon: "🎓", title: "Portfolio Karir dari Tugas Akhir", desc: "Upload skripsi/TA → AI ekstrak kompetensi, buat Competency Passport awal yang bisa langsung dipakai melamar kerja.", user: "Nisa F., Fresh Graduate Unsri" },
+            { cat: "Karir & Profesi", icon: "💼", title: "Radar Chart Kompetensi vs Jabatan Target", desc: "Visualisasi spider chart 12 kompetensi Anda vs standar Ahli Muda — langsung tahu area yang perlu diperkuat bulan ini.", user: "Danu I., Civil Engineer 5 Tahun" },
+            { cat: "Sertifikasi BNSP", icon: "🛡️", title: "Alur Sertifikasi Step-by-Step", desc: "AI jelaskan dokumen yang dibutuhkan, LSP terdekat, estimasi biaya, dan tanggal asesmen — semua dalam 1 chat.", user: "Rino A., Teknisi Listrik Surabaya" },
+            { cat: "Otomasi Belajar", icon: "⚡", title: "Morning Briefing Kompetensi", desc: "Setiap pagi: ringkasan modul hari ini, reminder quiz yang belum selesai, dan 1 tips dari AI Expert — langsung di WhatsApp.", user: "Toni L., Project Manager Makassar" },
+            { cat: "Konstruksi & BIMTEK", icon: "🏗️", title: "Kalkulasi Beton + Tulangan via Chat", desc: "\"Hitung kebutuhan beton dan tulangan untuk plat lantai 10x12m tebal 12cm\" — AI hitung dan tampilkan tabel material.", user: "Slamet R., Kontraktor Yogyakarta" },
+          ];
+          const FILTERS = ["Semua", "Otomasi Belajar", "Konstruksi & BIMTEK", "Creator & Konten", "Akademik", "Karir & Profesi", "Corporate & HRD", "Sertifikasi BNSP"];
+          const FILTER_ICONS: Record<string, string> = { "Semua": "🔥", "Otomasi Belajar": "⚡", "Konstruksi & BIMTEK": "🏗️", "Creator & Konten": "🎬", "Akademik": "🎓", "Karir & Profesi": "💼", "Corporate & HRD": "🏢", "Sertifikasi BNSP": "🛡️" };
+          const filtered = activeUseCaseFilter === "Semua" ? USE_CASES : USE_CASES.filter(u => u.cat === activeUseCaseFilter);
+          return (
+            <div className="py-20 bg-gray-50 dark:bg-gray-900/50">
+              <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="text-center mb-10">
+                  <Badge className="mb-4 bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 border-green-200 dark:border-green-700">
+                    Dari Komunitas Pengguna
+                  </Badge>
+                  <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white mb-4">
+                    Apa yang Dibangun dengan{" "}
+                    <span className="bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">Chaesa Live</span>
+                  </h2>
+                  <p className="text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
+                    Use case nyata dari pengguna. Semua ini berjalan di Chaesa Live — dan dengan AI selalu aktif, semuanya bisa jalan 24/7 tanpa Anda angkat jari.
+                  </p>
+                </div>
+
+                {/* Filter tabs */}
+                <div className="flex flex-wrap justify-center gap-2 mb-8">
+                  {FILTERS.map(f => (
+                    <button
+                      key={f}
+                      onClick={() => setActiveUseCaseFilter(f)}
+                      className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold transition-all border ${
+                        activeUseCaseFilter === f
+                          ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-transparent shadow-md"
+                          : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-gray-400"
+                      }`}
+                    >
+                      <span>{FILTER_ICONS[f]}</span> {f}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Use case cards grid */}
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
+                  {filtered.map((uc, i) => (
+                    <div key={i} className="bg-white dark:bg-gray-900 rounded-2xl p-5 border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600 hover:shadow-md transition-all group">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="text-2xl group-hover:scale-110 transition-transform">{uc.icon}</div>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-medium">{uc.cat}</span>
+                      </div>
+                      <h3 className="font-bold text-gray-900 dark:text-white text-sm mb-2 leading-snug">{uc.title}</h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-3">{uc.desc}</p>
+                      <div className="flex items-center gap-1.5 pt-2 border-t border-gray-100 dark:border-gray-800">
+                        <div className="w-5 h-5 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 shrink-0" />
+                        <span className="text-[10px] text-gray-400 dark:text-gray-500 italic">{uc.user}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="text-center">
+                  <Link href="/auth">
+                    <Button className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold px-8 py-3 rounded-xl text-sm hover:opacity-90 transition-opacity">
+                      Coba Sendiri — Gratis <ArrowRight className="w-4 h-4 ml-2 inline" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* 3 Killer Features */}
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
