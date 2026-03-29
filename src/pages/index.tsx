@@ -128,6 +128,9 @@ export default function Home() {
                 <Link href="/platform" className="text-sm font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 transition-colors flex items-center gap-1">
                   <Rocket className="w-3 h-3" /> Platform
                 </Link>
+                <Link href="/hub" className="text-sm font-semibold text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 transition-colors flex items-center gap-1">
+                  🧩 ChaesaHub
+                </Link>
                 <Link href="/pricing" className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors">
                   Harga
                 </Link>
@@ -232,6 +235,9 @@ export default function Home() {
                   <div className="flex flex-col gap-2 mb-4">
                     <Link href="/platform" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 px-3 py-2.5 text-sm font-bold text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg">
                       <Rocket className="w-4 h-4" /> Platform Overview
+                    </Link>
+                    <Link href="/hub" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 px-3 py-2.5 text-sm font-bold text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg">
+                      🧩 ChaesaHub — Skill Library
                     </Link>
                     <Link href="/pricing" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
                       Harga
