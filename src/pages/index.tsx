@@ -124,6 +124,9 @@ export default function Home() {
 
               {/* Navigation */}
               <nav className="hidden lg:flex items-center gap-5">
+                <Link href="/platform" className="text-sm font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 transition-colors flex items-center gap-1">
+                  <Rocket className="w-3 h-3" /> Platform
+                </Link>
                 <Link href="/pricing" className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors">
                   Harga
                 </Link>
@@ -226,6 +229,9 @@ export default function Home() {
                   </SheetHeader>
 
                   <div className="flex flex-col gap-2 mb-4">
+                    <Link href="/platform" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 px-3 py-2.5 text-sm font-bold text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg">
+                      <Rocket className="w-4 h-4" /> Platform Overview
+                    </Link>
                     <Link href="/pricing" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
                       Harga
                     </Link>
@@ -1009,6 +1015,51 @@ export default function Home() {
                   )
                 )}
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Untuk Siapa Section */}
+        <div className="py-20 bg-white dark:bg-gray-950">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-10">
+              <Badge className="mb-4 bg-purple-500/20 text-purple-700 dark:text-purple-300 border-purple-500/50">
+                6 Segmen Pengguna
+              </Badge>
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+                Dirancang untuk <span className="bg-gradient-to-r from-purple-600 via-orange-500 to-teal-500 bg-clip-text text-transparent">Semua Orang</span>
+              </h2>
+              <p className="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
+                Dari pelajar SMA hingga corporate — satu platform yang memenuhi semua kebutuhan belajar dan sertifikasi
+              </p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+              {[
+                { emoji: "🎒", label: "Pelajar SMA/SMK", desc: "Quiz, ringkasan AI, sertifikat", color: "border-blue-200 dark:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20" },
+                { emoji: "🎓", label: "Mahasiswa", desc: "Rekam kuliah, portfolio, SKK", color: "border-purple-200 dark:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/20" },
+                { emoji: "🦺", label: "Pekerja & Teknisi", desc: "BIMTEK, PKB, SKK BNSP", color: "border-orange-200 dark:border-orange-700 hover:bg-orange-50 dark:hover:bg-orange-900/20" },
+                { emoji: "💼", label: "Profesional", desc: "Competency builder, passport", color: "border-indigo-200 dark:border-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/20" },
+                { emoji: "🎬", label: "Content Creator", desc: "Meeting → kursus, podcast, caption", color: "border-pink-200 dark:border-pink-700 hover:bg-pink-50 dark:hover:bg-pink-900/20" },
+                { emoji: "🏢", label: "Corporate & HRD", desc: "Training management, skills matrix", color: "border-teal-200 dark:border-teal-700 hover:bg-teal-50 dark:hover:bg-teal-900/20" },
+              ].map((s, i) => (
+                <Link key={i} href="/platform">
+                  <div className={`p-5 rounded-2xl border-2 bg-white dark:bg-gray-900 ${s.color} transition-all cursor-pointer group`}>
+                    <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">{s.emoji}</div>
+                    <div className="font-bold text-gray-900 dark:text-white text-sm mb-1">{s.label}</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">{s.desc}</div>
+                    <div className="flex items-center gap-1 mt-2 text-xs text-purple-600 dark:text-purple-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                      Lihat fitur <ArrowRight className="w-3 h-3" />
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+            <div className="text-center">
+              <Link href="/platform">
+                <Button className="bg-gradient-to-r from-purple-600 to-orange-500 text-white font-bold px-8 py-3 rounded-xl text-base shadow-lg hover:shadow-xl transition-shadow">
+                  <Rocket className="w-4 h-4 mr-2" /> Lihat Platform Overview Lengkap
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
