@@ -37,6 +37,13 @@ const SKKNI_SECTORS = [
   "Kesehatan & Keselamatan Kerja",
   "Logistik & Supply Chain",
   "Pariwisata & Perhotelan",
+  "Konstruksi – Sipil Gedung (BimtekKita)",
+  "Konstruksi – K3 Keselamatan Kerja (BimtekKita)",
+  "Konstruksi – Jalan & Jembatan (BimtekKita)",
+  "Konstruksi – Elektrikal (BimtekKita)",
+  "Konstruksi – Mekanikal (BimtekKita)",
+  "Konstruksi – Manajemen Proyek (BimtekKita)",
+  "Konstruksi – Sertifikasi SKK/BNSP (BimtekKita)",
 ];
 
 const ASSESSMENT_METHODS = [
@@ -90,6 +97,11 @@ const SAMPLE_COURSES = [
   { title: "Manajemen Tim Lintas Fungsi", unit: "M.701001.036.01", sector: "Sumber Daya Manusia", level: "L3" },
   { title: "Pengembangan Aplikasi Web", unit: "J.620100.001.02", sector: "Teknologi Informasi & Komunikasi", level: "L3" },
   { title: "Keselamatan & Kesehatan Kerja", unit: "P.854900.001.01", sector: "Kesehatan & Keselamatan Kerja", level: "L1" },
+  { title: "K3 Konstruksi Gedung", unit: "B001-K3-001.01", sector: "Konstruksi – K3 Keselamatan Kerja (BimtekKita)", level: "L2" },
+  { title: "Teknik Fondasi & Struktur Bangunan Gedung", unit: "B001-SG-001.01", sector: "Konstruksi – Sipil Gedung (BimtekKita)", level: "L3" },
+  { title: "Manajemen Proyek Konstruksi", unit: "B007-MJ-001.01", sector: "Konstruksi – Manajemen Proyek (BimtekKita)", level: "L3" },
+  { title: "Desain Jalan Raya & Perkerasan", unit: "F001-JL-001.01", sector: "Konstruksi – Jalan & Jembatan (BimtekKita)", level: "L3" },
+  { title: "Instalasi Listrik & Proteksi Gedung", unit: "E002-EL-001.01", sector: "Konstruksi – Elektrikal (BimtekKita)", level: "L2" },
 ];
 
 export default function CompetencyBuilder() {
@@ -498,6 +510,26 @@ export default function CompetencyBuilder() {
                     </div>
                   </div>
                 </Card>
+
+                {/* BimtekKita Callout for Konstruksi sectors */}
+                {course.sector.includes("BimtekKita") && (
+                  <div className="p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded-xl flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <div className="flex items-center gap-3 flex-1">
+                      <span className="text-2xl shrink-0">🏗️</span>
+                      <div>
+                        <p className="font-semibold text-orange-700 dark:text-orange-300 text-sm">Sektor Konstruksi — Didukung BimtekKita</p>
+                        <p className="text-xs text-orange-600 dark:text-orange-400">Akses 157 modul BIMTEK, database SKK, dan 8 AI Expert konstruksi yang relevan untuk sektor ini di BimtekKita.</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                      <Link href="/bimtek-integration">
+                        <Button size="sm" className="h-8 text-xs bg-orange-600 hover:bg-orange-700 text-white">
+                          Buka BimtekKita
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                )}
 
                 {/* Step Content */}
                 <Card className="p-5 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">

@@ -712,6 +712,52 @@ export default function CompetencyPassport() {
           </Card>
           )}
 
+          {/* BimtekKita PKB Integration */}
+          {viewMode === "list" && (
+          <Card className="p-5 border-2 border-orange-200 dark:border-orange-700 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div className="flex items-center gap-3 flex-1">
+                <span className="text-3xl shrink-0">🏗️</span>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-bold text-gray-900 dark:text-white">BimtekKita Integration</h3>
+                    <Badge className="text-[10px] bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 border-0">Terintegrasi</Badge>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                    Selesaikan modul BIMTEK konstruksi di BimtekKita dan lacak PKB Points Anda. Catat SKK konstruksi dari 334 posisi tersedia langsung ke passport ini.
+                  </p>
+                  <div className="flex flex-wrap gap-3 text-xs text-gray-500 dark:text-gray-400">
+                    <span className="flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5 text-orange-500" /> 157 Modul BIMTEK</span>
+                    <span className="flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5 text-orange-500" /> 334 Posisi SKK</span>
+                    <span className="flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5 text-orange-500" /> PKB Points Tracker</span>
+                    <span className="flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5 text-orange-500" /> 8 AI Expert Konstruksi</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col gap-2 shrink-0">
+                <Link href="/bimtek-integration">
+                  <Button className="bg-orange-600 hover:bg-orange-700 text-white w-full" size="sm">
+                    <TrendingUp className="w-4 h-4 mr-1.5" /> Buka BimtekKita
+                  </Button>
+                </Link>
+                <button
+                  onClick={() => {
+                    const newComp: any = {
+                      unit: "B001-K3-001.01", title: "K3 Konstruksi Gedung", sector: "Konstruksi – K3",
+                      level: "L2", verifiedAt: new Date().toISOString().split("T")[0],
+                      method: "Observasi + Tes Tertulis", score: 80, status: "verified",
+                    };
+                    save({ ...passport, competencies: [{ id: Date.now().toString(), ...newComp }, ...passport.competencies] });
+                  }}
+                  className="text-xs px-3 py-1.5 rounded-lg border border-orange-300 dark:border-orange-700 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors whitespace-nowrap"
+                >
+                  + Tambah SKK Konstruksi
+                </button>
+              </div>
+            </div>
+          </Card>
+          )}
+
           {/* Integration Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Link href="/competency-builder">

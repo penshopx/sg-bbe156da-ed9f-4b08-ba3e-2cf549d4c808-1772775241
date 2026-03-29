@@ -160,7 +160,10 @@ export default function Home() {
                   <button className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors flex items-center gap-1">
                     HRD & Training <Shield className="w-3 h-3" />
                   </button>
-                  <div className="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 py-2">
+                  <div className="absolute top-full left-0 mt-2 w-72 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 py-2">
+                    <Link href="/bimtek-integration" className="flex items-center gap-2 px-4 py-2.5 text-sm text-orange-700 dark:text-orange-300 hover:bg-orange-50 dark:hover:bg-orange-900/20 font-medium">
+                      🏗️ BimtekKita Integration <span className="ml-auto text-xs bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-300 px-1.5 py-0.5 rounded-full">Baru</span>
+                    </Link>
                     <Link href="/competency-builder" className="flex items-center gap-2 px-4 py-2.5 text-sm text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 font-medium">
                       🎯 Competency Builder <span className="ml-auto text-xs bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300 px-1.5 py-0.5 rounded-full">Baru</span>
                     </Link>
@@ -266,6 +269,9 @@ export default function Home() {
                       </AccordionTrigger>
                       <AccordionContent className="pl-3">
                         <div className="flex flex-col gap-1">
+                          <Link href="/bimtek-integration" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 text-sm text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg font-medium">
+                            🏗️ BimtekKita Integration <span className="ml-1 text-xs bg-orange-100 dark:bg-orange-900/40 px-1.5 rounded-full">Baru</span>
+                          </Link>
                           <Link href="/competency-builder" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 text-sm text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg font-medium">
                             🎯 Competency Builder <span className="ml-1 text-xs bg-purple-100 dark:bg-purple-900/40 px-1.5 rounded-full">Baru</span>
                           </Link>
@@ -890,78 +896,103 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Competency Builder Integration Section */}
+        {/* Competency Builder + BimtekKita Integration Section */}
         <div className="py-20 bg-gradient-to-br from-indigo-50 via-blue-50 to-teal-50 dark:from-indigo-950/40 dark:via-blue-950/40 dark:to-teal-950/40">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <Badge className="mb-4 bg-blue-500/20 text-blue-700 dark:text-blue-300 border-blue-500/50">
-                Integrasi Baru
+                Ekosistem Terintegrasi
               </Badge>
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-                Kini Lebih Powerful dengan<br />
-                <span className="bg-gradient-to-r from-blue-600 to-teal-500 bg-clip-text text-transparent">Competency-Based Learning</span>
+                Chaesa Live × BimtekKita<br />
+                <span className="bg-gradient-to-r from-orange-500 via-blue-600 to-teal-500 bg-clip-text text-transparent">Platform Kompetensi Lengkap</span>
               </h2>
-              <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                Gabungkan kekuatan AI meeting-to-course Chaesa Live dengan framework kompetensi terstruktur berbasis SKKNI
+              <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                157 modul BIMTEK konstruksi, 334 posisi SKK/BNSP, AI Expert, dan learning management — semuanya terhubung dalam satu ekosistem
               </p>
             </div>
-            <div className="grid md:grid-cols-2 gap-8 mb-10">
+            <div className="grid md:grid-cols-3 gap-6 mb-10">
+              {/* BimtekKita Card */}
+              <Link href="/bimtek-integration">
+                <div className="group relative bg-white dark:bg-gray-900 border-2 border-orange-200 dark:border-orange-700 rounded-2xl p-7 hover:border-orange-400 dark:hover:border-orange-500 hover:shadow-xl transition-all cursor-pointer h-full">
+                  <div className="absolute top-4 right-4">
+                    <Badge className="bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-700">Integrasi</Badge>
+                  </div>
+                  <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-amber-600 rounded-2xl flex items-center justify-center mb-5 shadow-lg">
+                    <span className="text-2xl">🏗️</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">BimtekKita Integration</h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">157 modul BIMTEK konstruksi dengan PKB points, database 334 posisi SKK, 8 AI Expert, dan tools kalkulasi teknik sipil.</p>
+                  <div className="grid grid-cols-2 gap-2 mb-4">
+                    {["157 Modul BIMTEK", "334 Posisi SKK", "8 AI Expert", "PKB Tracker"].map(f => (
+                      <div key={f} className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
+                        <CheckCircle className="w-3.5 h-3.5 text-orange-500 shrink-0" />{f}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-2 text-orange-600 dark:text-orange-400 font-semibold group-hover:gap-3 transition-all text-sm">
+                    Buka Integrasi <ArrowRight className="w-4 h-4" />
+                  </div>
+                </div>
+              </Link>
+              {/* Competency Builder Card */}
               <Link href="/competency-builder">
-                <div className="group relative bg-white dark:bg-gray-900 border-2 border-blue-200 dark:border-blue-700 rounded-2xl p-8 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-xl transition-all cursor-pointer h-full">
+                <div className="group relative bg-white dark:bg-gray-900 border-2 border-blue-200 dark:border-blue-700 rounded-2xl p-7 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-xl transition-all cursor-pointer h-full">
                   <div className="absolute top-4 right-4">
                     <Badge className="bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700">Baru</Badge>
                   </div>
                   <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-5 shadow-lg">
                     <Target className="w-7 h-7 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">🎯 Competency E-Course Builder</h3>
-                  <p className="text-gray-600 dark:text-gray-300 mb-5">Bangun e-course berbasis kompetensi dengan 6 langkah terstruktur: Orientasi → Konteks → Microlearning → Praktik → Asesmen → Refleksi. Didukung AI Chaesa Live untuk generate konten otomatis.</p>
-                  <div className="grid grid-cols-2 gap-3 mb-5">
-                    {["6 Langkah Terstruktur", "4 Level L1-L4", "SKKNI Mapping", "AI Content Generator"].map(f => (
-                      <div key={f} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                        <CheckCircle className="w-4 h-4 text-blue-500 shrink-0" />
-                        {f}
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">🎯 Competency E-Course Builder</h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">Bangun e-course berbasis kompetensi SKKNI dengan 6 langkah terstruktur dan AI Chaesa Live untuk generate konten otomatis.</p>
+                  <div className="grid grid-cols-2 gap-2 mb-4">
+                    {["6 Langkah Terstruktur", "4 Level L1-L4", "SKKNI Mapping", "AI Generator"].map(f => (
+                      <div key={f} className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
+                        <CheckCircle className="w-3.5 h-3.5 text-blue-500 shrink-0" />{f}
                       </div>
                     ))}
                   </div>
-                  <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold group-hover:gap-3 transition-all">
+                  <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold group-hover:gap-3 transition-all text-sm">
                     Mulai Build E-Course <ArrowRight className="w-4 h-4" />
                   </div>
                 </div>
               </Link>
+              {/* Competency Passport Card */}
               <Link href="/competency-passport">
-                <div className="group relative bg-white dark:bg-gray-900 border-2 border-teal-200 dark:border-teal-700 rounded-2xl p-8 hover:border-teal-400 dark:hover:border-teal-500 hover:shadow-xl transition-all cursor-pointer h-full">
+                <div className="group relative bg-white dark:bg-gray-900 border-2 border-teal-200 dark:border-teal-700 rounded-2xl p-7 hover:border-teal-400 dark:hover:border-teal-500 hover:shadow-xl transition-all cursor-pointer h-full">
                   <div className="absolute top-4 right-4">
                     <Badge className="bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 border-teal-200 dark:border-teal-700">Baru</Badge>
                   </div>
                   <div className="w-14 h-14 bg-gradient-to-br from-teal-500 to-green-600 rounded-2xl flex items-center justify-center mb-5 shadow-lg">
                     <Shield className="w-7 h-7 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">🛡️ Competency Passport</h3>
-                  <p className="text-gray-600 dark:text-gray-300 mb-5">Portfolio digital terverifikasi dari seluruh kompetensi yang Anda kuasai. Terintegrasi dengan standar BNSP/LSP, dilengkapi QR code verifikasi dan dapat dibagikan ke rekruter atau klien.</p>
-                  <div className="grid grid-cols-2 gap-3 mb-5">
-                    {["QR Code Verifikasi", "BNSP/LSP Support", "6 Metode Asesmen", "Download PDF"].map(f => (
-                      <div key={f} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                        <CheckCircle className="w-4 h-4 text-teal-500 shrink-0" />
-                        {f}
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">🛡️ Competency Passport</h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">Portfolio digital terverifikasi. Catat SKK konstruksi, PKB points dari BIMTEK, dan semua kompetensi SKKNI dalam satu passport.</p>
+                  <div className="grid grid-cols-2 gap-2 mb-4">
+                    {["SKK/BNSP Support", "PKB Points", "Radar Chart", "Cetak PDF"].map(f => (
+                      <div key={f} className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
+                        <CheckCircle className="w-3.5 h-3.5 text-teal-500 shrink-0" />{f}
                       </div>
                     ))}
                   </div>
-                  <div className="flex items-center gap-2 text-teal-600 dark:text-teal-400 font-semibold group-hover:gap-3 transition-all">
+                  <div className="flex items-center gap-2 text-teal-600 dark:text-teal-400 font-semibold group-hover:gap-3 transition-all text-sm">
                     Lihat Passport Saya <ArrowRight className="w-4 h-4" />
                   </div>
                 </div>
               </Link>
             </div>
             <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-700">
-              <div className="text-center text-sm text-gray-500 dark:text-gray-400 mb-4 font-medium">Ekosistem Competency-Based Learning yang Terintegrasi Penuh</div>
-              <div className="flex flex-wrap items-center justify-center gap-3">
+              <div className="text-center text-sm text-gray-500 dark:text-gray-400 mb-4 font-medium">Ekosistem Terintegrasi: Chaesa Live × BimtekKita</div>
+              <div className="flex flex-wrap items-center justify-center gap-2">
                 {[
-                  { label: "Meeting Recording", href: "/", icon: "🎥" },
+                  { label: "BIMTEK Modules", href: "/bimtek-integration", icon: "🎓" },
                   { label: "→", href: null },
                   { label: "AI Studio", href: "/micro-learning", icon: "🤖" },
                   { label: "→", href: null },
                   { label: "Competency Builder", href: "/competency-builder", icon: "🎯" },
+                  { label: "→", href: null },
+                  { label: "Quiz SKK", href: "/bimtek-integration", icon: "✍️" },
                   { label: "→", href: null },
                   { label: "Exam Center", href: "/sertifikasi", icon: "📝" },
                   { label: "→", href: null },
@@ -971,7 +1002,7 @@ export default function Home() {
                     <ArrowRight key={i} className="w-4 h-4 text-gray-400" />
                   ) : (
                     <Link key={i} href={item.href}>
-                      <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-purple-900/30 hover:text-purple-700 dark:hover:text-purple-300 transition-colors cursor-pointer">
+                      <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-orange-100 dark:hover:bg-orange-900/30 hover:text-orange-700 dark:hover:text-orange-300 transition-colors cursor-pointer">
                         {item.icon} {item.label}
                       </span>
                     </Link>
