@@ -745,6 +745,269 @@ Gedung: ${d.jenisGedung || "gedung bertingkat"}
 
 Checklist mencakup: (1) Pre-Clash Setup (toleransi jarak, rule set), (2) Tabel prioritas clash per tipe (Hard Clash, Soft Clash, Duplicate Clash), (3) Daftar clash yang paling umum ditemukan per pasangan disiplin, (4) Workflow penyelesaian clash (clash owner, deadline, verifikasi), (5) Format laporan clash report, (6) BCF workflow (jika digunakan). Format tabel siap digunakan di koordinasi BIM meeting. Referensi ISO 19650.`,
   },
+  /* ══ NOTIS-INSPIRED: CATATAN → DOKUMEN ══════════════════════════════ */
+  {
+    id: "notulen-dari-teks",
+    name: "Notulen Rapat dari Teks Mentah",
+    description: "Paste teks catatan rapat yang tidak terstruktur — AI langsung ekstrak keputusan, action items, PIC, dan deadline.",
+    longDesc: "Terinspirasi dari notis.ai: ubah catatan rapat yang berantakan menjadi notulen profesional siap distribusi dalam hitungan detik.",
+    category: "dokumen", categoryIcon: "📄", icon: "🎙️",
+    tier: "free", isNew: true, isPopular: true,
+    estimatedTime: "~15 detik",
+    agentId: "pm", outputLabel: "Notulen Rapat Terstruktur",
+    fields: [
+      { id: "namaProyek", label: "Nama Proyek", type: "text", placeholder: "Proyek Gedung Kantor PT Maju", required: true },
+      { id: "tanggalRapat", label: "Tanggal & Waktu Rapat", type: "text", placeholder: "Senin, 7 April 2025 — 10:00 WIB" },
+      { id: "teksRapat", label: "Tempel Catatan Rapat (teks bebas / voice-to-text)", type: "textarea", rows: 10, required: true,
+        placeholder: `Contoh (paste teks bebas dari rekaman/catatan):
+"jadi progress minggu ini kita udah 62 persen, harusnya 65, ada delay 3 hari di pekerjaan bekisting lt4 karena material kayu telat dateng. pak budi bilang supplier perlu dikonfirmasi ulang. rencananya rabu mau cor balok lt5. terus ada masalah di gambar, arsitek belum kirim revisi shop drawing. hendra minta deadline gambar paling lambat jumat. soal K3 pak slamet lapor ada 2 worker yang gak pake harness kemarin, perlu tindak lanjut..."`,
+        hint: "Bisa langsung dari voice-to-text, WhatsApp, atau catatan coret-coretan — AI akan merapikannya" },
+      { id: "peserta", label: "Peserta Rapat (opsional)", type: "text", placeholder: "PM, Site Manager, MK, Subkon Sipil" },
+      { id: "jenisRapat", label: "Jenis Rapat", type: "select", options: ["Rapat Koordinasi Mingguan","Rapat Progress","Rapat Teknis","Rapat K3","Rapat Keuangan","Rapat Lainnya"] },
+    ],
+    buildPrompt: (d) => `Kamu adalah sekretaris proyek konstruksi yang ahli. Ubah catatan rapat berantakan berikut menjadi notulen rapat profesional.
+
+Proyek: ${d.namaProyek}
+Tanggal: ${d.tanggalRapat || "tidak disebutkan"}
+Jenis: ${d.jenisRapat || "Rapat Proyek"}
+Peserta: ${d.peserta || "tidak disebutkan"}
+
+CATATAN MENTAH:
+${d.teksRapat}
+
+Hasilkan notulen dalam format berikut:
+
+## NOTULEN RAPAT — ${d.namaProyek}
+**Tanggal:** [tanggal]  **Jenis:** [jenis]  **Peserta:** [peserta]
+
+### Ringkasan Eksekutif
+(2-3 kalimat inti rapat)
+
+### Poin-Poin Pembahasan
+(buat daftar terstruktur per topik)
+
+### Keputusan yang Diambil
+(bullet list keputusan yang jelas dan konkret)
+
+### Action Items
+| No | Aktivitas | PIC | Deadline | Prioritas |
+|-----|-----------|-----|----------|-----------|
+(ekstrak semua tindak lanjut dengan PIC dan deadline — jika tidak disebutkan beri estimasi wajar)
+
+### Isu & Risiko yang Perlu Diperhatikan
+(hal-hal yang perlu dipantau lanjut)
+
+Bahasa Indonesia formal dan ringkas.`,
+    outputHint: "Siap dibagikan via email/WhatsApp — pastikan verifikasi nama PIC dan deadline",
+  },
+
+  {
+    id: "site-diary",
+    name: "Site Diary Harian Otomatis",
+    description: "Input catatan lapangan cepat — AI format menjadi site diary proyek yang profesional dan terdokumentasi.",
+    longDesc: "Catat kondisi lapangan dalam bahasa bebas, AI mengubahnya menjadi site diary resmi lengkap dengan cuaca, pekerjaan, tenaga kerja, dan catatan insiden.",
+    category: "dokumen", categoryIcon: "📄", icon: "📔",
+    tier: "free", isNew: true,
+    estimatedTime: "~12 detik",
+    agentId: "pm", outputLabel: "Site Diary Harian",
+    fields: [
+      { id: "namaProyek", label: "Nama Proyek", type: "text", placeholder: "Gedung Kantor 8 Lantai", required: true },
+      { id: "tanggal", label: "Tanggal", type: "text", placeholder: "7 April 2025", required: true },
+      { id: "cuaca", label: "Kondisi Cuaca", type: "select", required: true, options: ["Cerah sepanjang hari","Cerah pagi, hujan sore","Hujan sepanjang hari","Mendung (tidak hujan)","Panas terik"] },
+      { id: "catatanLapangan", label: "Catatan Lapangan Hari Ini (teks bebas)", type: "textarea", rows: 8, required: true,
+        placeholder: `Contoh catatan bebas:
+"cor balok lt5 grid A-C selesai jam 2 siang, 48m3 readymix. tenaga kerja tukang bata 24 orang, tukang besi 16, helper 30. ada 1 pekerja kena luka ringan di tangan kena besi, sudah P3K. pengiriman kayu bekisting dari PT Kayu Jaya 15m3 diterima jam 10. mandor slamet bilang besok rencana pasang tulangan kolom lt5 grid D-F. ada tamu dari owner jam 3 sore inspeksi, hasilnya ok.",
+`,
+        hint: "Tulis bebas seperti WhatsApp — AI akan merapikan menjadi site diary resmi" },
+      { id: "jumlahPekerja", label: "Total Pekerja Hari Ini", type: "number", placeholder: "75" },
+      { id: "alat", label: "Alat Berat Beroperasi", type: "text", placeholder: "Tower crane 1 unit, concrete pump 1 unit, vibrator 3 unit" },
+    ],
+    buildPrompt: (d) => `Kamu adalah Site Manager proyek konstruksi. Ubah catatan lapangan berikut menjadi Site Diary resmi.
+
+Proyek: ${d.namaProyek}
+Tanggal: ${d.tanggal}
+Cuaca: ${d.cuaca}
+Total Pekerja: ${d.jumlahPekerja || "lihat dari catatan"} orang
+Alat Berat: ${d.alat || "lihat dari catatan"}
+
+CATATAN LAPANGAN:
+${d.catatanLapangan}
+
+Format Site Diary resmi:
+
+## SITE DIARY — ${d.namaProyek}
+**Tanggal:** ${d.tanggal} | **Cuaca:** ${d.cuaca} | **Halaman:** ___
+
+### Kondisi Umum Lapangan
+(ringkasan situasi hari ini)
+
+### Pekerjaan yang Dilaksanakan
+| No | Uraian Pekerjaan | Lokasi/Zona | Volume | Satuan | Keterangan |
+|----|------------------|-------------|--------|--------|------------|
+
+### Sumber Daya
+**Tenaga Kerja:**
+| Jabatan | Jumlah |
+|---------|--------|
+
+**Peralatan:**
+| Alat | Jumlah | Kondisi |
+|------|--------|---------|
+
+**Material Diterima:**
+| Material | Volume | Supplier |
+|----------|--------|---------|
+
+### Insiden & K3
+(catat setiap insiden keselamatan, meski minor)
+
+### Kunjungan Tamu / Inspeksi
+(catat siapa yang datang dan hasilnya)
+
+### Kendala & Catatan Penting
+(masalah yang perlu tindak lanjut)
+
+### Rencana Kegiatan Esok Hari
+(berdasarkan catatan)
+
+**Dibuat oleh:** Site Manager | **Tanggal:** ${d.tanggal}
+
+Bahasa Indonesia formal dan presisi. Jika ada informasi tidak disebutkan, beri nilai "-".`,
+    outputHint: "Simpan site diary setiap hari — dokumen krusial untuk klaim dan audit",
+  },
+
+  {
+    id: "daily-report-generator",
+    name: "Daily Report Proyek (AI Digest)",
+    description: "Masukkan poin-poin progres harian, AI langsung susun daily report eksekutif yang siap kirim ke owner.",
+    longDesc: "Seperti daily digest notis.ai — ringkas semua aktivitas, masalah, dan rencana hari ini menjadi laporan eksekutif 1 halaman yang profesional.",
+    category: "pm", categoryIcon: "📊", icon: "📨",
+    tier: "free", isNew: true,
+    estimatedTime: "~15 detik",
+    agentId: "pm", outputLabel: "Daily Report Eksekutif",
+    fields: [
+      { id: "namaProyek", label: "Nama Proyek", type: "text", placeholder: "Pembangunan Gedung Kantor PT XYZ", required: true },
+      { id: "tanggal", label: "Tanggal Laporan", type: "text", placeholder: "Senin, 7 April 2025", required: true },
+      { id: "progressKumulatif", label: "Progress Kumulatif s.d. Hari Ini (%)", type: "number", placeholder: "63" },
+      { id: "progressRencana", label: "Progress Rencana s.d. Hari Ini (%)", type: "number", placeholder: "65" },
+      { id: "kegiatanHariIni", label: "Kegiatan yang Dikerjakan Hari Ini", type: "textarea", rows: 4, required: true,
+        placeholder: "Cor balok lt5 48m3, pasang bekisting kolom lt5 grid A-C, pengiriman besi D19..." },
+      { id: "kendalaHariIni", label: "Kendala / Masalah", type: "textarea", rows: 3,
+        placeholder: "Ready mix terlambat 2 jam, 1 pekerja sakit, cuaca hujan jam 15.00..." },
+      { id: "rencanaBesok", label: "Rencana Kegiatan Besok", type: "textarea", rows: 3,
+        placeholder: "Pasang tulangan kolom lt5, lanjut bekisting balok lt5, pengecatan lt2..." },
+      { id: "catatanPenting", label: "Catatan Penting / Isu Mendesak", type: "textarea", rows: 2,
+        placeholder: "Owner akan inspeksi Rabu, perlu koordinasi clean-up area lt3..." },
+    ],
+    buildPrompt: (d) => {
+      const deviasi = d.progressKumulatif && d.progressRencana
+        ? `${(Number(d.progressKumulatif) - Number(d.progressRencana)).toFixed(1)}%`
+        : "N/A";
+      const status = d.progressKumulatif && d.progressRencana
+        ? Number(d.progressKumulatif) >= Number(d.progressRencana) ? "ON TRACK ✅" : "BEHIND SCHEDULE ⚠️"
+        : "";
+      return `Kamu adalah Manajer Proyek konstruksi senior. Susun Daily Report eksekutif ringkas (1 halaman) untuk dikirim ke owner/direksi.
+
+Proyek: ${d.namaProyek}
+Tanggal: ${d.tanggal}
+Progress Aktual: ${d.progressKumulatif || "N/A"}% | Rencana: ${d.progressRencana || "N/A"}% | Deviasi: ${deviasi} | Status: ${status}
+
+Kegiatan Hari Ini:
+${d.kegiatanHariIni}
+
+Kendala:
+${d.kendalaHariIni || "Tidak ada kendala berarti"}
+
+Rencana Besok:
+${d.rencanaBesok || "Akan ditentukan"}
+
+Catatan Penting:
+${d.catatanPenting || "-"}
+
+Format Daily Report yang ringkas dan profesional:
+
+## DAILY REPORT — ${d.namaProyek}
+**Tanggal:** ${d.tanggal}
+
+### Status Progress
+(tabel mini: rencana vs aktual vs deviasi, status keseluruhan)
+
+### Kegiatan Hari Ini
+(bullet list ringkas per pekerjaan utama)
+
+### Kendala & Tindak Lanjut
+(issue + siapa yang bertanggung jawab menyelesaikan + kapan)
+
+### Rencana Besok
+(bullet list singkat)
+
+### Isu Penting untuk Perhatian Manajemen
+(highlight jika ada hal mendesak yang perlu keputusan owner/direksi)
+
+---
+*Laporan disiapkan oleh: Tim Proyek | ${d.tanggal}*
+
+Bahasa Indonesia profesional, ringkas, langsung ke poin. Maksimal 1 halaman A4.`;
+    },
+    outputHint: "Kirim daily report ke WhatsApp group owner/direksi setiap sore hari",
+  },
+
+  {
+    id: "voice-to-instruksi",
+    name: "Catatan Suara → Instruksi Lapangan",
+    description: "Paste voice-to-text atau catatan bebas dari lapangan — AI ubah jadi instruksi kerja tertulis yang jelas.",
+    longDesc: "Supervisor lapangan bicara, AI merapikan jadi instruksi kerja tertulis yang tidak ambigu untuk subkontraktor dan mandor.",
+    category: "dokumen", categoryIcon: "📄", icon: "🗣️",
+    tier: "free", isNew: true,
+    estimatedTime: "~10 detik",
+    agentId: "pm", outputLabel: "Instruksi Kerja Tertulis",
+    fields: [
+      { id: "namaProyek", label: "Nama Proyek", type: "text", placeholder: "Proyek Gedung Office Park", required: true },
+      { id: "ditujukanKe", label: "Ditujukan Kepada", type: "text", placeholder: "Mandor/Subkontraktor Sipil/Kepala Tukang Besi", required: true },
+      { id: "catatanSuara", label: "Paste Teks Catatan / Voice-to-Text", type: "textarea", rows: 8, required: true,
+        placeholder: `Paste langsung dari voice-to-text atau WhatsApp, contoh:
+"pak tolong besok pagi sebelum jam 7 tim besi nya udah standby di lt6 ya buat pasang tulangan kolom yang kemarin belum selesai. yang grid D sama E dulu karena jumat mau dicor. jangan lupa bawa las dan kawat ikat yang cukup. kalau ada yang butuh material tambahan langsung lapor ke pak hendra jangan nunggu sampai kehabisan. terus perhatiin juga jarak sengkang nya sesuai gambar, kemarin masih ada yang 25cm harusnya 15cm..."`,
+        hint: "Langsung paste dari voice-to-text HP, rekaman WhatsApp, atau catatan coret-coretan" },
+      { id: "prioritas", label: "Tingkat Prioritas", type: "select", options: ["Segera (hari ini)","Normal (besok)","Perencanaan (minggu ini)"] },
+    ],
+    buildPrompt: (d) => `Kamu adalah Site Manager konstruksi yang berpengalaman. Ubah catatan suara/teks bebas berikut menjadi instruksi kerja tertulis yang jelas, tidak ambigu, dan langsung bisa dilaksanakan di lapangan.
+
+Proyek: ${d.namaProyek}
+Kepada: ${d.ditujukanKe}
+Prioritas: ${d.prioritas || "Normal"}
+
+CATATAN ASLI:
+${d.catatanSuara}
+
+Format instruksi kerja:
+
+## INSTRUKSI KERJA
+**Proyek:** ${d.namaProyek}  
+**Kepada:** ${d.ditujukanKe}  
+**Prioritas:** ${d.prioritas || "Normal"}  
+**Tanggal:** [tanggal hari ini]  
+
+### Instruksi Pekerjaan:
+(ubah menjadi poin-poin instruksi yang jelas, terurut, dan spesifik — tanpa ambigu)
+1. ...
+2. ...
+
+### Spesifikasi & Standar yang Harus Dipatuhi:
+(ekstrak standar teknis atau mutu yang disebutkan)
+
+### Batas Waktu:
+(ekstrak deadline yang disebutkan, atau beri estimasi wajar)
+
+### Koordinasi & Pelaporan:
+(kepada siapa harus melapor dan kapan)
+
+### Catatan Keselamatan:
+(K3 yang relevan dengan pekerjaan ini)
+
+---
+Bahasa Indonesia formal dan tegas. Gunakan kalimat perintah aktif yang jelas.`,
+    outputHint: "Simpan instruksi ini sebagai bukti tertulis — lebih kuat dari instruksi lisan",
+  },
 ];
 
 /* Compute category counts */
