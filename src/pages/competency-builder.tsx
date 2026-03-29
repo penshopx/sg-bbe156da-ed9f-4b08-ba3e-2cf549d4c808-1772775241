@@ -98,9 +98,11 @@ export default function CompetencyBuilder() {
   const [currentStep, setCurrentStep] = useState(0);
   const [course, setCourse] = useState<CourseData>(defaultCourse());
   const [savedCourses, setSavedCourses] = useState<(CourseData & { id: string; createdAt: string; completedSteps: number })[]>([]);
-  const [activeTab, setActiveTab] = useState<"builder" | "library">("builder");
+  const [activeTab, setActiveTab] = useState<"builder" | "library" | "preview">("builder");
   const [generating, setGenerating] = useState(false);
+  const [generatingAll, setGeneratingAll] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const [aiError, setAiError] = useState<string | null>(null);
 
   const storageKey = getUserStorageKey(user, "competency_courses");
 
@@ -178,58 +180,119 @@ export default function CompetencyBuilder() {
     setCompletedSteps(new Set());
   };
 
+  const callAI = async (type: string) => {
+    const res = await fetch("/api/ai/generate-competency", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type,
+        competencyUnit: course.competencyUnit,
+        sector: course.sector,
+        level: course.level,
+        title: course.title,
+      }),
+    });
+    if (!res.ok) throw new Error(`API error ${res.status}`);
+    const json = await res.json();
+    return json.data;
+  };
+
   const generateAI = async (type: string) => {
     if (!course.competencyUnit) {
       toast({ title: "Isi unit kompetensi dulu", variant: "destructive" });
       return;
     }
     setGenerating(true);
-    await new Promise(r => setTimeout(r, 1800));
-    setGenerating(false);
-
-    if (type === "indicators") {
-      updateNested("orientasi", "indicators", [
-        `Mampu mengidentifikasi konsep utama ${course.competencyUnit}`,
-        `Mampu menerapkan prosedur standar sesuai ${course.level}`,
-        `Mampu mengevaluasi hasil kerja dengan kriteria yang terukur`,
-        `Mampu mendokumentasikan proses dan evidensi kompetensi`,
-      ]);
-      markStepComplete(0);
-    } else if (type === "caseStudy") {
-      updateNested("konteks", "caseStudy", `Sebuah perusahaan menengah menghadapi tantangan dalam ${course.competencyUnit}. Tim perlu menganalisis kondisi saat ini dan merancang solusi berbasis kompetensi yang terukur dengan standar SKKNI.`);
-      updateNested("konteks", "realScenario", `Skenario: Anda ditugaskan sebagai konsultan internal untuk meningkatkan kapabilitas tim di bidang ${course.competencyUnit} dengan target pencapaian ${course.level}.`);
-      markStepComplete(1);
-    } else if (type === "microlearning") {
-      updateNested("microlearning", "videoTopics", [
-        `Pengantar: Mengapa ${course.competencyUnit} Penting`,
-        `Konsep Dasar dan Kerangka Kerja`,
-        `Studi Kasus: Implementasi Terbaik`,
-        `Tools dan Teknik Praktis`,
-        `Evaluasi dan Peningkatan Berkelanjutan`,
-      ]);
-      updateNested("microlearning", "aiSummary", `Modul microlearning ini dirancang untuk level ${course.level}, mencakup 5 video berdurasi 5-7 menit yang membangun pemahaman secara bertahap dari konsep dasar hingga penerapan strategis.`);
-      markStepComplete(2);
-    } else if (type === "tasks") {
-      updateNested("praktik", "tasks", [
-        `Buat peta kompetensi untuk tim Anda menggunakan template SKKNI`,
-        `Lakukan self-assessment terhadap ${course.competencyUnit}`,
-        `Implementasikan satu prosedur standar dan dokumentasikan hasilnya`,
-        `Presentasikan hasil praktik kepada mentor atau supervisor`,
-      ]);
-      updateNested("praktik", "workBased", `Tugas berbasis pekerjaan nyata: Peserta menerapkan ${course.competencyUnit} dalam konteks pekerjaan mereka sehari-hari selama 2 minggu, dengan bimbingan supervisor.`);
-      markStepComplete(3);
-    } else if (type === "selfAssessment") {
-      updateNested("refleksi", "selfAssessment", `Refleksikan perjalanan belajar Anda: Apa yang telah Anda kuasai dari ${course.competencyUnit}? Bagaimana Anda akan menerapkan kompetensi ini dalam 30 hari ke depan? Evidensi apa yang dapat Anda kumpulkan untuk membuktikan pencapaian level ${course.level}?`);
-      updateNested("refleksi", "evidenceTypes", [
-        "Foto/video dokumentasi praktik kerja",
-        "Laporan tertulis hasil implementasi",
-        "Testimoni supervisor atau rekan kerja",
-        "Karya/output nyata dari proyek praktik",
-      ]);
-      markStepComplete(5);
+    setAiError(null);
+    try {
+      if (type === "indicators") {
+        const data = await callAI("indicators");
+        if (data.objective) updateNested("orientasi", "objective", data.objective);
+        if (data.standards?.length) updateNested("orientasi", "standards", data.standards);
+        if (data.indicators?.length) updateNested("orientasi", "indicators", data.indicators);
+        markStepComplete(0);
+      } else if (type === "caseStudy") {
+        const data = await callAI("konteks");
+        if (data.caseStudy) updateNested("konteks", "caseStudy", data.caseStudy);
+        if (data.realScenario) updateNested("konteks", "realScenario", data.realScenario);
+        if (data.relevance) updateNested("konteks", "relevance", data.relevance);
+        markStepComplete(1);
+      } else if (type === "microlearning") {
+        const data = await callAI("microlearning");
+        if (data.videoTopics?.length) updateNested("microlearning", "videoTopics", data.videoTopics);
+        if (data.articles?.length) updateNested("microlearning", "articles", data.articles);
+        if (data.aiSummary) updateNested("microlearning", "aiSummary", data.aiSummary);
+        markStepComplete(2);
+      } else if (type === "tasks") {
+        const data = await callAI("praktik");
+        if (data.tasks?.length) updateNested("praktik", "tasks", data.tasks);
+        if (data.workBased) updateNested("praktik", "workBased", data.workBased);
+        if (data.duration) updateNested("praktik", "duration", data.duration);
+        markStepComplete(3);
+      } else if (type === "selfAssessment") {
+        const data = await callAI("refleksi");
+        if (data.selfAssessment) updateNested("refleksi", "selfAssessment", data.selfAssessment);
+        if (data.evidenceTypes?.length) updateNested("refleksi", "evidenceTypes", data.evidenceTypes);
+        if (data.portfolioItems?.length) updateNested("refleksi", "portfolioItems", data.portfolioItems);
+        markStepComplete(5);
+      }
+      toast({ title: "AI berhasil generate konten!", description: "Konten telah diisi. Silakan review dan sesuaikan." });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Gagal generate";
+      setAiError(msg);
+      toast({ title: "Gagal generate AI", description: msg, variant: "destructive" });
+    } finally {
+      setGenerating(false);
     }
+  };
 
-    toast({ title: "AI menghasilkan konten!", description: "Konten telah diisi secara otomatis. Silakan review dan sesuaikan." });
+  const generateFullCourse = async () => {
+    if (!course.competencyUnit || !course.title) {
+      toast({ title: "Isi judul & unit kompetensi dulu", variant: "destructive" });
+      return;
+    }
+    setGeneratingAll(true);
+    setAiError(null);
+    try {
+      const data = await callAI("full");
+      setCourse(prev => ({
+        ...prev,
+        orientasi: {
+          objective: data.orientasi?.objective || prev.orientasi.objective,
+          standards: data.orientasi?.standards || prev.orientasi.standards,
+          indicators: data.orientasi?.indicators || prev.orientasi.indicators,
+        },
+        konteks: {
+          caseStudy: data.konteks?.caseStudy || prev.konteks.caseStudy,
+          realScenario: data.konteks?.realScenario || prev.konteks.realScenario,
+          relevance: data.konteks?.relevance || prev.konteks.relevance,
+        },
+        microlearning: {
+          videoTopics: data.microlearning?.videoTopics || prev.microlearning.videoTopics,
+          articles: data.microlearning?.articles || prev.microlearning.articles,
+          aiSummary: data.microlearning?.aiSummary || prev.microlearning.aiSummary,
+        },
+        praktik: {
+          tasks: data.praktik?.tasks || prev.praktik.tasks,
+          workBased: data.praktik?.workBased || prev.praktik.workBased,
+          duration: data.praktik?.duration || prev.praktik.duration,
+        },
+        refleksi: {
+          selfAssessment: data.refleksi?.selfAssessment || prev.refleksi.selfAssessment,
+          evidenceTypes: data.refleksi?.evidenceTypes || prev.refleksi.evidenceTypes,
+          portfolioItems: data.refleksi?.portfolioItems || prev.refleksi.portfolioItems,
+        },
+      }));
+      setCompletedSteps(new Set([0, 1, 2, 3, 5]));
+      toast({ title: "Seluruh e-course berhasil di-generate!", description: "AI telah mengisi semua 6 langkah. Review dan sesuaikan sebelum menyimpan." });
+      setActiveTab("preview");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Gagal generate";
+      setAiError(msg);
+      toast({ title: "Gagal generate lengkap", description: msg, variant: "destructive" });
+    } finally {
+      setGeneratingAll(false);
+    }
   };
 
   const progress = Math.round((completedSteps.size / STEPS.length) * 100);
@@ -264,19 +327,53 @@ export default function CompetencyBuilder() {
                 <h1 className="text-2xl font-bold mb-1">Competency E-Course Builder</h1>
                 <p className="text-blue-100 text-sm">Bangun e-course terstruktur dari unit kompetensi — bukan sekadar materi. 1 unit kompetensi = 1 e-course yang terukur.</p>
               </div>
-              <div className="flex gap-2 shrink-0">
+              <div className="flex flex-wrap gap-2 shrink-0">
+                <Button
+                  onClick={generateFullCourse}
+                  disabled={generatingAll || !course.title || !course.competencyUnit}
+                  size="sm"
+                  className="bg-yellow-400 text-gray-900 hover:bg-yellow-300 font-bold"
+                >
+                  {generatingAll ? <RefreshCw className="w-4 h-4 mr-1.5 animate-spin" /> : <Zap className="w-4 h-4 mr-1.5" />}
+                  {generatingAll ? "Generating..." : "Generate Semua Langkah"}
+                </Button>
+                <Button onClick={() => setActiveTab("preview")} variant="outline" size="sm" className="border-white/30 text-white hover:bg-white/20 bg-white/10">
+                  <Eye className="w-4 h-4 mr-1.5" /> Preview
+                </Button>
                 <Button onClick={() => setActiveTab("library")} variant="outline" size="sm" className="border-white/30 text-white hover:bg-white/20 bg-white/10">
                   <BookOpen className="w-4 h-4 mr-1.5" /> Perpustakaan ({savedCourses.length})
                 </Button>
-                <Button onClick={newCourse} size="sm" className="bg-white text-purple-700 hover:bg-white/90 font-semibold">
+                <Button onClick={() => { newCourse(); setActiveTab("builder"); }} size="sm" className="bg-white text-purple-700 hover:bg-white/90 font-semibold">
                   <Plus className="w-4 h-4 mr-1.5" /> Buat Baru
                 </Button>
               </div>
             </div>
           </div>
 
+          {/* AI Error Banner */}
+          {aiError && (
+            <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl text-sm text-red-700 dark:text-red-300 flex items-center justify-between gap-3">
+              <span>⚠️ {aiError}</span>
+              <button onClick={() => setAiError(null)} className="text-red-400 hover:text-red-600 text-lg leading-none">&times;</button>
+            </div>
+          )}
+
+          {/* Generating Full Course Banner */}
+          {generatingAll && (
+            <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-xl">
+              <div className="flex items-center gap-3 mb-2">
+                <RefreshCw className="w-5 h-5 text-yellow-600 animate-spin" />
+                <span className="font-semibold text-yellow-700 dark:text-yellow-300">AI sedang menyusun e-course lengkap Anda...</span>
+              </div>
+              <p className="text-xs text-yellow-600 dark:text-yellow-400">Menganalisis unit kompetensi, menyusun 6 langkah terstruktur sesuai standar SKKNI dan level {course.level}. Mohon tunggu...</p>
+              <Progress value={undefined} className="h-1.5 mt-3" />
+            </div>
+          )}
+
           {activeTab === "library" ? (
             <LibraryView savedCourses={savedCourses} onLoad={loadCourse} onDelete={deleteCourse} onNew={() => { newCourse(); setActiveTab("builder"); }} />
+          ) : activeTab === "preview" ? (
+            <CoursePreview course={course} completedSteps={completedSteps} onEdit={() => setActiveTab("builder")} onSave={saveCourse} />
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
@@ -742,6 +839,209 @@ function Step5Refleksi({ course, updateNested, addItem, removeItem, updateItem, 
         </div>
         <p className="text-xs text-green-600 dark:text-green-400">Setelah menyelesaikan semua langkah, kompetensi ini akan tercatat di <Link href="/competency-passport" className="underline font-medium">Competency Passport</Link> Anda sebagai bukti penguasaan yang terverifikasi.</p>
       </div>
+    </div>
+  );
+}
+
+function CoursePreview({ course, completedSteps, onEdit, onSave }: { course: CourseData; completedSteps: Set<number>; onEdit: () => void; onSave: () => void }) {
+  const levelConfig: Record<string, { color: string; bg: string }> = {
+    L1: { color: "text-blue-700 dark:text-blue-300", bg: "bg-blue-100 dark:bg-blue-900/30" },
+    L2: { color: "text-green-700 dark:text-green-300", bg: "bg-green-100 dark:bg-green-900/30" },
+    L3: { color: "text-purple-700 dark:text-purple-300", bg: "bg-purple-100 dark:bg-purple-900/30" },
+    L4: { color: "text-orange-700 dark:text-orange-300", bg: "bg-orange-100 dark:bg-orange-900/30" },
+  };
+  const lvl = levelConfig[course.level] || levelConfig.L2;
+
+  const totalVideos = course.microlearning.videoTopics.filter(v => v.trim()).length;
+  const totalTasks = course.praktik.tasks.filter(t => t.trim()).length;
+  const totalIndicators = course.orientasi.indicators.filter(i => i.trim()).length;
+  const totalEvidence = course.refleksi.evidenceTypes.filter(e => e.trim()).length;
+  const estimatedHours = totalVideos * 0.12 + totalTasks * 2 + 1;
+
+  const stepData = [
+    { step: STEPS[0], icon: Target, content: course.orientasi, filled: !!(course.orientasi.objective || course.orientasi.standards[0]) },
+    { step: STEPS[1], icon: Map, content: course.konteks, filled: !!course.konteks.caseStudy },
+    { step: STEPS[2], icon: Video, content: course.microlearning, filled: !!course.microlearning.videoTopics[0] },
+    { step: STEPS[3], icon: Wrench, content: course.praktik, filled: !!course.praktik.tasks[0] },
+    { step: STEPS[4], icon: ClipboardCheck, content: course.asesmen, filled: course.asesmen.methods.length > 0 },
+    { step: STEPS[5], icon: Lightbulb, content: course.refleksi, filled: !!course.refleksi.selfAssessment },
+  ];
+
+  return (
+    <div className="space-y-6">
+      {/* Actions bar */}
+      <div className="flex items-center justify-between">
+        <Button onClick={onEdit} variant="outline" size="sm">
+          <ChevronLeft className="w-4 h-4 mr-1" /> Kembali ke Builder
+        </Button>
+        <div className="flex gap-2">
+          <Button onClick={onSave} size="sm" className="bg-purple-600 hover:bg-purple-700 text-white">
+            <Save className="w-4 h-4 mr-1.5" /> Simpan E-Course
+          </Button>
+          <Button onClick={() => window.print()} size="sm" variant="outline">
+            <Download className="w-4 h-4 mr-1.5" /> Cetak / Export
+          </Button>
+        </div>
+      </div>
+
+      {/* Course Header Card */}
+      <Card className="p-6 border-2 border-purple-200 dark:border-purple-700 bg-gradient-to-br from-white to-purple-50 dark:from-gray-900 dark:to-purple-950">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap gap-2 mb-3">
+              <Badge className={`${lvl.bg} ${lvl.color} border-0 font-bold`}>{course.level} - {COMPETENCY_LEVELS.find(l => l.id === course.level)?.label.split(" - ")[1]}</Badge>
+              {course.skkniCode && <Badge variant="outline" className="text-xs">{course.skkniCode}</Badge>}
+              <Badge variant="outline" className="text-xs">{course.sector}</Badge>
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">{course.title || "Judul E-Course"}</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400 font-mono">Unit Kompetensi: {course.competencyUnit}</p>
+            {course.orientasi.objective && (
+              <p className="mt-3 text-gray-600 dark:text-gray-300 text-sm italic border-l-4 border-purple-300 dark:border-purple-600 pl-3">{course.orientasi.objective}</p>
+            )}
+          </div>
+          <div className="grid grid-cols-2 gap-3 shrink-0">
+            {[
+              { label: "Video", value: totalVideos, icon: Video, color: "text-purple-600" },
+              { label: "Indikator", value: totalIndicators, icon: Target, color: "text-blue-600" },
+              { label: "Tugas Praktik", value: totalTasks, icon: Wrench, color: "text-orange-600" },
+              { label: "Jenis Evidensi", value: totalEvidence, icon: FileText, color: "text-green-600" },
+            ].map((s, i) => (
+              <div key={i} className="text-center p-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 min-w-[72px]">
+                <s.icon className={`w-4 h-4 ${s.color} mx-auto mb-0.5`} />
+                <div className={`text-xl font-bold ${s.color}`}>{s.value}</div>
+                <div className="text-[10px] text-gray-400">{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Stats row */}
+        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800 flex flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400">
+          <span className="flex items-center gap-1.5"><TrendingUp className="w-4 h-4 text-green-500" /> Estimasi: ~{estimatedHours.toFixed(0)} jam belajar</span>
+          <span className="flex items-center gap-1.5"><Users className="w-4 h-4 text-blue-500" /> {course.asesmen.methods.length} metode asesmen</span>
+          <span className="flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-purple-500" /> {completedSteps.size}/6 langkah selesai</span>
+          {course.asesmen.passingScore && <span className="flex items-center gap-1.5"><Award className="w-4 h-4 text-orange-500" /> Nilai lulus: {course.asesmen.passingScore}%</span>}
+        </div>
+      </Card>
+
+      {/* 6-Step Breakdown */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {stepData.map(({ step, icon: Icon, content, filled }, idx) => (
+          <Card key={idx} className={`p-4 border ${filled ? "border-gray-200 dark:border-gray-700" : "border-dashed border-gray-300 dark:border-gray-600 opacity-70"} bg-white dark:bg-gray-900`}>
+            <div className="flex items-center gap-3 mb-3">
+              <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${step.color} flex items-center justify-center`}>
+                <Icon className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold text-gray-400">LANGKAH {idx + 1}</span>
+                  {completedSteps.has(idx) && <CheckCircle className="w-3.5 h-3.5 text-green-500" />}
+                  {!filled && <span className="text-[10px] text-yellow-600 dark:text-yellow-400 font-medium">Belum diisi</span>}
+                </div>
+                <div className="font-bold text-gray-900 dark:text-white text-sm">{step.label}</div>
+              </div>
+            </div>
+            <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1.5">
+              {idx === 0 && (
+                <>
+                  {(content as any).objective && <p className="italic text-gray-500">{(content as any).objective.slice(0, 100)}{(content as any).objective.length > 100 ? "..." : ""}</p>}
+                  {(content as any).indicators?.filter((i: string) => i.trim()).slice(0, 3).map((ind: string, i: number) => (
+                    <div key={i} className="flex items-start gap-1.5"><CheckCircle className="w-3 h-3 text-blue-400 shrink-0 mt-0.5" /><span>{ind}</span></div>
+                  ))}
+                </>
+              )}
+              {idx === 1 && (content as any).caseStudy && <p>{(content as any).caseStudy.slice(0, 140)}{(content as any).caseStudy.length > 140 ? "..." : ""}</p>}
+              {idx === 2 && (
+                (content as any).videoTopics?.filter((v: string) => v.trim()).slice(0, 4).map((t: string, i: number) => (
+                  <div key={i} className="flex items-center gap-1.5">
+                    <div className="w-4 h-4 rounded bg-purple-100 dark:bg-purple-900/40 text-purple-600 text-[10px] font-bold flex items-center justify-center shrink-0">{i + 1}</div>
+                    <span>{t}</span>
+                  </div>
+                ))
+              )}
+              {idx === 3 && (
+                (content as any).tasks?.filter((t: string) => t.trim()).slice(0, 3).map((t: string, i: number) => (
+                  <div key={i} className="flex items-start gap-1.5"><Wrench className="w-3 h-3 text-orange-400 shrink-0 mt-0.5" /><span>{t}</span></div>
+                ))
+              )}
+              {idx === 4 && (
+                <div className="flex flex-wrap gap-1">
+                  {(content as any).methods?.map((m: string) => (
+                    <Badge key={m} variant="outline" className="text-[10px] px-2 py-0.5">{ASSESSMENT_METHODS.find(am => am.id === m)?.label.split(" ")[0] || m}</Badge>
+                  ))}
+                  {(content as any).projectDesc && <p className="mt-1 text-gray-500">{(content as any).projectDesc.slice(0, 80)}...</p>}
+                </div>
+              )}
+              {idx === 5 && (
+                <>
+                  {(content as any).selfAssessment && <p className="italic text-gray-500">{(content as any).selfAssessment.slice(0, 120)}...</p>}
+                  {(content as any).evidenceTypes?.filter((e: string) => e.trim()).slice(0, 3).map((e: string, i: number) => (
+                    <div key={i} className="flex items-start gap-1.5"><FileText className="w-3 h-3 text-green-400 shrink-0 mt-0.5" /><span>{e}</span></div>
+                  ))}
+                </>
+              )}
+              {!filled && (
+                <p className="text-gray-400 italic">— Belum ada konten untuk langkah ini —</p>
+              )}
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      {/* Assessment Methods */}
+      {course.asesmen.methods.length > 0 && (
+        <Card className="p-5 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+          <h2 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+            <ClipboardCheck className="w-5 h-5 text-red-500" /> Metode Asesmen yang Dipilih
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {course.asesmen.methods.map(m => {
+              const method = ASSESSMENT_METHODS.find(am => am.id === m);
+              if (!method) return null;
+              const Icon = method.icon;
+              return (
+                <div key={m} className="flex items-center gap-2 px-3 py-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg text-sm text-red-700 dark:text-red-300">
+                  <Icon className="w-4 h-4" /> {method.label}
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+      )}
+
+      {/* Completion Checklist */}
+      <Card className="p-5 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <h2 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+          <CheckCircle className="w-5 h-5 text-green-500" /> Checklist Kelengkapan E-Course
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {[
+            { label: "Judul e-course diisi", ok: !!course.title },
+            { label: "Unit kompetensi SKKNI diisi", ok: !!course.competencyUnit },
+            { label: "Level kompetensi dipilih", ok: !!course.level },
+            { label: "Tujuan pembelajaran diisi", ok: !!course.orientasi.objective },
+            { label: "Min. 2 indikator kompetensi", ok: course.orientasi.indicators.filter(i => i.trim()).length >= 2 },
+            { label: "Studi kasus konteks diisi", ok: !!course.konteks.caseStudy },
+            { label: "Min. 3 topik video microlearning", ok: course.microlearning.videoTopics.filter(v => v.trim()).length >= 3 },
+            { label: "Min. 2 tugas praktik diisi", ok: course.praktik.tasks.filter(t => t.trim()).length >= 2 },
+            { label: "Min. 1 metode asesmen dipilih", ok: course.asesmen.methods.length >= 1 },
+            { label: "Pertanyaan refleksi diisi", ok: !!course.refleksi.selfAssessment },
+            { label: "Min. 2 jenis evidensi", ok: course.refleksi.evidenceTypes.filter(e => e.trim()).length >= 2 },
+            { label: "Nilai kelulusan minimum diisi", ok: !!course.asesmen.passingScore },
+          ].map((item, i) => (
+            <div key={i} className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm ${item.ok ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300" : "bg-gray-50 dark:bg-gray-800 text-gray-500"}`}>
+              {item.ok ? <CheckCircle className="w-4 h-4 text-green-500 shrink-0" /> : <Circle className="w-4 h-4 text-gray-300 dark:text-gray-600 shrink-0" />}
+              {item.label}
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
+          <span className="text-sm text-gray-500">Kelengkapan: {[!!course.title, !!course.competencyUnit, !!course.level, !!course.orientasi.objective, course.orientasi.indicators.filter(i=>i.trim()).length>=2, !!course.konteks.caseStudy, course.microlearning.videoTopics.filter(v=>v.trim()).length>=3, course.praktik.tasks.filter(t=>t.trim()).length>=2, course.asesmen.methods.length>=1, !!course.refleksi.selfAssessment, course.refleksi.evidenceTypes.filter(e=>e.trim()).length>=2, !!course.asesmen.passingScore].filter(Boolean).length}/12 item</span>
+          <Button onClick={onSave} size="sm" className="bg-purple-600 hover:bg-purple-700 text-white">
+            <Save className="w-4 h-4 mr-1.5" /> Simpan ke Perpustakaan
+          </Button>
+        </div>
+      </Card>
     </div>
   );
 }
