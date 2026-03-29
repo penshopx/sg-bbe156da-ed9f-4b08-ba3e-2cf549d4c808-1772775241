@@ -610,6 +610,194 @@ export default function Platform() {
             </div>
           </div>
 
+          {/* 6-Step SKKNI Course Structure */}
+          <div>
+            <div className="text-center mb-8">
+              <Badge className="mb-3 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700">
+                Standar SKKNI/BNSP
+              </Badge>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3">
+                6-Langkah <span className="bg-gradient-to-r from-blue-600 to-teal-500 bg-clip-text text-transparent">Struktur Kompetensi</span>
+              </h2>
+              <p className="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
+                Setiap kursus dibangun mengikuti kerangka SKKNI — dari pengenalan hingga refleksi mendalam, menghasilkan kompetensi terverifikasi
+              </p>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[
+                {
+                  step: "01", label: "Orientasi", icon: "🧭", color: "from-violet-500 to-purple-600", light: "bg-violet-50 dark:bg-violet-900/20 border-violet-200 dark:border-violet-700",
+                  desc: "Peserta memahami tujuan, konteks, dan gambaran besar kompetensi yang akan dibangun",
+                  bullets: ["Identifikasi tujuan belajar", "Peta kompetensi keseluruhan", "Self-assessment awal", "Ekspektasi hasil akhir"],
+                },
+                {
+                  step: "02", label: "Konteks", icon: "📍", color: "from-blue-500 to-indigo-600", light: "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700",
+                  desc: "Membangun pemahaman konteks industri, regulasi, dan standar yang berlaku di bidang kompetensi",
+                  bullets: ["Regulasi industri terkait", "Standar K3 yang berlaku", "Konteks proyek nyata", "Perbandingan praktik internasional"],
+                },
+                {
+                  step: "03", label: "Micro-Learning", icon: "⚡", color: "from-cyan-500 to-teal-500", light: "bg-cyan-50 dark:bg-cyan-900/20 border-cyan-200 dark:border-cyan-700",
+                  desc: "Unit-unit belajar kecil (5–15 menit per unit) yang AI-generated dan mudah dicerna kapan saja",
+                  bullets: ["5–15 modul per kompetensi", "Video + teks + infografik", "AI-generated content", "Bisa diulang kapan saja"],
+                },
+                {
+                  step: "04", label: "Praktik", icon: "🔧", color: "from-orange-500 to-amber-500", light: "bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-700",
+                  desc: "Latihan hands-on, studi kasus, dan simulasi proyek nyata untuk mengaplikasikan teori",
+                  bullets: ["Studi kasus proyek real", "Simulasi asesmen lapangan", "Tools kalkulasi teknis", "Diskusi forum dengan AI Expert"],
+                },
+                {
+                  step: "05", label: "Asesmen", icon: "✅", color: "from-green-500 to-emerald-600", light: "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700",
+                  desc: "Ujian kompetensi terstruktur — dari quiz simulasi hingga asesmen formal BNSP dengan skor dan umpan balik AI",
+                  bullets: ["Quiz simulasi 65+ soal", "Asesmen portofolio kerja", "Skor real-time + pembahasan", "Siap menghadapi LSP"],
+                },
+                {
+                  step: "06", label: "Refleksi", icon: "💡", color: "from-pink-500 to-rose-500", light: "bg-pink-50 dark:bg-pink-900/20 border-pink-200 dark:border-pink-700",
+                  desc: "Merekap perjalanan belajar, mengidentifikasi gap, merencanakan langkah pengembangan lanjutan",
+                  bullets: ["Ringkasan perjalanan belajar", "Gap analysis vs standar", "PKB points terisi otomatis", "Rencana pengembangan lanjut"],
+                },
+              ].map((s, i) => (
+                <div key={i} className={`rounded-2xl border-2 ${s.light} p-5`}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${s.color} flex items-center justify-center text-white font-extrabold text-sm shadow-md`}>{s.step}</div>
+                    <div>
+                      <div className="text-lg">{s.icon}</div>
+                    </div>
+                    <div className="font-bold text-gray-900 dark:text-white text-base">{s.label}</div>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">{s.desc}</p>
+                  <ul className="space-y-1">
+                    {s.bullets.map((b, j) => (
+                      <li key={j} className="flex items-start gap-2 text-xs text-gray-500 dark:text-gray-400">
+                        <CheckCircle className="w-3 h-3 text-green-500 shrink-0 mt-0.5" /> {b}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* SKKNI Level Framework */}
+          <div className="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-3xl p-8 border border-indigo-200 dark:border-indigo-700">
+            <div className="text-center mb-8">
+              <Badge className="mb-3 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-700">
+                Kerangka Kualifikasi Nasional Indonesia
+              </Badge>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                Level Kompetensi <span className="bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text text-transparent">L1 — L4 SKKNI</span>
+              </h2>
+              <p className="text-gray-500 dark:text-gray-400">Pilih level yang sesuai dengan pengalaman dan target karir Anda</p>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                { level: "L1", label: "Asisten Ahli", icon: "🌱", color: "from-green-400 to-emerald-500", years: "0–2 tahun", eg: "Calon Teknisi, Fresh Graduate", skills: ["Pemahaman dasar K3", "Prosedur standar lapangan", "Penggunaan alat dasar", "Laporan kerja sederhana"] },
+                { level: "L2", label: "Teknisi Madya", icon: "⚙️", color: "from-blue-400 to-indigo-500", years: "2–5 tahun", eg: "Teknisi, Pelaksana Lapangan", skills: ["Pengawasan sub-unit", "Analisa masalah teknis", "Koordinasi tim kecil", "Dokumentasi teknis"] },
+                { level: "L3", label: "Ahli Muda", icon: "🏗️", color: "from-orange-400 to-amber-500", years: "5–10 tahun", eg: "Site Engineer, Pengawas", skills: ["Manajemen proyek", "Desain & perencanaan", "Evaluasi kualitas", "Mentoring junior"] },
+                { level: "L4", label: "Ahli Utama", icon: "🏆", color: "from-purple-500 to-violet-600", years: "10+ tahun", eg: "Project Manager, Direktur Teknik", skills: ["Kepemimpinan strategis", "Manajemen risiko proyek", "Inovasi & R&D", "Kebijakan perusahaan"] },
+              ].map((lvl, i) => (
+                <div key={i} className="bg-white dark:bg-gray-900 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm">
+                  <div className={`bg-gradient-to-r ${lvl.color} p-5 text-white`}>
+                    <div className="text-2xl mb-1">{lvl.icon}</div>
+                    <div className="text-2xl font-extrabold">{lvl.level}</div>
+                    <div className="font-semibold text-sm">{lvl.label}</div>
+                    <div className="text-white/70 text-xs mt-1">{lvl.years} pengalaman</div>
+                  </div>
+                  <div className="p-4">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-2 italic">Contoh: {lvl.eg}</div>
+                    <ul className="space-y-1.5">
+                      {lvl.skills.map((sk, j) => (
+                        <li key={j} className="flex items-start gap-2 text-xs text-gray-700 dark:text-gray-300">
+                          <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 shrink-0" /> {sk}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 8 AI Expert Konstruksi */}
+          <div>
+            <div className="text-center mb-8">
+              <Badge className="mb-3 bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-700">
+                Konsultasi 24/7 — Gratis
+              </Badge>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3">
+                8 AI Expert <span className="bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">Konstruksi Spesialis</span>
+              </h2>
+              <p className="text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
+                Tanyakan apa saja — dari hitung struktur beton hingga strategi proyek — tersedia 24 jam kapan pun Anda butuh
+              </p>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                { name: "Ir. Arif Struktur", role: "Ahli Struktur & Konstruksi Beton", avatar: "🏛️", color: "border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/10", accent: "text-blue-600 dark:text-blue-400", prompts: ["Hitung kapasitas balok beton 30x50 beban 12 ton/m", "Apa perbedaan tulangan ulir vs polos untuk kolom?", "Syarat sambungan las struktur baja SNI 1729"] },
+                { name: "Dr. Hendra K3", role: "Keselamatan & Kesehatan Kerja", avatar: "⛑️", color: "border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/10", accent: "text-red-600 dark:text-red-400", prompts: ["Prosedur K3 pekerjaan di ketinggian >3m", "Daftar APD wajib untuk pekerjaan pengelasan", "Cara mengisi formulir izin kerja berbahaya"] },
+                { name: "Eng. Sari MEP", role: "Mekanikal, Elektrikal & Plumbing", avatar: "⚡", color: "border-yellow-200 dark:border-yellow-700 bg-yellow-50 dark:bg-yellow-900/10", accent: "text-yellow-600 dark:text-yellow-400", prompts: ["Spesifikasi kabel listrik untuk beban 50 kVA", "Hitung kapasitas pompa air bersih 10 lantai", "Standar HVAC untuk ruang server 100 m²"] },
+                { name: "Pak Budi Proyek", role: "Manajemen Proyek Konstruksi", avatar: "📊", color: "border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/10", accent: "text-green-600 dark:text-green-400", prompts: ["Template Rencana Mutu Proyek (RMP)", "Cara buat S-Curve progress pekerjaan tanah", "Klaim keterlambatan akibat force majeure"] },
+                { name: "Drs. Fuad Sipil", role: "Teknik Sipil & Infrastruktur Jalan", avatar: "🛣️", color: "border-indigo-200 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-900/10", accent: "text-indigo-600 dark:text-indigo-400", prompts: ["Perhitungan tebal perkerasan lentur Bina Marga", "Spesifikasi beton K-350 untuk rigid pavement", "Desain drainase saluran trapesium 200 l/dt"] },
+                { name: "Ir. Maya Arsitek", role: "Arsitektur & Desain Bangunan", avatar: "🏠", color: "border-pink-200 dark:border-pink-700 bg-pink-50 dark:bg-pink-900/10", accent: "text-pink-600 dark:text-pink-400", prompts: ["Persyaratan IMB untuk bangunan komersial", "Standar pencahayaan alami SNI ruang kantor", "Cara buat RAB arsitektur dari gambar schematic"] },
+                { name: "Dr. Rini Geotek", role: "Geoteknik & Fondasi", avatar: "⛏️", color: "border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/10", accent: "text-amber-600 dark:text-amber-400", prompts: ["Tentukan jenis fondasi untuk tanah lunak SPT < 5", "Hitung daya dukung tiang pancang 40x40 cm", "Syarat penyelidikan tanah untuk gedung 20 lantai"] },
+                { name: "Pak Eko Legal", role: "Kontrak & Hukum Konstruksi", avatar: "⚖️", color: "border-teal-200 dark:border-teal-700 bg-teal-50 dark:bg-teal-900/10", accent: "text-teal-600 dark:text-teal-400", prompts: ["Klausa force majeure standar kontrak FIDIC", "Syarat wanprestasi dan sanksi dalam SPK", "Cara klaim asuransi CAR (Contractor All Risk)"] },
+              ].map((exp, i) => (
+                <Card key={i} className={`p-5 border-2 ${exp.color}`}>
+                  <div className="text-3xl mb-2">{exp.avatar}</div>
+                  <div className="font-bold text-gray-900 dark:text-white text-sm mb-0.5">{exp.name}</div>
+                  <div className={`text-xs ${exp.accent} font-medium mb-3`}>{exp.role}</div>
+                  <div className="text-xs text-gray-400 dark:text-gray-500 mb-1.5 font-semibold uppercase tracking-wide">Contoh pertanyaan:</div>
+                  <ul className="space-y-1.5">
+                    {exp.prompts.map((p, j) => (
+                      <li key={j} className="text-xs text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 rounded-lg px-2.5 py-1.5 border border-gray-100 dark:border-gray-700 italic">
+                        "{p}"
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              ))}
+            </div>
+            <div className="text-center mt-6">
+              <Link href="/bimtek-integration">
+                <Button className="bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold px-8 rounded-xl shadow-lg">
+                  💬 Mulai Konsultasi dengan AI Expert <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          {/* FAQ */}
+          <div>
+            <div className="text-center mb-8">
+              <Badge className="mb-3 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700">
+                FAQ
+              </Badge>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3">
+                Pertanyaan <span className="bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">Yang Sering Ditanyakan</span>
+              </h2>
+            </div>
+            <div className="max-w-3xl mx-auto space-y-3">
+              {[
+                { q: "Apakah platform ini benar-benar gratis untuk pelajar?", a: "Ya! Pelajar SMA/SMK dan mahasiswa bisa mengakses ratusan materi micro-learning, quiz, dan learning path secara gratis. Fitur premium seperti AI content generator dan e-course builder membutuhkan langganan, namun ada paket khusus mahasiswa dengan harga terjangkau." },
+                { q: "Apa itu PKB dan mengapa penting untuk pekerja konstruksi?", a: "PKB (Pengembangan Keprofesian Berkelanjutan) adalah kewajiban 150 jam/tahun untuk mempertahankan dan memperpanjang Sertifikat Kompetensi Kerja (SKK). Platform ini melacak jam PKB Anda secara otomatis setiap kali menyelesaikan modul BIMTEK, sehingga Anda tidak perlu khawatir saat perpanjangan SKK." },
+                { q: "Bagaimana cara kerja fitur Meeting → E-Course untuk content creator?", a: "Cukup rekam meeting/webinar Anda menggunakan Chaesa Live, lalu AI kami akan memproses rekaman tersebut dalam 15 menit: memotong menjadi 15–20 modul belajar, membuat ringkasan + quiz per modul, generate slide presentasi, script podcast, dan caption multi-platform. Semua siap dijual melalui live commerce Mayar.id." },
+                { q: "Apakah sertifikat dari platform ini diakui secara nasional?", a: "Sertifikat digital Chaesa Live berlaku sebagai bukti penyelesaian kursus dan bisa dibagikan ke LinkedIn. Untuk pengakuan formal BNSP/LSP, platform menyediakan persiapan SKK lengkap (quiz simulasi, materi BIMTEK) sehingga Anda siap menghadapi asesmen resmi di Lembaga Sertifikasi Profesi terakreditasi." },
+                { q: "Apakah ada fitur untuk HRD yang ingin manage training tim?", a: "Ya! Fitur Corporate mencakup: Skills Matrix seluruh tim, dashboard PKB per karyawan, alert sertifikat yang akan kedaluwarsa, repository Competency Passport terpusat, dan kemampuan membuat e-course internal dari knowledge tim menggunakan AI. Hubungi kami untuk demo paket Enterprise." },
+                { q: "Berapa lama untuk mendapatkan SKK setelah menggunakan platform ini?", a: "Timeline bervariasi tergantung posisi SKK. Umumnya: 2–4 minggu intensif untuk persiapan materi BIMTEK + quiz simulasi, kemudian mendaftar asesmen ke LSP (biasanya 1–3 bulan antrian). Platform ini membantu Anda siap 100% saat asesmen — tingkat kelulusan peserta yang menggunakan quiz simulasi kami lebih tinggi dari rata-rata." },
+                { q: "Bisakah profesional non-konstruksi menggunakan platform ini?", a: "Tentu! Competency Builder mendukung 15+ sektor kompetensi: IT, Kesehatan, Pariwisata, Keuangan, Manufaktur, Agribisnis, dan lainnya — selain Konstruksi. Competency Passport dan Competency Radar berlaku universal untuk semua bidang." },
+              ].map((faq, i) => (
+                <details key={i} className="group bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                  <summary className="flex items-center justify-between p-5 cursor-pointer list-none hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    <span className="font-semibold text-gray-900 dark:text-white text-sm pr-4">{faq.q}</span>
+                    <ChevronDown className="w-5 h-5 text-gray-400 shrink-0 group-open:rotate-180 transition-transform" />
+                  </summary>
+                  <div className="px-5 pb-5 text-sm text-gray-600 dark:text-gray-300 leading-relaxed border-t border-gray-100 dark:border-gray-800 pt-4">
+                    {faq.a}
+                  </div>
+                </details>
+              ))}
+            </div>
+          </div>
+
           {/* CTA */}
           <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-teal-600 rounded-3xl p-10 text-white text-center">
             <div className="text-4xl mb-4">🚀</div>

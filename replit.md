@@ -3,6 +3,20 @@
 ## Overview
 A Next.js (Pages Router) application for converting meetings into micro-learning courses, now integrated with competency-based learning (SKKNI/BNSP standard) and BimtekKita (bimtek.replit.app — construction training platform for Indonesia). Built with React 18, TypeScript, Tailwind CSS, and Supabase. Features creator tools, HRD tools, AI-powered Competency E-Course Builder, a digital Competency Passport, and full cross-platform integration with BimtekKita's 157 BIMTEK modules, 334 SKK positions, PKB points tracking, and 8 AI construction experts.
 
+### `/platform` — Comprehensive Platform Overview page
+- Hero + stats row (3 platforms, 157+ BIMTEK modules, 334 SKK, 6 segments)
+- Interactive 6-segment picker with per-segment feature grid (6 features each)
+- All-features accordion table with segment tags (Chaesa / Competency / BimtekKita)
+- Platform comparison table vs competitors
+- 5-step end-to-end learning journey timeline
+- **6-Step SKKNI Course Structure** (Orientasi → Konteks → Micro-Learning → Praktik → Asesmen → Refleksi) — each with bullets
+- **SKKNI L1–L4 level framework** (Asisten Ahli → Teknisi Madya → Ahli Muda → Ahli Utama)
+- **8 AI Expert Konstruksi profiles** with 3 sample prompts each
+- **FAQ section** with 7 Q&A items covering all segments
+- 3-app showcase cards + 12-item Quick Access grid
+- Gradient CTA banner
+- Nav: "🚀 Platform" link added to both desktop nav and mobile Sheet menu
+
 ## Architecture
 - **Framework**: Next.js 15.5.9 (Pages Router, `src/pages/`)
 - **Styling**: Tailwind CSS + Radix UI components + Framer Motion
