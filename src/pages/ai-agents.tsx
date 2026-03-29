@@ -28,6 +28,8 @@ import {
   extractFacts, mergeMemory, memoryToContext,
 } from "@/lib/agent-memory";
 import type { MemoryFact } from "@/lib/agent-memory";
+import { extractCitations, TYPE_CONFIG } from "@/lib/standards-data";
+import type { Citation } from "@/lib/standards-data";
 
 /* ── Types ──────────────────────────────────────────── */
 interface HistoryItem { role: "user" | "assistant"; content: string; }
@@ -150,6 +152,106 @@ function MarkdownContent({ text }: { text: string }) {
   return <div className="space-y-0.5 text-gray-700 dark:text-gray-300">{elements}</div>;
 }
 
+/* ── Citation components (inspired by scite.ai) ────── */
+function CitationPanel({ citations }: { citations: Citation[] }) {
+  const [expanded, setExpanded] = useState(false);
+  const [activeIdx, setActiveIdx] = useState<number | null>(null);
+
+  if (citations.length === 0) return null;
+
+  return (
+    <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800">
+      {/* Header row */}
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Referensi Dikutip</span>
+          <span className="bg-gray-100 dark:bg-gray-800 text-gray-500 text-[9px] px-1.5 py-0.5 rounded-full font-bold">{citations.length}</span>
+        </div>
+        <button
+          onClick={() => { setExpanded(!expanded); setActiveIdx(null); }}
+          className="text-[10px] text-purple-500 hover:text-purple-700 dark:hover:text-purple-300 font-medium transition-colors"
+        >
+          {expanded ? "Tutup ▲" : "Lihat detail ▼"}
+        </button>
+      </div>
+
+      {/* Citation chips */}
+      <div className="flex flex-wrap gap-1.5 mb-2">
+        {citations.map((c, i) => {
+          const cfg = TYPE_CONFIG[c.standard.type];
+          return (
+            <button
+              key={i}
+              onClick={() => { setExpanded(true); setActiveIdx(activeIdx === i ? null : i); }}
+              className={`inline-flex items-center gap-1.5 text-[10px] px-2.5 py-1.5 rounded-full border font-semibold transition-all hover:shadow-sm ${cfg.color} ${activeIdx === i ? "ring-2 ring-offset-1 ring-current shadow-md scale-105" : ""}`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${cfg.dot}`} />
+              {c.standard.code}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Legend */}
+      <div className="flex items-center gap-3 mb-2">
+        {(["wajib","disarankan","referensi"] as const).map(t => {
+          const cfg = TYPE_CONFIG[t];
+          const count = citations.filter(c => c.standard.type === t).length;
+          if (count === 0) return null;
+          return (
+            <div key={t} className="flex items-center gap-1">
+              <span className={`w-2 h-2 rounded-full ${cfg.dot}`} />
+              <span className="text-[10px] text-gray-400">{cfg.label} ({count})</span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Expanded detail cards */}
+      {expanded && (
+        <div className="mt-2 space-y-2">
+          {citations.map((c, i) => {
+            const cfg = TYPE_CONFIG[c.standard.type];
+            const isActive = activeIdx === i;
+            return (
+              <div
+                key={i}
+                className={`rounded-xl border p-3 transition-all cursor-pointer ${isActive ? "border-purple-300 dark:border-purple-600 bg-purple-50 dark:bg-purple-900/20" : "border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 hover:border-gray-200 dark:hover:border-gray-700"}`}
+                onClick={() => setActiveIdx(isActive ? null : i)}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-start gap-2 min-w-0">
+                    <span className={`text-[9px] px-2 py-0.5 rounded-full border font-bold shrink-0 mt-0.5 ${cfg.color}`}>{cfg.label}</span>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-gray-900 dark:text-white">{c.standard.code}</p>
+                      <p className="text-[11px] text-gray-600 dark:text-gray-400 leading-snug mt-0.5">{c.standard.name}</p>
+                    </div>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <p className="text-[10px] text-gray-400">{c.standard.year}</p>
+                    <p className="text-[10px] text-gray-400">{c.standard.body}</p>
+                  </div>
+                </div>
+                {isActive && (
+                  <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                    <p className="text-[11px] text-gray-600 dark:text-gray-400 leading-relaxed">
+                      <strong className="text-gray-700 dark:text-gray-300">Cakupan: </strong>
+                      {c.standard.scope}
+                    </p>
+                    {c.standard.nameEn && (
+                      <p className="text-[10px] text-gray-400 italic mt-1">{c.standard.nameEn}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Collab message (Blackboard pattern output) ─────── */
 function CollabMessage({ collab, followups, onFollowup }: {
   collab: { contributions: Contribution[]; synthesis: string };
@@ -227,6 +329,7 @@ function CollabMessage({ collab, followups, onFollowup }: {
           </div>
         )}
         <MarkdownContent text={activeContent || ""} />
+        <CitationPanel citations={extractCitations(activeContent || "")} />
       </div>
 
       {/* Follow-ups */}
@@ -922,6 +1025,7 @@ export default function AIAgentsPage() {
                           <div className="flex-1 min-w-0">
                             <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl rounded-tl-sm px-4 py-4 shadow-sm">
                               <MarkdownContent text={msg.content} />
+                              <CitationPanel citations={extractCitations(msg.content)} />
                             </div>
                             {msg.followups && msg.followups.length > 0 && (
                               <div className="mt-2.5">

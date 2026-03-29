@@ -80,9 +80,11 @@ async function callSpecialist(
   memoryContext: string,
 ): Promise<string> {
   const agent = AGENTS[agentId];
+  const citationNote = `\nPENTING: Sebutkan kode standar secara eksplisit dan lengkap (contoh: SNI 2847:2019, PP 50/2012, ISO 45001:2018, FIDIC 1999, PUIL 2011, SNI 8460:2017, PMBOK 7th). Kamu sedang berkolaborasi dengan ahli lain — fokus pada keahlian spesifikmu, jawab terstruktur dan ringkas (maksimal 400 kata).`;
+
   const systemContent = memoryContext
-    ? `${agent.systemPrompt}\n\n${memoryContext}\n\nKamu sedang berkolaborasi dengan ahli lain — fokus pada keahlian spesifikmu, jawab secara terstruktur dan ringkas (maksimal 400 kata).`
-    : `${agent.systemPrompt}\n\nKamu sedang berkolaborasi dengan ahli lain — fokus pada keahlian spesifikmu, jawab secara terstruktur dan ringkas (maksimal 400 kata).`;
+    ? `${agent.systemPrompt}${citationNote}\n\n${memoryContext}`
+    : `${agent.systemPrompt}${citationNote}`;
 
   const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
     { role: "system", content: systemContent },

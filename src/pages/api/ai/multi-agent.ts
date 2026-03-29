@@ -71,9 +71,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const agent = AGENTS[agentId];
 
     // Step 2: build conversation history for the specialist
+    const citationInstruction = `\n\nPENTING: Dalam setiap jawaban, sebutkan kode standar/regulasi secara eksplisit dan lengkap saat mereferensikannya. Contoh format yang benar: "SNI 2847:2019", "PP 50/2012", "PUIL 2011", "ISO 45001:2018", "FIDIC 1999", "Perpres 16/2018", "ASTM D1586", "SNI 8460:2017", "PMBOK 7th", "SNI 1726:2019". Jangan hanya menyebut "SNI" atau "peraturan" tanpa kode lengkap.`;
+
     const systemContent = memoryContext
-      ? `${agent.systemPrompt}\n\n${memoryContext}`
-      : agent.systemPrompt;
+      ? `${agent.systemPrompt}${citationInstruction}\n\n${memoryContext}`
+      : `${agent.systemPrompt}${citationInstruction}`;
 
     const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
       { role: "system", content: systemContent },
