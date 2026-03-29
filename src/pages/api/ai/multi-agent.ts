@@ -48,7 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   try {
-    const { message, history = [], preferredAgent, sessionId } = req.body;
+    const { message, history = [], preferredAgent, sessionId, memoryContext = "" } = req.body;
 
     if (!message?.trim()) return res.status(400).json({ error: "message is required" });
 
@@ -71,8 +71,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const agent = AGENTS[agentId];
 
     // Step 2: build conversation history for the specialist
+    const systemContent = memoryContext
+      ? `${agent.systemPrompt}\n\n${memoryContext}`
+      : agent.systemPrompt;
+
     const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
-      { role: "system", content: agent.systemPrompt },
+      { role: "system", content: systemContent },
     ];
 
     // Include recent history
