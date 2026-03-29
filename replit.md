@@ -28,6 +28,21 @@ A Next.js (Pages Router) application for converting meetings into micro-learning
 - Nav: "🤖 AI Experts" (amber) added to desktop + mobile nav
 - **API**: `src/pages/api/ai/multi-agent.ts` — two-step: orchestrator → specialist
 - **Shared data**: `src/lib/agents-data.ts` — AGENTS const + AgentId type (safe for client import)
+- **Citation Intelligence System**: `src/lib/standards-data.ts` — 30+ SNI/PP/ISO/FIDIC standards; `CitationPanel` auto-extracts standard codes from agent responses and displays color-coded chips (Wajib/Disarankan/Referensi)
+- **Agent Memory**: `src/lib/agent-memory.ts` — auto-extracts project facts from chat via regex; stores in `chaesa_agent_memory_v2` localStorage key; injected into all API calls as `memoryContext`
+- **Blackboard Collab Mode**: `src/pages/api/ai/multi-agent-collab.ts` — 2 agents answer in parallel via `Promise.all`, then synthesis step
+- **API**: all agents instructed to cite exact standard codes (SNI 2847:2019 etc.) for citation parser to detect
+
+### `/tools` — AI Tools Hub (GipsyAI-inspired)
+- **27+ pre-built AI apps** for construction — no prompting needed, just fill form fields
+- **8 categories**: Manajemen Proyek, K3, Dokumen & Surat, Estimasi & RAB, Teknis & Sipil, Kontrak & Legal, MEP, BIM & Digital
+- **Tool card grid** with POPULER/BARU/PRO badges and estimated generation time
+- **Split-pane UX**: left sidebar category filter + right form panel with live output
+- **Form → Output**: structured fields → `buildPrompt()` → API → Markdown output with copy/download
+- **Tools include**: WBS Generator, JSA Generator, HIRARC, APD List, Surat Teguran, Perpanjangan Waktu, Notulen Rapat, RAB Kasar, AHS (Analisa Harga Satuan), Cash Flow, Volume Beton, QC Checklist, Interpretasi SPT, Klaim Keterlambatan, Estimasi Daya Listrik, Spesifikasi AC, BEP Generator, LOD Matrix, Clash Detection Checklist, dll
+- **API**: `src/pages/api/ai/run-tool.ts` — takes `toolId` + `formData`, calls `tool.buildPrompt(formData)`, sends to OpenAI gpt-4o-mini (2000 tokens)
+- **Data**: `src/lib/tools-data.ts` — `AiTool` interface with fields array + `buildPrompt` function
+- Nav: "🔧 AI Tools" (emerald) added to homepage desktop+mobile nav and AI Experts page
 
 ### `/hub` — ChaesaHub Skill Marketplace
 - ClawHub-style skill library with 35+ skills

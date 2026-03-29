@@ -758,6 +758,7 @@ export default function AIAgentsPage() {
                 <RotateCcw className="w-4 h-4" />
               </button>
               <ThemeSwitch />
+              <Link href="/tools"><Button variant="outline" size="sm" className="text-xs hidden sm:flex gap-1 ml-1 border-emerald-300 dark:border-emerald-700 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20">🔧 AI Tools</Button></Link>
               <Link href="/"><Button variant="outline" size="sm" className="text-xs hidden sm:flex gap-1 ml-1"><ArrowLeft className="w-3 h-3" /> Beranda</Button></Link>
             </div>
           </div>
