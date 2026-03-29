@@ -576,6 +576,144 @@ export default function Home() {
           </div>
         </div>
 
+        {/* MyClaw-style Competitive Advantage Section */}
+        <div className="py-20 bg-white dark:bg-gray-950">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            {/* Headline */}
+            <div className="text-center mb-14 max-w-3xl mx-auto">
+              <Badge className="mb-4 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-700">
+                AI Asisten Kompetensi Pribadi
+              </Badge>
+              <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white mb-5 leading-tight">
+                Semua Orang Mau Naik Kompetensi.{" "}
+                <span className="text-red-500">Hampir Tidak Ada Yang Berhasil.</span>
+              </h2>
+              <p className="text-lg text-gray-500 dark:text-gray-400">
+                Chaesa Live hadir seperti asisten pribadi yang selalu online — kerja untuk Anda 24/7, tanpa setup, tanpa ribet.
+              </p>
+            </div>
+
+            {/* Before / After Split */}
+            <div className="grid md:grid-cols-2 gap-6 mb-16">
+              {/* Without */}
+              <div className="bg-gray-950 rounded-2xl p-6 border border-gray-700">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-3 h-3 rounded-full bg-red-500" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                  <div className="w-3 h-3 rounded-full bg-green-500" />
+                  <span className="ml-2 text-xs text-gray-500 font-mono">Tanpa Chaesa Live</span>
+                </div>
+                <div className="font-mono text-sm space-y-2">
+                  <p className="text-green-400">$ Cari kelas konstruksi di Google...</p>
+                  <p className="text-gray-400">→ Nemu 50 hasil, tidak jelas mana yang BNSP-resmi</p>
+                  <p className="text-green-400">$ Daftar pelatihan offline...</p>
+                  <p className="text-red-400">ERROR: Kota terdekat 3 jam perjalanan. Biaya Rp 4.5 juta.</p>
+                  <p className="text-green-400">$ Coba YouTube gratis...</p>
+                  <p className="text-red-400">ERROR: Tidak ada sertifikat. Tidak ada ujian terstruktur.</p>
+                  <p className="text-green-400">$ Hubungi LSP untuk jadwal asesmen...</p>
+                  <p className="text-red-400">ERROR: Antrian 3 bulan. Materi persiapan tidak ada.</p>
+                  <p className="text-yellow-400 mt-4">⚠ PKB 150 jam belum terpenuhi. SKK kedaluarsa.</p>
+                  <p className="text-gray-600 mt-2">✗ Tidak ada struktur belajar</p>
+                  <p className="text-gray-600">✗ Tidak ada AI Expert yang bisa ditanya</p>
+                  <p className="text-gray-600">✗ Menyerah sebelum sertifikasi</p>
+                </div>
+              </div>
+              {/* With */}
+              <div className="bg-gradient-to-br from-purple-950 to-indigo-950 rounded-2xl p-6 border border-purple-500/40">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse" />
+                  <span className="text-xs text-purple-300 font-mono">Dengan Chaesa Live — Online 24/7</span>
+                </div>
+                <div className="space-y-3">
+                  {[
+                    { icon: "🤖", from: "Anda:", msg: "Saya mau ambil SKK Pelaksana Lapangan Gedung", you: true },
+                    { icon: "⚡", from: "Chaesa AI:", msg: "Siap! Saya temukan 12 modul BIMTEK yang relevan, 15 jam PKB, dan quiz simulasi 30 soal. Mulai sekarang?", you: false },
+                    { icon: "🤖", from: "Anda:", msg: "Ya. Juga carikan jadwal asesmen LSP terdekat.", you: true },
+                    { icon: "⚡", from: "Chaesa AI:", msg: "Jalur belajar 3 minggu disiapkan. PKB tracker aktif. 2 LSP di kota Anda tersedia bulan depan — mau saya buatkan reminder?", you: false },
+                    { icon: "🤖", from: "Anda:", msg: "Iya. Dan rekap progress ke Competency Passport saya.", you: true },
+                    { icon: "⚡", from: "Chaesa AI:", msg: "Done! Passport diupdate. Anda sudah 40% menuju SKK L2. Lanjut modul berikutnya? ✅", you: false },
+                  ].map((m, i) => (
+                    <div key={i} className={`flex gap-2.5 ${m.you ? "flex-row-reverse" : ""}`}>
+                      <div className={`w-7 h-7 rounded-full flex items-center justify-center text-sm shrink-0 ${m.you ? "bg-purple-600" : "bg-indigo-600"}`}>{m.icon}</div>
+                      <div className={`max-w-xs px-3 py-2 rounded-xl text-xs ${m.you ? "bg-purple-600/30 text-purple-100 rounded-tr-none" : "bg-white/10 text-gray-200 rounded-tl-none"}`}>
+                        <span className="font-semibold block text-[10px] opacity-70 mb-0.5">{m.from}</span>
+                        {m.msg}
+                      </div>
+                    </div>
+                  ))}
+                  <div className="flex gap-1.5 mt-3 pt-3 border-t border-purple-800/50">
+                    {["✓ PKB otomatis tercatat", "✓ AI Expert siap konsultasi", "✓ Sertifikasi siap dalam 3 minggu"].map((t, i) => (
+                      <span key={i} className="text-[10px] px-2 py-1 rounded-full bg-green-900/40 text-green-300 border border-green-700/50">{t}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 8 AI Capabilities Grid */}
+            <div className="mb-14">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-2">
+                Apa yang Bisa AI Lakukan untuk Anda
+              </h3>
+              <p className="text-center text-gray-400 text-sm mb-8">Asisten yang selalu aktif — mengerjakan semua ini otomatis di background</p>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                  { icon: "🏗️", title: "Jalur BIMTEK & SKK", desc: "Temukan modul wajib, lacak PKB 150 jam, dan siapkan asesmen BNSP dari satu tempat", color: "hover:border-orange-300 dark:hover:border-orange-600" },
+                  { icon: "🤖", title: "AI Expert 24/7", desc: "Tanya soal K3, struktur, MEP, atau manajemen proyek kapan saja — jawaban dalam detik", color: "hover:border-purple-300 dark:hover:border-purple-600" },
+                  { icon: "⚡", title: "Kursus dari Rekaman", desc: "Upload rekaman training/meeting → AI buat 20 modul siap pakai dalam 15 menit", color: "hover:border-blue-300 dark:hover:border-blue-600" },
+                  { icon: "🛡️", title: "Competency Passport", desc: "Semua SKK, PKB, dan sertifikat terdokumentasi di passport digital ber-QR code", color: "hover:border-teal-300 dark:hover:border-teal-600" },
+                  { icon: "✍️", title: "Quiz & Simulasi SKK", desc: "65+ soal latihan asesmen BNSP dengan pembahasan AI — tingkat kelulusan lebih tinggi", color: "hover:border-green-300 dark:hover:border-green-600" },
+                  { icon: "📊", title: "Skills Matrix Tim", desc: "HRD pantau kompetensi seluruh tim, alert SKK kedaluarsa, laporan per departemen", color: "hover:border-indigo-300 dark:hover:border-indigo-600" },
+                  { icon: "🎬", title: "Konten Multi-Platform", desc: "Dari 1 rekaman: kursus, podcast, slide, caption IG/TikTok/LinkedIn — semua otomatis", color: "hover:border-pink-300 dark:hover:border-pink-600" },
+                  { icon: "🗺️", title: "Learning Path Karir", desc: "AI rancangkan jalur belajar personal menuju posisi target dengan milestone terukur", color: "hover:border-amber-300 dark:hover:border-amber-600" },
+                ].map((cap, i) => (
+                  <div key={i} className={`p-5 rounded-2xl border-2 border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 transition-all group cursor-default ${cap.color}`}>
+                    <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">{cap.icon}</div>
+                    <div className="font-bold text-gray-900 dark:text-white text-sm mb-1.5">{cap.title}</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{cap.desc}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Social Proof Quotes */}
+            <div className="bg-gradient-to-br from-gray-50 to-purple-50 dark:from-gray-900 dark:to-purple-950/30 rounded-3xl p-8 border border-gray-200 dark:border-gray-700">
+              <p className="text-center text-xs text-gray-400 uppercase tracking-widest mb-6 font-semibold">Apa Kata Pengguna</p>
+              <div className="grid md:grid-cols-3 gap-5">
+                {[
+                  { quote: "Pertama kali nanya soal perhitungan pondasi ke AI Expert-nya, dijawab dalam 10 detik lengkap dengan rumus. Ini yang saya butuhkan sebelum asesmen LSP.", name: "Rudi H.", role: "Pelaksana Lapangan, Surabaya", avatar: "RH" },
+                  { quote: "Rekam internal training 2 jam, 15 menit kemudian sudah ada 18 modul siap pakai untuk onboarding karyawan baru. Hemat berminggu-minggu kerja tim HRD.", name: "Sinta M.", role: "HRD Manager, Jakarta", avatar: "SM" },
+                  { quote: "PKB saya sudah 140 jam dari 150 jam target — semua terhitung otomatis. Dulu saya tidak tahu harus mulai dari mana, sekarang tinggal ikuti jalur yang AI buat.", name: "Agus P.", role: "Site Engineer, Medan", avatar: "AP" },
+                ].map((t, i) => (
+                  <div key={i} className="bg-white dark:bg-gray-900 rounded-2xl p-5 border border-gray-100 dark:border-gray-800 shadow-sm">
+                    <div className="flex gap-1 mb-3">
+                      {[...Array(5)].map((_, j) => <Star key={j} className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />)}
+                    </div>
+                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-4 italic">"{t.quote}"</p>
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0">{t.avatar}</div>
+                      <div>
+                        <div className="font-semibold text-gray-900 dark:text-white text-sm">{t.name}</div>
+                        <div className="text-xs text-gray-400">{t.role}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="text-center mt-6">
+                <Link href="/auth">
+                  <Button className="bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold px-8 py-3 rounded-xl shadow-lg text-base">
+                    <Zap className="w-4 h-4 mr-2" /> Mulai Gratis — Tidak Perlu Setup
+                  </Button>
+                </Link>
+                <p className="text-xs text-gray-400 mt-2">Langsung pakai. Cancel kapan saja.</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
         {/* 3 Killer Features */}
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center mb-16">
