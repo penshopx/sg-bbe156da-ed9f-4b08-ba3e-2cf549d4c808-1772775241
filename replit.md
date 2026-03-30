@@ -1,7 +1,7 @@
 # Chaesa Live - Micro-Learning Platform
 
 ## Overview
-A Next.js (Pages Router) application for converting meetings into micro-learning courses, now integrated with competency-based learning (SKKNI/BNSP standard) and BimtekKita (bimtek.replit.app — construction training platform for Indonesia). Built with React 18, TypeScript, Tailwind CSS, and Supabase. Features creator tools, HRD tools, AI-powered Competency E-Course Builder, a digital Competency Passport, and full cross-platform integration with BimtekKita's 157 BIMTEK modules, 334 SKK positions, PKB points tracking, and 8 AI construction experts.
+A Next.js (Pages Router) application for converting meetings into micro-learning courses, now integrated with competency-based learning (SKKNI/BNSP standard) and BimtekKita (bimtek.replit.app — construction training platform for Indonesia). Built with React 18, TypeScript, Tailwind CSS, and Supabase. Features creator tools, HRD tools, AI-powered Competency E-Course Builder, a digital Competency Passport, full cross-platform integration with BimtekKita's 157 BIMTEK modules, 334 SKK positions, PKB points tracking, 8 AI construction experts, and an AI Tools Hub with 55+ specialized no-prompt tools.
 
 ### `/platform` — Comprehensive Platform Overview page
 - Hero + stats row (3 platforms, 157+ BIMTEK modules, 334 SKK, 6 segments)

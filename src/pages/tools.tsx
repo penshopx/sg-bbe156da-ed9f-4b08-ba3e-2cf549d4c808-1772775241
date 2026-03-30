@@ -2,8 +2,12 @@ import { useState, useRef, useEffect } from "react";
 import { useTheme } from "next-themes";
 import Head from "next/head";
 import Link from "next/link";
-import { Sun, Moon, Home, Search, Zap, X, ChevronRight, Copy, Download, RotateCcw, Loader2, Star, Sparkles, Lock, CheckCircle2, ArrowLeft } from "lucide-react";
+import { Sun, Moon, Home, Search, Zap, X, ChevronRight, Copy, Download, RotateCcw, Loader2, Star, Sparkles, Lock, CheckCircle2, ArrowLeft, Heart, Clock, BookMarked } from "lucide-react";
 import { AI_TOOLS, TOOL_CATEGORIES, type AiTool } from "@/lib/tools-data";
+
+const RECENTS_KEY = "chaesa_recent_tools_v1";
+const FAVS_KEY = "chaesa_fav_tools_v1";
+const MAX_RECENTS = 6;
 
 /* ── Markdown renderer (reuses chat pattern) ─────── */
 function MarkdownOutput({ text }: { text: string }) {
@@ -63,13 +67,34 @@ function MarkdownOutput({ text }: { text: string }) {
 }
 
 /* ── Tool Card ───────────────────────────────────── */
-function ToolCard({ tool, onClick }: { tool: AiTool; onClick: () => void }) {
+function ToolCard({
+  tool, onClick, isFav, onToggleFav,
+}: {
+  tool: AiTool;
+  onClick: () => void;
+  isFav?: boolean;
+  onToggleFav?: (e: React.MouseEvent) => void;
+}) {
   const categoryDef = TOOL_CATEGORIES.find(c => c.id === tool.category);
   return (
-    <button
+    <div
       onClick={onClick}
-      className="text-left group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 hover:border-green-400 dark:hover:border-green-500 hover:shadow-md transition-all duration-200 relative flex flex-col gap-2"
+      role="button"
+      tabIndex={0}
+      onKeyDown={e => e.key === "Enter" && onClick()}
+      className="cursor-pointer text-left group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 hover:border-green-400 dark:hover:border-green-500 hover:shadow-md transition-all duration-200 relative flex flex-col gap-2 select-none"
     >
+      {/* Fav button */}
+      {onToggleFav && (
+        <button
+          onClick={onToggleFav}
+          className={`absolute top-2.5 left-2.5 p-1 rounded-md transition-all z-10 ${isFav ? "text-rose-500" : "text-gray-300 dark:text-gray-700 hover:text-rose-400"}`}
+          title={isFav ? "Hapus dari favorit" : "Simpan ke favorit"}
+        >
+          <Heart className="w-3 h-3" fill={isFav ? "currentColor" : "none"} />
+        </button>
+      )}
+
       {/* Badges */}
       <div className="flex items-center gap-1.5 absolute top-3 right-3">
         {tool.isNew && <span className="text-[10px] font-bold bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded-full">BARU</span>}
@@ -78,13 +103,13 @@ function ToolCard({ tool, onClick }: { tool: AiTool; onClick: () => void }) {
       </div>
 
       {/* Icon */}
-      <div className="text-3xl leading-none">{tool.icon}</div>
+      <div className="text-3xl leading-none mt-1">{tool.icon}</div>
 
       {/* Category */}
       <div className="text-[10px] text-gray-400 dark:text-gray-600 font-medium">{categoryDef?.icon} {categoryDef?.label}</div>
 
       {/* Name */}
-      <div className="font-semibold text-sm text-gray-900 dark:text-gray-100 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors pr-10 leading-tight">{tool.name}</div>
+      <div className="font-semibold text-sm text-gray-900 dark:text-gray-100 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors pr-8 leading-tight">{tool.name}</div>
 
       {/* Description */}
       <div className="text-xs text-gray-500 dark:text-gray-500 leading-relaxed line-clamp-2">{tool.description}</div>
@@ -94,7 +119,7 @@ function ToolCard({ tool, onClick }: { tool: AiTool; onClick: () => void }) {
         {tool.estimatedTime && <span className="text-[10px] text-gray-400 dark:text-gray-600">⏱ {tool.estimatedTime}</span>}
         <span className="text-[10px] text-green-600 dark:text-green-400 font-medium ml-auto group-hover:underline">Gunakan →</span>
       </div>
-    </button>
+    </div>
   );
 }
 
@@ -141,7 +166,6 @@ function FormField({ field, value, onChange }: {
 export default function ToolsPage() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
   const [activeCategory, setActiveCategory] = useState("all");
   const [search, setSearch] = useState("");
   const [selectedTool, setSelectedTool] = useState<AiTool | null>(null);
@@ -150,20 +174,56 @@ export default function ToolsPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [recentIds, setRecentIds] = useState<string[]>([]);
+  const [favIds, setFavIds] = useState<string[]>([]);
   const outputRef = useRef<HTMLDivElement>(null);
+
+  /* Hydrate from localStorage */
+  useEffect(() => {
+    setMounted(true);
+    try {
+      const r = localStorage.getItem(RECENTS_KEY);
+      if (r) setRecentIds(JSON.parse(r));
+      const f = localStorage.getItem(FAVS_KEY);
+      if (f) setFavIds(JSON.parse(f));
+    } catch {}
+  }, []);
+
+  /* Derived lists */
+  const recentTools = recentIds.map(id => AI_TOOLS.find(t => t.id === id)).filter(Boolean) as AiTool[];
+  const favTools = favIds.map(id => AI_TOOLS.find(t => t.id === id)).filter(Boolean) as AiTool[];
 
   /* Filter tools */
   const filteredTools = AI_TOOLS.filter(t => {
+    if (activeCategory === "recent") return recentIds.includes(t.id);
+    if (activeCategory === "favorites") return favIds.includes(t.id);
     const matchCat = activeCategory === "all" || t.category === activeCategory;
     const matchSearch = !search || t.name.toLowerCase().includes(search.toLowerCase()) || t.description.toLowerCase().includes(search.toLowerCase());
     return matchCat && matchSearch;
   });
+
+  function trackRecent(tool: AiTool) {
+    setRecentIds(prev => {
+      const next = [tool.id, ...prev.filter(id => id !== tool.id)].slice(0, MAX_RECENTS);
+      try { localStorage.setItem(RECENTS_KEY, JSON.stringify(next)); } catch {}
+      return next;
+    });
+  }
+
+  function toggleFav(toolId: string) {
+    setFavIds(prev => {
+      const next = prev.includes(toolId) ? prev.filter(id => id !== toolId) : [toolId, ...prev];
+      try { localStorage.setItem(FAVS_KEY, JSON.stringify(next)); } catch {}
+      return next;
+    });
+  }
 
   function openTool(tool: AiTool) {
     setSelectedTool(tool);
     setFormData({});
     setOutput(null);
     setError(null);
+    trackRecent(tool);
   }
 
   function closeTool() {
@@ -259,7 +319,41 @@ export default function ToolsPage() {
 
         <div className="flex flex-1 overflow-hidden">
           {/* ── Left Sidebar ── */}
-          <aside className="hidden lg:flex flex-col w-56 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-3 gap-1 sticky top-[53px] h-[calc(100vh-53px)] overflow-y-auto">
+          <aside className="hidden lg:flex flex-col w-58 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-3 gap-1 sticky top-[53px] h-[calc(100vh-53px)] overflow-y-auto" style={{width:"224px"}}>
+
+            {/* My Tools section */}
+            {mounted && (recentTools.length > 0 || favTools.length > 0) && (
+              <div className="mb-2">
+                <div className="text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-widest mb-1 px-2">My Tools</div>
+                {favTools.length > 0 && (
+                  <button
+                    onClick={() => { setActiveCategory("favorites"); closeTool(); }}
+                    className={`flex items-center justify-between w-full px-3 py-2 rounded-lg text-sm transition-all duration-150 ${
+                      activeCategory === "favorites"
+                        ? "bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 font-semibold"
+                        : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50"
+                    }`}
+                  >
+                    <span className="flex items-center gap-1.5"><Heart className="w-3.5 h-3.5" fill="currentColor" /> Favorit</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400">{favTools.length}</span>
+                  </button>
+                )}
+                {recentTools.length > 0 && (
+                  <button
+                    onClick={() => { setActiveCategory("recent"); closeTool(); }}
+                    className={`flex items-center justify-between w-full px-3 py-2 rounded-lg text-sm transition-all duration-150 ${
+                      activeCategory === "recent"
+                        ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-semibold"
+                        : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50"
+                    }`}
+                  >
+                    <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> Terakhir Dipakai</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400">{recentTools.length}</span>
+                  </button>
+                )}
+              </div>
+            )}
+
             <div className="text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-widest mb-1 px-2">Kategori</div>
             {categoriesWithCount.map(cat => (
               <button
@@ -315,6 +409,33 @@ export default function ToolsPage() {
                   </div>
                 </div>
               </div>
+
+              {/* ── Recent Tools Strip ── */}
+              {activeCategory === "all" && !search && mounted && recentTools.length > 0 && (
+                <div className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/30 px-4 py-3">
+                  <div className="max-w-4xl mx-auto">
+                    <div className="flex items-center justify-between mb-2.5">
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-3.5 h-3.5 text-blue-500" />
+                        <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Terakhir Digunakan</span>
+                      </div>
+                      <button onClick={() => { setActiveCategory("recent"); closeTool(); }} className="text-[10px] text-blue-500 hover:underline">Lihat semua →</button>
+                    </div>
+                    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                      {recentTools.map(tool => (
+                        <button
+                          key={tool.id}
+                          onClick={() => openTool(tool)}
+                          className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-all group"
+                        >
+                          <span className="text-base leading-none">{tool.icon}</span>
+                          <span className="text-xs font-medium text-gray-700 dark:text-gray-300 group-hover:text-blue-700 dark:group-hover:text-blue-400 whitespace-nowrap max-w-[140px] truncate">{tool.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* ── Featured / Popular Strip ── */}
               {activeCategory === "all" && !search && (
@@ -408,19 +529,48 @@ export default function ToolsPage() {
                 <div className="max-w-4xl mx-auto">
                   {filteredTools.length === 0 ? (
                     <div className="text-center py-16 text-gray-400 dark:text-gray-600">
-                      <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                      <p className="text-sm">Tidak ada tool yang ditemukan untuk "<strong>{search}</strong>"</p>
+                      {activeCategory === "favorites" ? (
+                        <>
+                          <Heart className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                          <p className="text-sm font-medium mb-1">Belum ada tool favorit</p>
+                          <p className="text-xs">Klik ikon ❤ di sudut kartu tool untuk menyimpannya ke sini</p>
+                        </>
+                      ) : activeCategory === "recent" ? (
+                        <>
+                          <Clock className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                          <p className="text-sm font-medium mb-1">Belum ada riwayat penggunaan</p>
+                          <p className="text-xs">Tool yang pernah Anda buka akan muncul di sini</p>
+                        </>
+                      ) : (
+                        <>
+                          <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                          <p className="text-sm">Tidak ada tool yang ditemukan untuk "<strong>{search}</strong>"</p>
+                        </>
+                      )}
                     </div>
                   ) : (
                     <>
-                      <div className="text-xs text-gray-500 dark:text-gray-600 mb-3">
-                        Menampilkan {filteredTools.length} tools
-                        {activeCategory !== "all" && ` · Kategori: ${categoriesWithCount.find(c => c.id === activeCategory)?.label}`}
-                        {search && ` · Pencarian: "${search}"`}
+                      <div className="text-xs text-gray-500 dark:text-gray-600 mb-3 flex items-center justify-between">
+                        <span>
+                          {activeCategory === "favorites" ? `${filteredTools.length} tool favorit` :
+                           activeCategory === "recent" ? `${filteredTools.length} terakhir digunakan` :
+                           `${filteredTools.length} tools`}
+                          {activeCategory !== "all" && activeCategory !== "favorites" && activeCategory !== "recent" && ` · ${categoriesWithCount.find(c => c.id === activeCategory)?.label}`}
+                          {search && ` · "${search}"`}
+                        </span>
+                        {(activeCategory === "favorites" || activeCategory === "recent") && (
+                          <button onClick={() => setActiveCategory("all")} className="text-[10px] text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">← Semua tools</button>
+                        )}
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         {filteredTools.map(tool => (
-                          <ToolCard key={tool.id} tool={tool} onClick={() => openTool(tool)} />
+                          <ToolCard
+                            key={tool.id}
+                            tool={tool}
+                            onClick={() => openTool(tool)}
+                            isFav={favIds.includes(tool.id)}
+                            onToggleFav={(e) => { e.stopPropagation(); toggleFav(tool.id); }}
+                          />
                         ))}
                       </div>
                       <p className="text-[10px] text-gray-400 dark:text-gray-700 text-center mt-6">*Tools gratis tersedia tanpa batas. Tools PRO memerlukan akun premium Chaesa.</p>
@@ -443,6 +593,13 @@ export default function ToolsPage() {
                     <div className="font-bold text-sm text-gray-900 dark:text-gray-100 truncate">{selectedTool.name}</div>
                     <div className="text-[10px] text-gray-500 dark:text-gray-600">{selectedTool.description}</div>
                   </div>
+                  <button
+                    onClick={() => toggleFav(selectedTool.id)}
+                    className={`p-1.5 rounded-lg transition-all ${favIds.includes(selectedTool.id) ? "text-rose-500 bg-rose-50 dark:bg-rose-950/30" : "text-gray-400 hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30"}`}
+                    title={favIds.includes(selectedTool.id) ? "Hapus dari favorit" : "Simpan ke favorit"}
+                  >
+                    <Heart className="w-4 h-4" fill={favIds.includes(selectedTool.id) ? "currentColor" : "none"} />
+                  </button>
                   {selectedTool.tier === "pro" && (
                     <span className="text-[10px] font-bold bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 px-2 py-1 rounded-full flex items-center gap-1">
                       <Lock className="w-2.5 h-2.5" /> PRO
