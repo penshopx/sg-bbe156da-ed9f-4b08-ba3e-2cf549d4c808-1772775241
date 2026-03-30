@@ -286,30 +286,84 @@ export default function ToolsPage() {
             {/* Tool Grid */}
             <div className={`flex-1 flex flex-col overflow-y-auto transition-all duration-300 ${selectedTool ? "hidden xl:flex" : "flex"}`}>
               {/* Hero */}
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/20 border-b border-green-100 dark:border-green-900/30 px-6 py-6">
-                <div className="max-w-4xl mx-auto">
+              <div className="bg-gradient-to-br from-gray-950 via-green-950/60 to-emerald-950/40 dark:from-gray-950 dark:via-green-950/60 dark:to-emerald-950/40 border-b border-green-900/30 px-6 py-7 relative overflow-hidden">
+                {/* decorative rings */}
+                <div className="absolute -top-20 -right-20 w-64 h-64 bg-green-500/5 rounded-full" />
+                <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-emerald-500/5 rounded-full" />
+                <div className="max-w-4xl mx-auto relative">
                   <div className="flex items-center gap-2 mb-2">
-                    <Zap className="w-5 h-5 text-green-600" />
-                    <span className="text-xs font-bold text-green-600 dark:text-green-400 uppercase tracking-wider">AI Tools Hub</span>
+                    <span className="flex items-center gap-1.5 text-[10px] font-bold bg-green-500/20 text-green-400 border border-green-500/30 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                      <Zap className="w-3 h-3" /> AI Tools Hub
+                    </span>
+                    <span className="text-[10px] text-green-500/70">Tanpa prompting. Langsung jadi.</span>
                   </div>
-                  <h1 className="text-2xl font-black text-gray-900 dark:text-white mb-1">{AI_TOOLS.length}+ Aplikasi AI Tanpa Prompting</h1>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Isi form sederhana — AI langsung hasilkan dokumen, analisa, dan checklist profesional untuk proyek konstruksi Anda.</p>
-                  {/* Stats */}
-                  <div className="flex flex-wrap gap-4">
+                  <h1 className="text-2xl sm:text-3xl font-black text-white mb-1">{AI_TOOLS.length}+ Aplikasi AI Konstruksi</h1>
+                  <p className="text-sm text-gray-400 mb-5 max-w-xl">Isi form sederhana — AI hasilkan JSA, RAB, Notulen, BEP, dan dokumen teknis profesional langsung siap pakai. Sesuai standar SNI, PP, dan FIDIC.</p>
+                  {/* Stats row */}
+                  <div className="flex flex-wrap gap-5">
                     {[
-                      { v: `${AI_TOOLS.length}+`, l: "AI Tools" },
-                      { v: "8", l: "Disiplin Konstruksi" },
-                      { v: "SNI/PP", l: "Standar Indonesia" },
-                      { v: "Free", l: "Tanpa Limit*" },
+                      { v: `${AI_TOOLS.length}+`, l: "AI Tools", color: "text-green-400" },
+                      { v: "8", l: "Disiplin", color: "text-emerald-400" },
+                      { v: "SNI/PP", l: "Standar Indonesia", color: "text-teal-400" },
+                      { v: "Free", l: "Akses Gratis*", color: "text-cyan-400" },
                     ].map(s => (
                       <div key={s.v} className="flex flex-col">
-                        <span className="text-lg font-black text-green-700 dark:text-green-400">{s.v}</span>
-                        <span className="text-[10px] text-gray-500 dark:text-gray-500">{s.l}</span>
+                        <span className={`text-xl font-black ${s.color}`}>{s.v}</span>
+                        <span className="text-[10px] text-gray-500">{s.l}</span>
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
+
+              {/* ── Featured / Popular Strip ── */}
+              {activeCategory === "all" && !search && (
+                <div className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 px-4 py-3">
+                  <div className="max-w-4xl mx-auto">
+                    <div className="flex items-center gap-2 mb-2.5">
+                      <Star className="w-3.5 h-3.5 text-amber-500" />
+                      <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Tools Terpopuler</span>
+                    </div>
+                    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                      {AI_TOOLS.filter(t => t.isPopular).slice(0, 8).map(tool => (
+                        <button
+                          key={tool.id}
+                          onClick={() => openTool(tool)}
+                          className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 hover:border-green-400 dark:hover:border-green-600 hover:bg-green-50 dark:hover:bg-green-950/30 transition-all group"
+                        >
+                          <span className="text-lg leading-none">{tool.icon}</span>
+                          <span className="text-xs font-medium text-gray-700 dark:text-gray-300 group-hover:text-green-700 dark:group-hover:text-green-400 whitespace-nowrap">{tool.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── New Tools Strip ── */}
+              {activeCategory === "all" && !search && (
+                <div className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 px-4 py-3">
+                  <div className="max-w-4xl mx-auto">
+                    <div className="flex items-center gap-2 mb-2.5">
+                      <Sparkles className="w-3.5 h-3.5 text-blue-500" />
+                      <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Baru Ditambahkan</span>
+                    </div>
+                    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                      {AI_TOOLS.filter(t => t.isNew).slice(0, 8).map(tool => (
+                        <button
+                          key={tool.id}
+                          onClick={() => openTool(tool)}
+                          className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl border border-blue-100 dark:border-blue-900/40 bg-blue-50/50 dark:bg-blue-950/20 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-all group"
+                        >
+                          <span className="text-lg leading-none">{tool.icon}</span>
+                          <span className="text-xs font-medium text-gray-700 dark:text-gray-300 group-hover:text-blue-700 dark:group-hover:text-blue-400 whitespace-nowrap">{tool.name}</span>
+                          <span className="text-[9px] font-bold bg-blue-500 text-white px-1.5 py-0.5 rounded-full">BARU</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Search + Category Tabs (mobile) */}
               <div className="px-4 py-3 bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 sticky top-[53px] z-10">
