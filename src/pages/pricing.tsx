@@ -30,7 +30,7 @@ export default function PricingPage() {
   const [isAnnual, setIsAnnual] = useState(false);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
-  const [processingId, setProcessingId] = useState<string | null>(null);
+
 
   useEffect(() => {
     fetchPlans();
@@ -137,60 +137,10 @@ export default function PricingPage() {
       return;
     }
 
-    try {
-      setProcessingId(plan.id);
-      
-      // Check auth
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast({
-          title: "Perlu Login",
-          description: "Silakan login terlebih dahulu untuk berlangganan",
-          variant: "destructive"
-        });
-        router.push("/");
-        return;
-      }
-
-      const price = isAnnual ? plan.price_yearly : plan.price_monthly;
-      const billingCycle = isAnnual ? "annual" : "monthly";
-
-      const response = await fetch("/api/mayar/create-payment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          planId: plan.id,
-          planName: plan.name,
-          planPrice: price,
-          billingCycle,
-          userId: user.id,
-          userEmail: user.email,
-          userName: user.user_metadata?.full_name || user.email,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!data.success) {
-        throw new Error(data.error || "Failed to create payment");
-      }
-
-      if (data.paymentLink) {
-        window.location.href = data.paymentLink;
-      } else {
-        throw new Error("No payment link received");
-      }
-
-    } catch (error) {
-      console.error("Subscribe error:", error);
-      toast({
-        title: "Subscription Failed",
-        description: error instanceof Error ? error.message : "Unknown error occurred",
-        variant: "destructive"
-      });
-    } finally {
-      setProcessingId(null);
-    }
+    toast({
+      title: "Segera Hadir",
+      description: `Pembayaran untuk paket ${plan.name} akan segera tersedia. Hubungi kami untuk informasi lebih lanjut.`,
+    });
   };
 
   const formatPrice = (amount: number) => {
@@ -280,11 +230,7 @@ export default function PricingPage() {
                         className="w-full" 
                         variant={plan.name === 'Pro' ? 'default' : 'outline'}
                         onClick={() => handleSubscribe(plan)}
-                        disabled={!!processingId}
                       >
-                        {processingId === plan.id ? (
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        ) : null}
                         {isFree ? "Get Started Free" : `Subscribe to ${plan.name}`}
                       </Button>
                     </CardFooter>

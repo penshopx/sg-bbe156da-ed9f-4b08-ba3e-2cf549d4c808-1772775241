@@ -46,7 +46,7 @@ const nextConfig = {
       },
     ],
   },
-  allowedDevOrigins: ["*.daytona.work", "*.softgen.dev", "*.replit.dev", "*.repl.co", "*.riker.replit.dev"],
+  allowedDevOrigins: ["*.daytona.work", "*.softgen.dev", "*.replit.dev", "*.repl.co", "*.riker.replit.dev", "*.kirk.replit.dev"],
 };
 
 export default nextConfig;
